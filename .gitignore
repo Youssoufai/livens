@@ -2,7 +2,8 @@
 
 # dependencies
 node_modules/
-
+.url
+constants/url.js
 # Expo
 .expo/
 dist/

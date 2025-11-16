@@ -1,0 +1,171 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+    header: {
+        paddingHorizontal: 20,
+        paddingBottom: 6,
+    },
+    headerTitle: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#000",
+    },
+    sectionHeader: {
+        alignSelf: "center",
+        borderRadius: 8,
+        paddingVertical: 4,
+        paddingHorizontal: 16,
+        marginTop: 20,
+        marginBottom: 0,
+    },
+    sectionHeaderFull: {
+        borderTopLeftRadius: 14,
+        borderTopRightRadius: 14,
+        paddingVertical: 6,
+        width: "100%",
+        alignItems: "center",
+    },
+    sectionHeaderText: {
+        fontSize: 13,
+        fontWeight: "600",
+        textAlign: "center",
+    },
+    cardLight: {
+        borderRadius: 14,
+        padding: 16,
+        backgroundColor: "#F6F7FB",
+        marginBottom: 14,
+    },
+    cardMerged: {
+        borderRadius: 14,
+        backgroundColor: "#fff",
+        shadowColor: "#FF3B30",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 4,
+        marginTop: 20,
+        marginBottom: 14,
+    },
+    cardInner: {
+        backgroundColor: "#fff",
+        borderBottomLeftRadius: 14,
+        borderBottomRightRadius: 14,
+        padding: 16,
+    },
+    cardTitle: {
+        fontSize: 15,
+        fontWeight: "700",
+        marginBottom: 6,
+    },
+    cardDescription: {
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    viewButtonRed: {
+        backgroundColor: "#FF3B30",
+        marginTop: 14,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    viewButtonRedText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 14,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#fff",
+    },
+    emptyTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#000",
+    },
+    emptyText: {
+        color: "#666",
+        marginTop: 4,
+        fontSize: 14,
+    },
+    fab: {
+        position: "absolute",
+        bottom: 30,
+        right: 25,
+        backgroundColor: "#FF3B30",
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 3,
+    },
+    filterRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#E5E5E5",
+    },
+    filterButton: {
+        borderWidth: 1,
+        borderColor: "#E3E3E3",
+        borderRadius: 50,
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+    },
+    filterText: {
+        fontSize: 13,
+        fontWeight: "500",
+        color: "#000",
+    },
+    scrollContent: {
+        paddingHorizontal: 16,
+        paddingBottom: 60,
+    },
+    card: {
+        backgroundColor: "#fff",
+        borderBottomWidth: 1,
+        borderColor: "#EEE",
+        paddingVertical: 14,
+    },
+    userRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    avatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "#D9D9D9",
+        marginRight: 10,
+    },
+    name: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#000",
+    },
+    subText: {
+        fontSize: 12,
+        color: "#888",
+    },
+    description: {
+        fontSize: 14,
+        color: "#000",
+        marginBottom: 4,
+    },
+    locationText: {
+        fontSize: 12,
+        color: "#666",
+    },
+    locationLink: {
+        color: "#3B82F6",
+        textDecorationLine: "underline",
+    },
+
+});

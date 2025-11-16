@@ -1,22 +1,26 @@
+import { router } from 'expo-router'
 import React from 'react'
 import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Onboarding2() {
     return (
-        <ImageBackground
-            source={require('@/assets/images/onboarding1.png')}
-            style={styles.background}
-            resizeMode="cover"
-        >
-            <View style={styles.overlay}>
-                <Text style={styles.title}>
-                    Know what's{'\n'}happening right{'\n'}now, anywhere in{'\n'}Nigeria.
-                </Text>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Get started</Text>
-                </TouchableOpacity>
-            </View>
-        </ImageBackground>
+        <SafeAreaView style={{ flex: 1 }}>
+            <ImageBackground
+                source={require('@/assets/images/onboarding1.png')}
+                style={styles.background}
+                resizeMode="cover"
+            >
+                <View style={styles.overlay}>
+                    <Text style={styles.title}>
+                        Know whats{'\n'}happening right{'\n'}now, anywhere in{'\n'}Nigeria.
+                    </Text>
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/onboarding3')}>
+                        <Text style={styles.buttonText}>Get started</Text>
+                    </TouchableOpacity>
+                </View>
+            </ImageBackground>
+        </SafeAreaView>
     )
 }
 

@@ -1,25 +1,35 @@
+import { router } from 'expo-router'
 import React from 'react'
 import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Onboarding3() {
     return (
-        <ImageBackground
-            source={require('@/assets/images/onboarding2.png')}
-            style={styles.background}
-            resizeMode="cover"
-        >
-            <View style={styles.overlay}>
-                <Text style={styles.title}>
-                    Earn cash by{'\n'}sharing insights{'\n'}about specific{'\n'}locations.
-                </Text>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Get Started</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.loginButton}>
-                    <Text style={styles.loginButtonText}>Login to account</Text>
-                </TouchableOpacity>
-            </View>
-        </ImageBackground>
+        <SafeAreaView style={{ flex: 1 }}>
+            <ImageBackground
+                source={require('@/assets/images/onboarding2.png')}
+                style={styles.background}
+                resizeMode="cover"
+            >
+                <View style={styles.overlay}>
+                    <Text style={styles.title}>
+                        Earn cash by{'\n'}sharing insights{'\n'}about specific{'\n'}locations.
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => router.push('create-account')}
+                    >
+                        <Text style={styles.buttonText}>Get Started</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.loginButton}
+                        onPress={() => router.push('/login')}
+                    >
+                        <Text style={styles.loginButtonText}>Login to account</Text>
+                    </TouchableOpacity>
+                </View>
+            </ImageBackground>
+        </SafeAreaView>
     )
 }
 

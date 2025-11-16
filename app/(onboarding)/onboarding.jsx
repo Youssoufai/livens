@@ -1,45 +1,39 @@
-import React from 'react'
-import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native'
-import Onboarding2 from './onboarding2'
-import Onboarding3 from './onboarding3'
-const { width, height } = Dimensions.get('window')
-export default function onboarding() {
+import { router } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
+
+export default function Onboarding() {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            // Navigate to the next screen after 2 seconds
+            router.replace('/(onboarding)/onboarding2');
+            // Assuming you have navigation set up, replace the following line with your navigation logic
+            // e.g., navigation.replace('next-screen');
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            style={styles.scroll}
-        >
-            <View style={[styles.page, { width, height }]}>
-                <Image
-                    source={require('@/assets/images/logo.png')}
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-            </View>
-
-            <View style={{ width, height }}>
-                <Onboarding2 />
-            </View>
-
-            <View style={{ width, height }}>
-                <Onboarding3 />
-            </View>
-        </ScrollView>
-    )
+        <View style={styles.container}>
+            <Image
+                source={require('@/assets/images/logo.png')}
+                style={styles.pin}
+                resizeMode="contain"
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-    scroll: {
+    container: {
         flex: 1,
-    },
-    page: {
+        backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    logo: {
-        width: 200,
-        height: 200,
+
+    pin: {
+        width: 60,     // adjust to match your design
+        height: 60,
     },
-})
+});
