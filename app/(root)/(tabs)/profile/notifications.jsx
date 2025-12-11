@@ -1,237 +1,223 @@
-import React, { useState } from 'react';
+import { BASE_URL } from "@/app/constants/url";
+import { getToken } from "@/app/utils/secureStore";
+import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const NotificationSettings = () => {
-    const [notifications, setNotifications] = useState({
-        pushRequestUpdates: false,
-        pushEarnings: false,
-        pushPromotions: false,
-        emailRequestUpdates: false,
-        emailEarnings: false,
-        emailPromotions: false,
-    });
+import * as Device from "expo-device";
 
-    const toggleSwitch = (key) => {
-        setNotifications(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
+export default function NotificationsScreen() {
+    const [pushRequest, setPushRequest] = useState(false);
+    const [pushEarnings, setPushEarnings] = useState(false);
+    const [pushOffers, setPushOffers] = useState(false);
+
+    const [emailRequest, setEmailRequest] = useState(false);
+    const [emailEarnings, setEmailEarnings] = useState(false);
+    const [emailOffers, setEmailOffers] = useState(false);
+
+    useEffect(() => {
+        registerForPushNotifications();
+    }, []);
+
+    const registerForPushNotifications = async () => {
+        // ❗ Prevent Expo Go Android error
+        if (Platform.OS === "android" && Constants.appOwnership === "expo") {
+            console.warn(
+                "Push notifications not supported in Expo Go on Android. Use a dev build."
+            );
+            return;
+        }
+
+        if (!Device.isDevice) {
+            alert("Push notifications require a physical device.");
+            return;
+        }
+
+        const { status } = await Notifications.getPermissionsAsync();
+        let finalStatus = status;
+
+        if (finalStatus !== "granted") {
+            const { status: reqStatus } = await Notifications.requestPermissionsAsync();
+            finalStatus = reqStatus;
+        }
+
+        if (finalStatus !== "granted") {
+            alert("Permission denied!");
+            return;
+        }
+
+        const tokenData = await Notifications.getExpoPushTokenAsync({
+            projectId: Constants.expoConfig?.extra?.eas?.projectId,
+        });
+
+        const deviceToken = tokenData.data;
+        console.log("Expo Device Token:", deviceToken);
+
+        await saveDeviceToken(deviceToken);
     };
 
-    const NotificationItem = ({ title, description, value, onToggle }) => (
-        <div style={styles.notificationItem}>
-            <div style={styles.textContainer}>
-                <div style={styles.itemTitle}>{title}</div>
-                <div style={styles.itemDescription}>{description}</div>
-            </div>
-            <label style={styles.switch}>
-                <input
-                    type="checkbox"
-                    checked={value}
-                    onChange={onToggle}
-                    style={styles.switchInput}
-                />
-                <span style={{
-                    ...styles.slider,
-                    backgroundColor: value ? '#34D399' : '#E5E7EB'
-                }}></span>
-            </label>
-        </div>
-    );
+    const saveDeviceToken = async (deviceToken = null) => {
+        try {
+            const token = await getToken();
+
+            await fetch(`${BASE_URL}/device-token`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    device_token: deviceToken,
+                    push_request: pushRequest,
+                    push_earnings: pushEarnings,
+                    push_offers: pushOffers,
+                    email_request: emailRequest,
+                    email_earnings: emailEarnings,
+                    email_offers: emailOffers,
+                }),
+            });
+        } catch (err) {
+            console.log("Error saving token:", err);
+        }
+    };
+
+    const updateSettings = async (type, value) => {
+        switch (type) {
+            case "pushRequest": setPushRequest(value); break;
+            case "pushEarnings": setPushEarnings(value); break;
+            case "pushOffers": setPushOffers(value); break;
+            case "emailRequest": setEmailRequest(value); break;
+            case "emailEarnings": setEmailEarnings(value); break;
+            case "emailOffers": setEmailOffers(value); break;
+        }
+
+        // Save settings instantly (no deviceToken needed)
+        saveDeviceToken();
+    };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.statusBar}>
-                <span style={styles.time}>9:41</span>
-                <div style={styles.notch}></div>
-                <div style={styles.statusIcons}>
-                    <span>📶</span>
-                    <span>📡</span>
-                    <span>🔋</span>
-                </div>
-            </div>
+        <SafeAreaView style={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.headerRow}>
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Ionicons name="chevron-back" size={24} color="#000" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Notifications</Text>
+                    <View style={{ width: 24 }} />
+                </View>
 
-            <div style={styles.header}>
-                <button style={styles.backButton}>←</button>
-                <span style={styles.headerTitle}>Notifications</span>
-            </div>
+                <Text style={styles.sectionTitle}>Push Notifications</Text>
 
-            <div style={styles.content}>
-                <div style={styles.sectionTitle}>Push Notifications</div>
-
-                <NotificationItem
+                <ToggleRow
                     title="Request updates"
-                    description="Receive alerts for new requests or status changes."
-                    value={notifications.pushRequestUpdates}
-                    onToggle={() => toggleSwitch('pushRequestUpdates')}
+                    desc="Receive alerts for new requests or status changes."
+                    value={pushRequest}
+                    onValueChange={(v) => updateSettings("pushRequest", v)}
                 />
 
-                <NotificationItem
+                <ToggleRow
                     title="Earnings and transactions"
-                    description="Be notified instantly when you receive earnings or withdraw money."
-                    value={notifications.pushEarnings}
-                    onToggle={() => toggleSwitch('pushEarnings')}
+                    desc="Be notified instantly for earnings and withdrawals."
+                    value={pushEarnings}
+                    onValueChange={(v) => updateSettings("pushEarnings", v)}
                 />
 
-                <NotificationItem
+                <ToggleRow
                     title="Promotions and offers"
-                    description="Receive alerts about new features and special deals."
-                    value={notifications.pushPromotions}
-                    onToggle={() => toggleSwitch('pushPromotions')}
+                    desc="Stay informed about deals and new features."
+                    value={pushOffers}
+                    onValueChange={(v) => updateSettings("pushOffers", v)}
                 />
 
-                <div style={styles.sectionTitle}>Email Notifications</div>
+                <Text style={styles.sectionTitle}>Email Notifications</Text>
 
-                <NotificationItem
+                <ToggleRow
                     title="Request updates"
-                    description="Receive alerts for new requests or status changes."
-                    value={notifications.emailRequestUpdates}
-                    onToggle={() => toggleSwitch('emailRequestUpdates')}
+                    desc="Receive alerts for new requests or status changes."
+                    value={emailRequest}
+                    onValueChange={(v) => updateSettings("emailRequest", v)}
                 />
 
-                <NotificationItem
+                <ToggleRow
                     title="Earnings and transactions"
-                    description="Be notified instantly when you receive earnings or withdraw money."
-                    value={notifications.emailEarnings}
-                    onToggle={() => toggleSwitch('emailEarnings')}
+                    desc="Be notified instantly for earnings and withdrawals."
+                    value={emailEarnings}
+                    onValueChange={(v) => updateSettings("emailEarnings", v)}
                 />
 
-                <NotificationItem
+                <ToggleRow
                     title="Promotions and offers"
-                    description="Receive alerts about new features and special deals."
-                    value={notifications.emailPromotions}
-                    onToggle={() => toggleSwitch('emailPromotions')}
+                    desc="Get important product updates and offers."
+                    value={emailOffers}
+                    onValueChange={(v) => updateSettings("emailOffers", v)}
                 />
-            </div>
-
-            <div style={styles.homeIndicator}></div>
-        </div>
+            </ScrollView>
+        </SafeAreaView>
     );
-};
+}
 
-const styles = {
+const ToggleRow = ({ title, desc, value, onValueChange }) => (
+    <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+            <Text style={styles.rowTitle}>{title}</Text>
+            <Text style={styles.rowDesc}>{desc}</Text>
+        </View>
+        <Switch value={value} onValueChange={onValueChange} />
+    </View>
+);
+
+const styles = StyleSheet.create({
     container: {
-        maxWidth: '400px',
-        margin: '0 auto',
-        backgroundColor: '#FFFFFF',
-        minHeight: '100vh',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-        position: 'relative',
+        flex: 1,
+        backgroundColor: "#fff",
+        paddingHorizontal: 20
     },
-    statusBar: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '8px 20px',
-        fontSize: '14px',
-        fontWeight: '600',
-        position: 'relative',
-    },
-    time: {
-        fontSize: '15px',
-        fontWeight: '600',
-    },
-    notch: {
-        position: 'absolute',
-        top: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '120px',
-        height: '30px',
-        backgroundColor: '#000000',
-        borderRadius: '0 0 20px 20px',
-    },
-    statusIcons: {
-        display: 'flex',
-        gap: '4px',
-        fontSize: '12px',
-    },
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '12px 16px',
-        borderBottom: '1px solid #F3F4F6',
-        backgroundColor: '#FFFFFF',
-    },
-    backButton: {
-        background: 'none',
-        border: 'none',
-        fontSize: '24px',
-        cursor: 'pointer',
-        marginRight: '12px',
-        padding: '0',
-        color: '#000000',
+    headerRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 20,
+        marginTop: 10
     },
     headerTitle: {
-        fontSize: '18px',
-        fontWeight: '600',
-        color: '#000000',
-    },
-    content: {
-        padding: '0 16px',
-        paddingBottom: '40px',
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#000"
     },
     sectionTitle: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#000000',
-        marginTop: '24px',
-        marginBottom: '16px',
+        fontSize: 15,
+        fontWeight: "700",
+        marginTop: 20,
+        marginBottom: 10,
+        color: "#000"
     },
-    notificationItem: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: '16px',
-        paddingBottom: '16px',
-        borderBottom: '1px solid #F3F4F6',
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+        paddingVertical: 15
     },
-    textContainer: {
-        flex: '1',
-        marginRight: '12px',
+    rowTitle: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#000"
     },
-    itemTitle: {
-        fontSize: '15px',
-        fontWeight: '500',
-        color: '#000000',
-        marginBottom: '4px',
-    },
-    itemDescription: {
-        fontSize: '13px',
-        color: '#6B7280',
-        lineHeight: '1.4',
-    },
-    switch: {
-        position: 'relative',
-        display: 'inline-block',
-        width: '51px',
-        height: '31px',
-        flexShrink: '0',
-    },
-    switchInput: {
-        opacity: '0',
-        width: '0',
-        height: '0',
-    },
-    slider: {
-        position: 'absolute',
-        cursor: 'pointer',
-        top: '0',
-        left: '0',
-        right: '0',
-        bottom: '0',
-        borderRadius: '31px',
-        transition: '0.3s',
-    },
-    homeIndicator: {
-        position: 'fixed',
-        bottom: '8px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '134px',
-        height: '5px',
-        backgroundColor: '#000000',
-        borderRadius: '100px',
-    },
-};
-
-export default NotificationSettings;
+    rowDesc: {
+        fontSize: 12,
+        color: "#777",
+        marginTop: 3
+    }
+});

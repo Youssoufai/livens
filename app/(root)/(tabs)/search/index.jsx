@@ -1,28 +1,53 @@
+import { getToken } from "@/app/utils/secureStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     ImageBackground,
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
 
 export default function SearchScreen() {
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = await getToken("token");
+            if (!token || token.length === 0) {
+                router.replace("/(auth)/login"); // redirect if not authenticated
+            } else {
+                setLoading(false); // user is authenticated, show screen
+            }
+        };
+
+        checkAuth();
+    }, []);
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color="#de1c1c" />
+            </View>
+        );
+    }
+
     return (
         <ImageBackground
             source={require("@/assets/images/search.png")}
             style={styles.background}
             resizeMode="cover"
+            blurRadius={3}
         >
             <ScrollView
                 contentContainerStyle={styles.scrollContainer}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Top Texts */}
+                {/* Header Text */}
                 <View style={styles.textContainer}>
                     <Text style={styles.title}>
                         Search a place in <Text style={styles.highlight}>Abuja</Text>
@@ -32,16 +57,15 @@ export default function SearchScreen() {
                     </Text>
                 </View>
 
-                {/* Search Bar */}
-                <View style={styles.searchBar}>
-                    <Ionicons name="search" size={18} color="#9CA3AF" />
-                    <TextInput
-                        placeholder="Search places, areas, events"
-                        placeholderTextColor="#9CA3AF"
-                        style={styles.input}
-                        onFocus={() => router.push("/(root)/(tabs)/search/posts")}
-                    />
-                </View>
+                {/* Fake Search Input */}
+                <TouchableOpacity
+                    style={styles.searchBar}
+                    activeOpacity={0.8}
+                    onPress={() => router.push("/(root)/(tabs)/search/posts")}
+                >
+                    <Ionicons name="search" size={18} color="#ddd" />
+                    <Text style={styles.fakeInput}>Search places, areas, events</Text>
+                </TouchableOpacity>
 
                 {/* Get Started Section */}
                 <View style={styles.section}>
@@ -91,6 +115,8 @@ export default function SearchScreen() {
     );
 }
 
+
+// 💅 Styles
 const styles = StyleSheet.create({
     background: {
         flex: 1,
@@ -99,11 +125,11 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         padding: 24,
-        paddingBottom: 100,
+        paddingBottom: 120,
     },
     textContainer: {
         marginTop: 80,
-        marginBottom: 24,
+        marginBottom: 30,
     },
     title: {
         fontSize: 28,
@@ -116,7 +142,7 @@ const styles = StyleSheet.create({
         color: "#fff",
     },
     subtitle: {
-        color: "#F3F4F6",
+        color: "#E5E7EB",
         fontSize: 15,
         marginTop: 6,
         lineHeight: 22,
@@ -128,18 +154,17 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.4)",
         borderRadius: 12,
         paddingHorizontal: 14,
-        height: 48,
-        backgroundColor: "rgba(255,255,255,0.15)", // slight transparency for contrast
-        marginBottom: 24,
+        height: 50,
+        backgroundColor: "rgba(255,255,255,0.18)",
+        marginBottom: 30,
     },
-    input: {
-        flex: 1,
+    fakeInput: {
         marginLeft: 8,
         fontSize: 15,
-        color: "#fff",
+        color: "#E5E7EB",
     },
     section: {
-        marginTop: 20,
+        marginTop: 10,
     },
     sectionTitle: {
         fontSize: 18,
@@ -148,7 +173,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     sectionDesc: {
-        color: "#E5E7EB",
+        color: "#D1D5DB",
         fontSize: 14,
         marginBottom: 16,
         lineHeight: 20,
@@ -156,16 +181,20 @@ const styles = StyleSheet.create({
     option: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.3)",
-        borderRadius: 14,
+        backgroundColor: "rgba(0,0,0,0.35)",
+        borderRadius: 16,
         padding: 16,
-        marginBottom: 12,
+        marginBottom: 14,
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 2,
     },
     optionIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: "rgba(255,255,255,0.2)",
+        width: 46,
+        height: 46,
+        borderRadius: 23,
+        backgroundColor: "rgba(255,255,255,0.25)",
         alignItems: "center",
         justifyContent: "center",
         marginRight: 14,

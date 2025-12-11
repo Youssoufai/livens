@@ -1,15 +1,27 @@
+import { BASE_URL } from "@/app/constants/url";
+import { getToken } from "@/app/utils/secureStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditProfile() {
     const [image, setImage] = useState("https://via.placeholder.com/100");
-    const [name, setName] = useState("Johnathan Benjamin");
-    const [email, setEmail] = useState("johnathan@example.com");
-    const [phone, setPhone] = useState("+234 810 000 0000");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -24,6 +36,88 @@ export default function EditProfile() {
         }
     };
 
+    const handleSave = async () => {
+        if (!name.trim() && !email.trim() && !phone.trim()) {
+            Alert.alert("Validation Error", "Please update at least one field.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const token = await getToken();
+            const parsedToken = token ? JSON.parse(token) : null;
+
+            const updates = [];
+
+            // Dynamically push update requests based on filled fields
+            if (name.trim()) {
+                updates.push({
+                    url: `${BASE_URL}/update-profile/name/${encodeURIComponent(name)}`,
+                    field: 'Name',
+                });
+            }
+            if (email.trim()) {
+                updates.push({
+                    url: `${BASE_URL}/update-profile/email/${encodeURIComponent(email)}`,
+                    field: 'Email',
+                });
+            }
+            if (phone.trim()) {
+                updates.push({
+                    url: `${BASE_URL}/update-profile/phone/${encodeURIComponent(phone)}`,
+                    field: 'Phone',
+                });
+            }
+
+            let successMessages = [];
+            let errorMessages = [];
+
+            // Loop through each update and send request
+            for (const update of updates) {
+                const response = await fetch(update.url, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${parsedToken}`,
+                    },
+                });
+
+                const rawText = await response.text();
+                console.log(`🔥 Raw Response (${update.field}):`, rawText);
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (err) {
+                    errorMessages.push(`${update.field}: Invalid response`);
+                    continue;
+                }
+
+                if (response.ok) {
+                    successMessages.push(`${update.field} updated`);
+                } else {
+                    errorMessages.push(`${update.field}: ${data.message || "Failed"}`);
+                }
+            }
+
+            // Show combined results
+            if (successMessages.length) {
+                Alert.alert("Success", successMessages.join("\n"));
+                router.back();
+            }
+            if (errorMessages.length) {
+                Alert.alert("Error", errorMessages.join("\n"));
+            }
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Network Error", "Unable to connect to the server.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
@@ -32,14 +126,14 @@ export default function EditProfile() {
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Edit Profile</Text>
-                <View style={{ width: 24 }} /> {/* spacing balance */}
+                <View style={{ width: 24 }} />
             </View>
 
             {/* Profile Picture */}
             <View style={styles.avatarSection}>
                 <Image source={{ uri: image }} style={styles.avatar} />
                 <TouchableOpacity style={styles.changePhotoBtn} onPress={pickImage}>
-                    <Ionicons name="camera-outline" size={16} color="#007AFF" />
+                    <Ionicons name="camera-outline" size={16} color="#FF3344" />
                     <Text style={styles.changePhotoText}>Change Photo</Text>
                 </TouchableOpacity>
             </View>
@@ -77,8 +171,8 @@ export default function EditProfile() {
             </View>
 
             {/* Save Button */}
-            <TouchableOpacity style={styles.saveButton}>
-                <Text style={styles.saveText}>Save Changes</Text>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save</Text>}
             </TouchableOpacity>
         </SafeAreaView>
     );
@@ -89,6 +183,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
         paddingHorizontal: 20,
+        paddingTop: 20,
     },
     header: {
         flexDirection: "row",
@@ -108,7 +203,6 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 100,
-        backgroundColor: "#f2f2f2",
     },
     changePhotoBtn: {
         flexDirection: "row",
@@ -116,7 +210,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     changePhotoText: {
-        color: "#007AFF",
+        color: "#FF3344",
         marginLeft: 5,
         fontWeight: "600",
     },
@@ -140,7 +234,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fafafa",
     },
     saveButton: {
-        backgroundColor: "#007AFF",
+        backgroundColor: "#FF3344",
         paddingVertical: 14,
         borderRadius: 10,
         alignItems: "center",

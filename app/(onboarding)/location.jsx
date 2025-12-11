@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import ProgressBar from "../components/progressBar";
 import { BASE_URL } from "../constants/url";
+import { getToken } from "../utils/secureStore";
 
 export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
     const [address, setAddress] = useState("");
@@ -24,15 +25,15 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
         try {
             setIsLoading(true);
 
-            const apiUrl = `${BASE_URL}/update-location`; // 🔁 Replace with your actual URL
+            // 🔁 Replace with your actual URL
 
-            console.log("Sending to:", apiUrl);
             console.log("Body:", JSON.stringify(locationData, null, 2));
-
-            const response = await fetch(apiUrl, {
+            const token = await getToken("token");
+            const response = await fetch(`${BASE_URL}/update-location`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token.replace(/"/g, "")}`,
                 },
                 body: JSON.stringify(locationData),
             });

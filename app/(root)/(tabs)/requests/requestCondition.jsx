@@ -1,31 +1,31 @@
+import CheckBox from "@/app/components/CheckBox";
+import { useRequest } from "@/app/context/requestContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { useRouter, useSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from "react-native";
-import RadioGroup from "react-native-radio-buttons-group";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../../../styles/requestCondition";
 
-export default function Request() {
+export default function RequestConditions() {
     const router = useRouter();
-    const params = useSearchParams();
-
-    const location = params?.location || "";
-    const description = params?.description || "";
+    const { updateRequest } = useRequest();
 
     const [duration, setDuration] = useState("");
     const [radioButtons, setRadioButtons] = useState([
         { id: "1", label: "Yes", value: "yes", selected: true },
-        { id: "2", label: "No", value: "no" },
+        { id: "2", label: "No", value: "no", selected: false },
     ]);
 
-    const onPressRadioButton = (radioArray) => setRadioButtons(radioArray);
-
-    const getAllowComment = () => {
-        const selected = radioButtons.find((r) => r.selected);
-        return selected?.value === "yes" ? "1" : "0"; // string
+    const handleSelect = (id) => {
+        setRadioButtons(radioButtons.map(btn => ({
+            ...btn,
+            selected: btn.id === id,
+        })));
     };
+
+    const getAllowComment = () => radioButtons.find(btn => btn.selected)?.value === "yes" ? "1" : "0";
 
     const handleNext = () => {
         if (!duration) {
@@ -33,25 +33,18 @@ export default function Request() {
             return;
         }
 
-        router.push({
-            pathname: "/requests/reward",
-            params: {
-                location,
-                description,
-                duration,
-                allow_comment: getAllowComment(),
-            },
+        updateRequest({
+            duration,
+            allow_comment: getAllowComment(),
         });
+
+        router.push("/(root)/(tabs)/requests/reward"); // next step
     };
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
-                style={{ flex: 1 }}
-            >
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
                 <View style={styles.container}>
-                    {/* Header */}
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => router.back()}>
                             <Ionicons name="chevron-back" size={24} color="#000" />
@@ -63,23 +56,23 @@ export default function Request() {
 
                     <Text style={styles.label}>Choose a time duration for which the request must be completed.</Text>
                     <View style={styles.inputContainer}>
-                        <Picker
-                            selectedValue={duration || ""}
-                            style={styles.picker}
-                            onValueChange={(itemValue) => setDuration(itemValue)}
-                        >
+                        <Picker selectedValue={duration || ""} style={styles.picker} onValueChange={setDuration}>
                             <Picker.Item label="Select duration" value="" color="#999" />
-                            <Picker.Item label="1 hour" value="1h" />
-                            <Picker.Item label="3 hours" value="3h" />
-                            <Picker.Item label="6 hours" value="6h" />
-                            <Picker.Item label="12 hours" value="12h" />
-                            <Picker.Item label="24 hours" value="24h" />
+                            <Picker.Item label="1 hour" value="1 hour" />
+                            <Picker.Item label="3 hours" value="3 hours" />
+                            <Picker.Item label="6 hours" value="6 hours" />
+                            <Picker.Item label="12 hours" value="12 hours" />
+                            <Picker.Item label="24 hours" value="24 hours" />
                         </Picker>
                     </View>
 
-                    <Text style={[styles.label, { marginTop: 24 }]}>Allow respondents to write comments based on their experience.</Text>
+                    <Text style={[styles.label, { marginTop: 24 }]}>
+                        Allow respondents to write comments based on their experience.
+                    </Text>
                     <View style={styles.radioContainer}>
-                        <RadioGroup radioButtons={radioButtons} onPress={onPressRadioButton} layout="row" />
+                        {radioButtons.map(btn => (
+                            <CheckBox key={btn.id} label={btn.label} checked={btn.selected} onPress={() => handleSelect(btn.id)} />
+                        ))}
                     </View>
 
                     <TouchableOpacity onPress={handleNext} style={styles.button}>

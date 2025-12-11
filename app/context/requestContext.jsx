@@ -1,4 +1,3 @@
-// context/RequestContext.jsx
 import React, { createContext, useContext, useState } from "react";
 
 const RequestContext = createContext();
@@ -6,30 +5,31 @@ const RequestContext = createContext();
 export const useRequest = () => useContext(RequestContext);
 
 export const RequestProvider = ({ children }) => {
-    const [requestData, setRequestData] = useState({
+    const [request, setRequest] = useState({
         location: "",
         description: "",
         duration: "",
-        allow_comment: "1",
-        reward: "1000",
+        allow_comment: "",
+        reward: 1000,
+
     });
 
     const updateRequest = (data) => {
-        setRequestData((prev) => ({ ...prev, ...data }));
+        setRequest((prev) => ({ ...prev, ...data }));
     };
 
     const resetRequest = () => {
-        setRequestData({
+        setRequest({
             location: "",
             description: "",
             duration: "",
             allow_comment: "1",
-            reward: "1000",
+            reward: 1000,
         });
     };
 
     return (
-        <RequestContext.Provider value={{ requestData, updateRequest, resetRequest }}>
+        <RequestContext.Provider value={{ request, updateRequest, resetRequest }}>
             {children}
         </RequestContext.Provider>
     );

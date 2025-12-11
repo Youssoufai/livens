@@ -134,4 +134,16 @@ export const styles = StyleSheet.create({
         color: "#4B5563",
         lineHeight: 18,
     },
+    searchBtn: {
+        backgroundColor: "#EF4444",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        marginLeft: 6,
+    },
+    searchBtnText: {
+        color: "#fff",
+        fontWeight: "600",
+    },
+
 });

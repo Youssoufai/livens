@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import {
     ScrollView,
@@ -9,7 +10,7 @@ import {
 } from "react-native";
 
 export default function CaptureContent() {
-    const photos = Array(10).fill(null); // sample 10 placeholders
+    const photos = []; // EMPTY = first screen UI
 
     return (
         <View style={styles.container}>
@@ -26,23 +27,25 @@ export default function CaptureContent() {
                     We’ll review every photo before the requester views it.
                 </Text>
 
-                {/* Photo Grid */}
-                <View style={styles.grid}>
-                    {photos.map((_, index) => (
-                        <View key={index} style={styles.photoBox}>
-                            <TouchableOpacity style={styles.removeButton}>
-                                <Ionicons name="close" size={14} color="#fff" />
-                            </TouchableOpacity>
-                            <Ionicons
-                                name="play-circle-outline"
-                                size={24}
-                                color="#D1D5DB"
-                                style={{ opacity: 0.8 }}
-                            />
-                            <Text style={styles.duration}>0:34</Text>
-                        </View>
-                    ))}
-                </View>
+                {/* If photos exist, show grid — else nothing */}
+                {photos.length > 0 && (
+                    <View style={styles.grid}>
+                        {photos.map((_, index) => (
+                            <View key={index} style={styles.photoBox}>
+                                <TouchableOpacity style={styles.removeButton}>
+                                    <Ionicons name="close" size={14} color="#fff" />
+                                </TouchableOpacity>
+                                <Ionicons
+                                    name="play-circle-outline"
+                                    size={24}
+                                    color="#D1D5DB"
+                                    style={{ opacity: 0.8 }}
+                                />
+                                <Text style={styles.duration}>0:34</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
 
                 {/* Photo Instructions */}
                 <View style={styles.instructions}>
@@ -56,24 +59,11 @@ export default function CaptureContent() {
                         requester wants to see.
                     </Text>
                 </View>
-
-                {/* Upload Limit Info */}
-                <View style={styles.infoBox}>
-                    <Text style={styles.infoText}>
-                        <Text style={{ fontWeight: "600" }}>Maximum image upload</Text>{" "}
-                        You can upload up to 10 images, ensure to abide by the photo
-                        capturing guidelines above.
-                    </Text>
-                </View>
-
-                {/* Buttons */}
-                <TouchableOpacity style={styles.captureBtn}>
-                    <Text style={styles.captureText}>Capture more photos</Text>
-                </TouchableOpacity>
             </ScrollView>
 
-            <TouchableOpacity style={styles.continueBtn}>
-                <Text style={styles.continueText}>Continue</Text>
+            {/* Bottom Capture Button (Matches your screenshot) */}
+            <TouchableOpacity style={styles.captureMainBtn} onPress={() => router.push('/(root)/(tabs)/requests/cameraScreen')}>
+                <Text style={styles.captureMainText}>Capture</Text>
             </TouchableOpacity>
         </View>
     );
@@ -92,20 +82,39 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     title: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: "700",
         color: "#111827",
+        lineHeight: 30,
     },
     subtitle: {
         color: "#6B7280",
         fontSize: 14,
         marginTop: 6,
-        marginBottom: 18,
+        marginBottom: 24,
+        lineHeight: 20,
     },
+    instructions: {
+        marginTop: 14,
+    },
+    instructionHeader: {
+        color: "#111827",
+        fontWeight: "600",
+        marginBottom: 6,
+        fontSize: 16,
+    },
+    bullet: {
+        color: "#4B5563",
+        fontSize: 14,
+        lineHeight: 22,
+    },
+
+    /* Grid styles (only shows when photos exist) */
     grid: {
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "space-between",
+        marginBottom: 20,
     },
     photoBox: {
         width: "47%",
@@ -133,56 +142,22 @@ const styles = StyleSheet.create({
         bottom: 8,
         right: 8,
     },
-    instructions: {
-        marginTop: 20,
-    },
-    instructionHeader: {
-        color: "#111827",
-        fontWeight: "600",
-        marginBottom: 6,
-    },
-    bullet: {
-        color: "#4B5563",
-        fontSize: 14,
-        lineHeight: 22,
-    },
-    infoBox: {
-        backgroundColor: "#FFF7ED",
-        borderRadius: 8,
-        padding: 12,
-        marginTop: 18,
-    },
-    infoText: {
-        fontSize: 13,
-        color: "#92400E",
-        lineHeight: 18,
-    },
-    captureBtn: {
-        marginTop: 20,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 10,
-        paddingVertical: 12,
-        alignItems: "center",
-    },
-    captureText: {
-        color: "#111827",
-        fontWeight: "600",
-        fontSize: 15,
-    },
-    continueBtn: {
+
+    /* Bottom Main Capture Button (red) */
+    captureMainBtn: {
         position: "absolute",
         bottom: 20,
         left: 20,
         right: 20,
         backgroundColor: "#EF4444",
-        borderRadius: 10,
+        borderRadius: 100,
         paddingVertical: 14,
         alignItems: "center",
+        justifyContent: "center",
     },
-    continueText: {
+    captureMainText: {
         color: "#fff",
         fontWeight: "600",
-        fontSize: 16,
+        fontSize: 17,
     },
 });

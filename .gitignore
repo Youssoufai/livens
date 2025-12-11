@@ -9,7 +9,6 @@ constants/url.js
 dist/
 web-build/
 expo-env.d.ts
-
 # Native
 .kotlin/
 *.orig.*

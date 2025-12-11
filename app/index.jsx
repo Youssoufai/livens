@@ -1,38 +1,40 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { getToken } from "./utils/secureStore";
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
+    const checkAuth = async () => {
       try {
-        const user = await AsyncStorage.getItem("user"); // stored after register/login
-        if (user) {
-          router.replace("/(root)/(tabs)/requests"); // user exists → go to home tabs
+        const token = await getToken("token");
+        console.log("TOKEN FOUND IN INDEX:", token);
+
+        if (token && token.length > 0) {
+          router.replace("/(root)/(tabs)/search");
         } else {
-          router.replace("/(onboarding)/onboarding"); // no user → go to onboarding
+          router.replace("/(auth)/login");
         }
       } catch (error) {
-        console.error("Error checking user:", error);
+        console.log("Token check error:", error);
+        router.replace("/(auth)/login");
       } finally {
         setLoading(false);
       }
     };
 
-    checkUser();
+    checkAuth();
   }, []);
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="red" />
+        <ActivityIndicator size="large" color="#de1c1c" />
       </View>
     );
   }
 
-  return null;
+  return null; // nothing else should render
 }

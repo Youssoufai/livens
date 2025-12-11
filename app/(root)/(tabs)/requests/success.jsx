@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: "700",
-        color: "#000",
+        color: "#FF3344",
         textAlign: "center",
         marginBottom: 10,
     },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     button: {
-        backgroundColor: "#111",
+        backgroundColor: "#FF3344",
         paddingVertical: 14,
         paddingHorizontal: 50,
         borderRadius: 30,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     secondaryText: {
-        color: "#007aff",
+        color: "#FF3344",
         fontWeight: "500",
         fontSize: 15,
     },

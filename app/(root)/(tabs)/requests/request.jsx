@@ -1,8 +1,12 @@
+import { BASE_URL } from "@/app/constants/url";
+import { getToken } from "@/app/utils/secureStore";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     ScrollView,
     StyleSheet,
     Text,
@@ -12,71 +16,157 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 const Tab = createMaterialTopTabNavigator();
 
-// 🟢 Available Requests
+// 🟢 Available Requests 
+
+const SAVED_KEY = "SAVED_REQUESTS";
+
+// Save request ID
+const saveRequest = async (id) => {
+
+    try {
+
+        const stored = await AsyncStorage.getItem(SAVED_KEY);
+        const parsed = stored ? JSON.parse(stored) : [];
+
+        if (!parsed.includes(id)) {
+            parsed.push(id);
+            await AsyncStorage.setItem(SAVED_KEY, JSON.stringify(parsed));
+        }
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+// Remove saved request
+const removeRequest = async (id) => {
+    try {
+        const stored = await AsyncStorage.getItem(SAVED_KEY);
+        let parsed = stored ? JSON.parse(stored) : [];
+
+        parsed = parsed.filter(item => item !== id);
+        await AsyncStorage.setItem(SAVED_KEY, JSON.stringify(parsed));
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+// Get saved IDs
+const getSavedRequests = async () => {
+    const stored = await AsyncStorage.getItem(SAVED_KEY);
+    return stored ? JSON.parse(stored) : [];
+};
+
+
 function AvailableRequests() {
-    const requests = [
-        {
-            id: 1,
-            name: "Timothy Weimann",
-            location: "Abuja, 900110",
-            description: "Forem ipsum dolor sit amet, consectetur adipiscing elit.",
-            requestLocation: "9472 W Monroe Street",
-        },
-        {
-            id: 2,
-            name: "Timothy Weimann",
-            location: "Abuja, 900110",
-            description: "Forem ipsum dolor sit amet, consectetur adipiscing elit.",
-            requestLocation: "9472 W Monroe Street",
-        },
-        {
-            id: 3,
-            name: "Timothy Lenan",
-            location: "Abuja, 900110",
-            description: "Forem ipsum dolor sit amet, consectetur adipiscing elit.",
-            requestLocation: "9472 W Monroe Street",
-        },
-    ];
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [savedIds, setSavedIds] = useState([]);
+
+    const loadSaved = async () => {
+        const ids = await getSavedRequests();
+        setSavedIds(ids);
+    };
+
+    const toggleSave = async (id) => {
+        if (savedIds.includes(id)) {
+            await removeRequest(id);
+            setSavedIds(savedIds.filter(item => item !== id));
+        } else {
+            await saveRequest(id);
+            setSavedIds([...savedIds, id]);
+        }
+    };
+
+    const fetchRequests = async () => {
+        try {
+            const token = await getToken("token");
+            const res = await fetch(`${BASE_URL}/get-requests`, {
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token.replace(/"/g, "")}`,
+                },
+            });
+
+            const data = await res.json();
+            setRequests(data.data || []);
+        } catch (error) {
+            console.error("Error fetching requests:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRequests();
+        loadSaved();
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+    }
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-            {requests.map((req) => (
-                <TouchableOpacity
-                    key={req.id}
-                    style={styles.card}
-                    activeOpacity={0.8}
-                    onPress={() =>
-                        router.push({
-                            pathname: "/requests/requestDetails",
-                            params: {
-                                id: req.id,
-                                name: req.name,
-                                location: req.location,
-                                description: req.description,
-                                requestLocation: req.requestLocation,
-                            },
-                        })
-                    }
-                >
-                    <View style={styles.userRow}>
-                        <View style={styles.avatar} />
-                        <View>
-                            <Text style={styles.name}>{req.name}</Text>
-                            <Text style={styles.subText}>{req.location}</Text>
-                        </View>
+            {requests.map((req) => {
+                const isSaved = savedIds.includes(req.id);
+
+                return (
+                    <View key={req.id} style={styles.card}>
+                        {/* 🔘 Save Button */}
+                        <TouchableOpacity
+                            style={{ position: "absolute", top: 12, right: 12 }}
+                            onPress={() => toggleSave(req.id)}
+                        >
+                            <Ionicons
+                                name={isSaved ? "bookmark" : "bookmark-outline"}
+                                size={24}
+                                color={isSaved ? "#FF9900" : "#777"}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/requests/requestDetails",
+                                    params: {
+                                        id: req.id,
+                                        name: req.user?.name || "Unknown",
+                                        location: req.location,
+                                        description: req.description,
+                                        requestLocation: req.location,
+                                    },
+                                })
+                            }
+                        >
+                            <View style={styles.userRow}>
+                                <View style={styles.avatar} />
+                                <View>
+                                    <Text style={styles.name}>
+                                        {req.user?.name || "Unknown User"}
+                                    </Text>
+                                    <Text style={styles.subText}>
+                                        {req.location || "Unknown location"}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <Text style={styles.description}>{req.description}</Text>
+
+                            <Text style={styles.locationText}>
+                                Request location:{" "}
+                                <Text style={styles.locationLink}>{req.location}</Text>
+                            </Text>
+                        </TouchableOpacity>
                     </View>
-
-                    <Text style={styles.description}>{req.description}</Text>
-
-                    <Text style={styles.locationText}>
-                        Request location:{" "}
-                        <Text style={styles.locationLink}>{req.requestLocation}</Text>
-                    </Text>
-                </TouchableOpacity>
-            ))}
+                );
+            })}
         </ScrollView>
     );
 }
+
+
 
 // 🔵 Posted Requests
 function PostedRequests() {
@@ -132,7 +222,7 @@ function PostedRequests() {
             {/* ➕ Floating Button */}
             <TouchableOpacity
                 style={styles.fab}
-                onPress={() => router.push('/requests')}
+                onPress={() => router.push('/(root)/(tabs)/requests/index2')}
             >
                 <Ionicons name="add" size={26} color="#fff" />
             </TouchableOpacity>
