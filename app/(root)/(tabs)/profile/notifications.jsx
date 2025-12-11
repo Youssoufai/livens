@@ -6,6 +6,7 @@ import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+    Alert,
     Platform,
     ScrollView,
     StyleSheet,
@@ -27,59 +28,74 @@ export default function NotificationsScreen() {
     const [emailEarnings, setEmailEarnings] = useState(false);
     const [emailOffers, setEmailOffers] = useState(false);
 
+    const [deviceToken, setDeviceToken] = useState(null);
+
     useEffect(() => {
         registerForPushNotifications();
     }, []);
 
     const registerForPushNotifications = async () => {
-        // ❗ Prevent Expo Go Android error
+        Alert.alert("Debug", "Registering for push notifications...");
+
         if (Platform.OS === "android" && Constants.appOwnership === "expo") {
-            console.warn(
-                "Push notifications not supported in Expo Go on Android. Use a dev build."
-            );
+            Alert.alert("Notice", "Push notifications won't work inside Expo Go. Use dev build.");
             return;
         }
 
         if (!Device.isDevice) {
-            alert("Push notifications require a physical device.");
+            Alert.alert("Notice", "Physical device required.");
             return;
         }
 
+        // Check permission
         const { status } = await Notifications.getPermissionsAsync();
+        Alert.alert("Permission Status", status);
         let finalStatus = status;
 
         if (finalStatus !== "granted") {
             const { status: reqStatus } = await Notifications.requestPermissionsAsync();
             finalStatus = reqStatus;
+            Alert.alert("Permission Requested", reqStatus);
         }
 
         if (finalStatus !== "granted") {
-            alert("Permission denied!");
+            Alert.alert("Error", "Permission denied.");
             return;
         }
+
+        Alert.alert("Debug", "Getting Expo push token...");
 
         const tokenData = await Notifications.getExpoPushTokenAsync({
             projectId: Constants.expoConfig?.extra?.eas?.projectId,
         });
 
-        const deviceToken = tokenData.data;
-        console.log("Expo Device Token:", deviceToken);
+        setDeviceToken(tokenData.data);
+        Alert.alert("Device Token", tokenData.data);
 
-        await saveDeviceToken(deviceToken);
+        console.log("Expo Device Token:", tokenData.data);
+
+        await saveDeviceToken(tokenData.data);
     };
 
-    const saveDeviceToken = async (deviceToken = null) => {
-        try {
-            const token = await getToken();
+    const saveDeviceToken = async (token = deviceToken) => {
+        if (!token) {
+            Alert.alert("Debug", "No token available yet.");
+            return;
+        }
 
-            await fetch(`${BASE_URL}/device-token`, {
+        Alert.alert("Debug", "Saving device token to backend...");
+
+        try {
+            const authToken = await getToken("token");
+
+            const response = await fetch(`${BASE_URL}/device-token`, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${authToken.replace(/"/g, "")}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    device_token: deviceToken,
+                    device_token: token,
                     push_request: pushRequest,
                     push_earnings: pushEarnings,
                     push_offers: pushOffers,
@@ -88,12 +104,22 @@ export default function NotificationsScreen() {
                     email_offers: emailOffers,
                 }),
             });
+
+            if (!response.ok) {
+                Alert.alert("Backend Error", "Failed to save notification settings.");
+                return;
+            }
+
+            Alert.alert("Success", "Notification settings updated.");
         } catch (err) {
             console.log("Error saving token:", err);
+            Alert.alert("Error", "Could not save device token.");
         }
     };
 
     const updateSettings = async (type, value) => {
+        Alert.alert("Updating", `Changed: ${type} to ${value}`);
+
         switch (type) {
             case "pushRequest": setPushRequest(value); break;
             case "pushEarnings": setPushEarnings(value); break;
@@ -103,7 +129,6 @@ export default function NotificationsScreen() {
             case "emailOffers": setEmailOffers(value); break;
         }
 
-        // Save settings instantly (no deviceToken needed)
         saveDeviceToken();
     };
 

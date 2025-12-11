@@ -1,3 +1,4 @@
+import { saveToken } from "@/app/utils/secureStore";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -12,7 +13,6 @@ import {
 import Button from "../components/Button";
 import CheckBox from "../components/CheckBox";
 import { BASE_URL } from "../constants/url";
-import { saveToken } from "../utils/secureStore";
 
 export default function Login() {
     const [checked, setChecked] = useState(false);
