@@ -15,7 +15,7 @@ export default function Index() {
         if (token && token.length > 0) {
           router.replace("/(root)/(tabs)/search");
         } else {
-          router.replace("/(auth)/login");
+          router.replace("/(onboarding)/onboarding");
         }
       } catch (error) {
         console.log("Token check error:", error);

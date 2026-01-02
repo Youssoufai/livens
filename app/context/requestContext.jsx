@@ -9,10 +9,11 @@ export const RequestProvider = ({ children }) => {
         location: "",
         description: "",
         duration: "",
-        allow_comment: "",
+        allow_comment: "1",
         reward: 1000,
-
     });
+
+    const [requestId, setRequestId] = useState(null); // ✅ store backend request ID
 
     const updateRequest = (data) => {
         setRequest((prev) => ({ ...prev, ...data }));
@@ -26,10 +27,17 @@ export const RequestProvider = ({ children }) => {
             allow_comment: "1",
             reward: 1000,
         });
+        setRequestId(null); // reset ID too
+    };
+
+    const saveRequestId = (id) => {
+        setRequestId(id);
     };
 
     return (
-        <RequestContext.Provider value={{ request, updateRequest, resetRequest }}>
+        <RequestContext.Provider
+            value={{ request, updateRequest, resetRequest, requestId, saveRequestId }}
+        >
             {children}
         </RequestContext.Provider>
     );

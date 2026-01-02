@@ -63,13 +63,6 @@ export default function TabsLayout({ children }) {
                 }}
             />
             <Tabs.Screen
-                name="saved"
-                options={{
-                    title: "Saved",
-                    tabBarIcon: ({ color, size }) => <Ionicons name="bookmark" size={size} color={color} />,
-                }}
-            />
-            <Tabs.Screen
                 name="profile"
                 options={{
                     title: "Profile",

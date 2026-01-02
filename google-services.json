@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "423889979292",
+    "project_id": "livelens-963c0",
+    "storage_bucket": "livelens-963c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423889979292:android:2e6690bc0c891b24542a59",
+        "android_client_info": {
+          "package_name": "livelens.inc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtSA721dqVBnXIGhuJ-4xU6T80WYDvioY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

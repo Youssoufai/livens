@@ -22,9 +22,7 @@ const SAVED_KEY = "SAVED_REQUESTS";
 
 // Save request ID
 const saveRequest = async (id) => {
-
     try {
-
         const stored = await AsyncStorage.getItem(SAVED_KEY);
         const parsed = stored ? JSON.parse(stored) : [];
 
@@ -56,15 +54,26 @@ const getSavedRequests = async () => {
     return stored ? JSON.parse(stored) : [];
 };
 
-
 function AvailableRequests() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [savedIds, setSavedIds] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     const loadSaved = async () => {
         const ids = await getSavedRequests();
         setSavedIds(ids);
+    };
+
+    const loadCurrentUser = async () => {
+        try {
+            const userId = await AsyncStorage.getItem("user_id");
+            if (userId) {
+                setCurrentUserId(String(userId));
+            }
+        } catch (err) {
+            console.log("Error loading user_id:", err);
+        }
     };
 
     const toggleSave = async (id) => {
@@ -89,6 +98,7 @@ function AvailableRequests() {
             });
 
             const data = await res.json();
+            console.log("Fetched Requests:", data);
             setRequests(data.data || []);
         } catch (error) {
             console.error("Error fetching requests:", error);
@@ -100,6 +110,7 @@ function AvailableRequests() {
     useEffect(() => {
         fetchRequests();
         loadSaved();
+        loadCurrentUser();
     }, []);
 
     if (loading) {
@@ -110,6 +121,9 @@ function AvailableRequests() {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             {requests.map((req) => {
                 const isSaved = savedIds.includes(req.id);
+                const isOwner =
+                    String(currentUserId) === String(req.user_id || req.user?.id);
+
 
                 return (
                     <View key={req.id} style={styles.card}>
@@ -125,20 +139,21 @@ function AvailableRequests() {
                             />
                         </TouchableOpacity>
 
+                        {/* 🔘 Card Press */}
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() =>
+                            onPress={() => {
+                                if (!req?.id) return;
+
                                 router.push({
-                                    pathname: "/requests/requestDetails",
+                                    pathname: isOwner
+                                        ? "/requests/requestDetails"
+                                        : "/requests/accept-request",
                                     params: {
-                                        id: req.id,
-                                        name: req.user?.name || "Unknown",
-                                        location: req.location,
-                                        description: req.description,
-                                        requestLocation: req.location,
+                                        request: JSON.stringify(req),
                                     },
-                                })
-                            }
+                                });
+                            }}
                         >
                             <View style={styles.userRow}>
                                 <View style={styles.avatar} />
@@ -152,11 +167,15 @@ function AvailableRequests() {
                                 </View>
                             </View>
 
-                            <Text style={styles.description}>{req.description}</Text>
+                            <Text style={styles.description}>
+                                {req.description}
+                            </Text>
 
                             <Text style={styles.locationText}>
                                 Request location:{" "}
-                                <Text style={styles.locationLink}>{req.location}</Text>
+                                <Text style={styles.locationLink}>
+                                    {req.location}
+                                </Text>
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -167,7 +186,6 @@ function AvailableRequests() {
 }
 
 
-
 // 🔵 Posted Requests
 function PostedRequests() {
     return (
@@ -176,7 +194,6 @@ function PostedRequests() {
                 contentContainerStyle={styles.scrollContainer}
                 showsVerticalScrollIndicator={false}
             >
-                {/* 🕒 Waiting for Responses */}
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionHeaderText}>Waiting for responses</Text>
                 </View>
@@ -189,7 +206,6 @@ function PostedRequests() {
                     </Text>
                 </View>
 
-                {/* 🔴 Active */}
                 <View style={styles.sectionHeaderActive}>
                     <Text style={styles.sectionHeaderActiveText}>Active</Text>
                 </View>
@@ -205,7 +221,6 @@ function PostedRequests() {
                     </TouchableOpacity>
                 </View>
 
-                {/* ⚪ Completed */}
                 <View style={styles.sectionHeaderCompleted}>
                     <Text style={styles.sectionHeaderCompletedText}>Completed</Text>
                 </View>
@@ -219,7 +234,6 @@ function PostedRequests() {
                 </View>
             </ScrollView>
 
-            {/* ➕ Floating Button */}
             <TouchableOpacity
                 style={styles.fab}
                 onPress={() => router.push('/(root)/(tabs)/requests/index2')}

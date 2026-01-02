@@ -11,14 +11,13 @@ import {
     View,
 } from "react-native";
 import ProgressBar from "../components/progressBar";
+import { BASE_URL } from "../constants/url";
 
 export default function CreateAccount({
     activeIndex,
     totalSteps,
     onNextStep,
 }) {
-    const [passwordVisible, setPasswordVisible] = useState(false);
-    const [confirmVisible, setConfirmVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(null);
 
     const [fullName, setFullName] = useState("");
@@ -26,29 +25,32 @@ export default function CreateAccount({
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [phone, setPhone] = useState("");
+
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmVisible, setConfirmVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const passwordsMatch = password === confirmPassword || confirmPassword === "";
+    const passwordsMatch =
+        confirmPassword.length === 0 || password === confirmPassword;
 
-    // ✅ Register Function
+    const isFormValid =
+        fullName &&
+        email &&
+        phone &&
+        password.length >= 8 &&
+        passwordsMatch;
+
     const handleRegister = async () => {
-        if (!fullName || !email || !password || !confirmPassword || !phone) {
-            Alert.alert("Missing Fields", "Please fill in all fields.");
-            return;
-        }
-        if (password !== confirmPassword) {
-            Alert.alert("Password Mismatch", "Passwords do not match.");
-            return;
-        }
-        if (password.length < 8) {
-            Alert.alert("Weak Password", "Password must be at least 8 characters long.");
+        if (!isFormValid) {
+            Alert.alert("Invalid Form", "Please fix the errors before continuing.");
             return;
         }
 
         setLoading(true);
+
         try {
             const response = await fetch(
-                "https://livelenns.online/public/api/register",
+                `${BASE_URL}/register`,
                 {
                     method: "POST",
                     headers: {
@@ -56,11 +58,11 @@ export default function CreateAccount({
                         Accept: "application/json",
                     },
                     body: JSON.stringify({
-                        name: fullName,
-                        email,
+                        name: fullName.trim(),
+                        email: email.trim(),
                         password,
                         password_confirmation: confirmPassword,
-                        phone,
+                        phone: `+234${phone}`,
                     }),
                 }
             );
@@ -68,34 +70,25 @@ export default function CreateAccount({
             const data = await response.json();
             setLoading(false);
 
-            if (response.ok) {
-                console.log("✅ Registered:", data);
-
-                // ✅ Navigate to confirm email screen with email param
-                router.push({
-                    pathname: "/(onboarding)/confirm-email",
-                    params: { email },
-                });
-
-                // If using a step-based onboarding flow
-                onNextStep?.();
-            } else {
-                console.log("❌ Error:", data);
-                if (data.errors) {
-                    const errorMessages = Object.values(data.errors)
-                        .flat()
-                        .join("\n");
-                    Alert.alert("Validation Error", errorMessages);
-                } else {
-                    Alert.alert("Error", data.message || "Something went wrong.");
-                }
+            if (!response.ok) {
+                const message = data?.errors
+                    ? Object.values(data.errors).flat().join("\n")
+                    : data?.message || "Registration failed";
+                Alert.alert("Error", message);
+                return;
             }
+
+            router.push({
+                pathname: "/(onboarding)/confirm-email",
+                params: { email },
+            });
+
+            onNextStep && onNextStep();
         } catch (error) {
             setLoading(false);
-            console.error("❌ Network Error:", error);
             Alert.alert(
                 "Network Error",
-                "Please check your connection and try again."
+                "Please check your internet connection and try again."
             );
         }
     };
@@ -106,12 +99,16 @@ export default function CreateAccount({
 
             <Text style={styles.title}>Create your account</Text>
             <Text style={styles.subtitle}>
-                Get real-time location updates and enjoy full access to all features.
+                Get real-time location updates and full access to all features.
             </Text>
 
             {/* Full Name */}
+            <Text style={styles.label}>Full Name</Text>
             <TextInput
-                style={[styles.input, focusedInput === "name" && styles.focusedInput]}
+                style={[
+                    styles.input,
+                    focusedInput === "name" && styles.focusedInput,
+                ]}
                 placeholder="John Doe"
                 value={fullName}
                 onFocus={() => setFocusedInput("name")}
@@ -120,10 +117,15 @@ export default function CreateAccount({
             />
 
             {/* Email */}
+            <Text style={styles.label}>Email</Text>
             <TextInput
-                style={[styles.input, focusedInput === "email" && styles.focusedInput]}
+                style={[
+                    styles.input,
+                    focusedInput === "email" && styles.focusedInput,
+                ]}
                 placeholder="john@example.com"
                 keyboardType="email-address"
+                autoCapitalize="none"
                 value={email}
                 onFocus={() => setFocusedInput("email")}
                 onBlur={() => setFocusedInput(null)}
@@ -131,6 +133,7 @@ export default function CreateAccount({
             />
 
             {/* Password */}
+            <Text style={styles.label}>Password</Text>
             <View
                 style={[
                     styles.passwordContainer,
@@ -138,7 +141,7 @@ export default function CreateAccount({
                 ]}
             >
                 <TextInput
-                    style={[styles.inputField, { flex: 1 }]}
+                    style={styles.passwordInput}
                     placeholder="Create a password"
                     secureTextEntry={!passwordVisible}
                     value={password}
@@ -148,41 +151,43 @@ export default function CreateAccount({
                 />
                 <TouchableOpacity
                     onPress={() => setPasswordVisible(!passwordVisible)}
-                    style={styles.eyeIcon}
                 >
                     <Ionicons
                         name={passwordVisible ? "eye-off" : "eye"}
                         size={20}
-                        color="gray"
+                        color="#777"
                     />
                 </TouchableOpacity>
             </View>
 
+            <Text style={styles.helperText}>
+                Minimum 8 characters. Use letters and numbers.
+            </Text>
+
             {/* Confirm Password */}
+            <Text style={styles.label}>Confirm Password</Text>
             <View
                 style={[
                     styles.passwordContainer,
-                    !passwordsMatch && confirmPassword ? styles.errorBorder : null,
-                    focusedInput === "confirm" && styles.focusedInput,
+                    !passwordsMatch &&
+                    confirmPassword &&
+                    styles.errorBorder,
                 ]}
             >
                 <TextInput
-                    style={[styles.inputField, { flex: 1 }]}
+                    style={styles.passwordInput}
                     placeholder="Confirm password"
                     secureTextEntry={!confirmVisible}
                     value={confirmPassword}
-                    onFocus={() => setFocusedInput("confirm")}
-                    onBlur={() => setFocusedInput(null)}
                     onChangeText={setConfirmPassword}
                 />
                 <TouchableOpacity
                     onPress={() => setConfirmVisible(!confirmVisible)}
-                    style={styles.eyeIcon}
                 >
                     <Ionicons
                         name={confirmVisible ? "eye-off" : "eye"}
                         size={20}
-                        color="gray"
+                        color="#777"
                     />
                 </TouchableOpacity>
             </View>
@@ -191,49 +196,35 @@ export default function CreateAccount({
                 <Text style={styles.errorText}>Passwords do not match</Text>
             ) : null}
 
-            {/* Phone Number */}
+            {/* Phone */}
+            <Text style={styles.label}>Phone Number</Text>
             <View style={styles.phoneContainer}>
                 <View style={styles.countryCode}>
                     <Text style={styles.flag}>🇳🇬</Text>
                     <Text style={styles.code}>+234</Text>
                 </View>
                 <TextInput
-                    style={[
-                        styles.input,
-                        { flex: 1, marginLeft: 8 },
-                        focusedInput === "phone" && styles.focusedInput,
-                    ]}
-                    placeholder="Phone number"
+                    style={[styles.input, { flex: 1, marginLeft: 8 }]}
+                    placeholder="8012345678"
                     keyboardType="phone-pad"
                     value={phone}
-                    onFocus={() => setFocusedInput("phone")}
-                    onBlur={() => setFocusedInput(null)}
                     onChangeText={setPhone}
                 />
             </View>
 
-            {/* Register Button */}
+            {/* Submit */}
             <TouchableOpacity
                 style={[
                     styles.nextButton,
-                    passwordsMatch && password.length >= 8
-                        ? styles.nextButtonActive
-                        : null,
+                    isFormValid && styles.nextButtonActive,
                 ]}
                 onPress={handleRegister}
-                disabled={loading}
+                disabled={!isFormValid || loading}
             >
                 {loading ? (
                     <ActivityIndicator color="#fff" />
                 ) : (
-                    <Text
-                        style={[
-                            styles.nextButtonText,
-                            passwordsMatch && password.length >= 8
-                                ? styles.nextButtonTextActive
-                                : null,
-                        ]}
-                    >
+                    <Text style={styles.nextButtonText}>
                         Create Account
                     </Text>
                 )}
@@ -259,12 +250,17 @@ const styles = StyleSheet.create({
         color: "#555",
         marginBottom: 20,
     },
+    label: {
+        fontSize: 13,
+        fontWeight: "600",
+        marginBottom: 6,
+    },
     input: {
         borderWidth: 1,
-        borderColor: "#ddd",
+        borderColor: "#D0D0D2",
         borderRadius: 6,
         padding: 12,
-        marginBottom: 15,
+        marginBottom: 14,
     },
     focusedInput: {
         borderColor: "red",
@@ -273,15 +269,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderWidth: 1,
-        borderColor: "#ddd",
+        borderColor: "#D0D0D2",
         borderRadius: 6,
-        marginBottom: 10,
+        paddingHorizontal: 12,
     },
-    inputField: {
-        padding: 12,
+    passwordInput: {
+        flex: 1,
+        paddingVertical: 12,
     },
-    eyeIcon: {
-        paddingHorizontal: 10,
+    helperText: {
+        fontSize: 12,
+        color: "#666",
+        marginBottom: 12,
     },
     errorBorder: {
         borderColor: "red",
@@ -289,6 +288,7 @@ const styles = StyleSheet.create({
     errorText: {
         color: "red",
         fontSize: 12,
+        marginTop: 6,
         marginBottom: 10,
     },
     phoneContainer: {
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderWidth: 1,
-        borderColor: "#ddd",
+        borderColor: "#D0D0D2",
         borderRadius: 6,
         paddingHorizontal: 10,
         paddingVertical: 12,
@@ -310,26 +310,24 @@ const styles = StyleSheet.create({
         marginRight: 4,
     },
     code: {
-        fontSize: 14,
         fontWeight: "600",
     },
     nextButton: {
-        backgroundColor: "#ddd",
+        backgroundColor: "#111",
         paddingVertical: 14,
         borderRadius: 25,
         alignItems: "center",
         marginTop: "auto",
         marginBottom: 20,
+        opacity: 0.6,
     },
     nextButtonActive: {
         backgroundColor: "red",
+        opacity: 1,
     },
     nextButtonText: {
-        color: "#999",
+        color: "#fff",
         fontSize: 16,
         fontWeight: "600",
-    },
-    nextButtonTextActive: {
-        color: "#fff",
     },
 });

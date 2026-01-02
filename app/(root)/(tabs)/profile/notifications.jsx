@@ -1,25 +1,24 @@
 import { BASE_URL } from "@/app/constants/url";
 import { getToken } from "@/app/utils/secureStore";
-import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
-    Platform,
     ScrollView,
     StyleSheet,
     Switch,
     Text,
-    TouchableOpacity,
     View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-import * as Device from "expo-device";
+export default function NotificationSettings() {
+    const [deviceToken, setDeviceToken] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-export default function NotificationsScreen() {
     const [pushRequest, setPushRequest] = useState(false);
     const [pushEarnings, setPushEarnings] = useState(false);
     const [pushOffers, setPushOffers] = useState(false);
@@ -28,64 +27,72 @@ export default function NotificationsScreen() {
     const [emailEarnings, setEmailEarnings] = useState(false);
     const [emailOffers, setEmailOffers] = useState(false);
 
-    const [deviceToken, setDeviceToken] = useState(null);
-
-    useEffect(() => {
-        registerForPushNotifications();
-    }, []);
-
+    // -------------------------------
+    // GET DEVICE TOKEN
+    // -------------------------------
     const registerForPushNotifications = async () => {
-        Alert.alert("Debug", "Registering for push notifications...");
+        try {
+            const { status: existingStatus } =
+                await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
 
-        if (Platform.OS === "android" && Constants.appOwnership === "expo") {
-            Alert.alert("Notice", "Push notifications won't work inside Expo Go. Use dev build.");
-            return;
+            if (existingStatus !== "granted") {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+
+            if (finalStatus !== "granted") {
+                Alert.alert("Permission denied", "Enable notifications in settings.");
+                return;
+            }
+
+            const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+
+            const tokenData = await Notifications.getExpoPushTokenAsync({
+                projectId,
+            });
+
+            if (!tokenData?.data) {
+                Alert.alert("Error", "Unable to fetch device token");
+                return;
+            }
+
+            // Save token to React state
+            setDeviceToken(tokenData.data);
+
+            // Save to AsyncStorage (instant)
+            await AsyncStorage.setItem("device_token", tokenData.data);
+
+            Alert.alert("Device Token", tokenData.data);
+
+            // Send to backend (first time)
+            await saveDeviceToken(tokenData.data);
+        } catch (err) {
+            Alert.alert("Error", "Failed to register for notifications.");
         }
-
-        if (!Device.isDevice) {
-            Alert.alert("Notice", "Physical device required.");
-            return;
-        }
-
-        // Check permission
-        const { status } = await Notifications.getPermissionsAsync();
-        Alert.alert("Permission Status", status);
-        let finalStatus = status;
-
-        if (finalStatus !== "granted") {
-            const { status: reqStatus } = await Notifications.requestPermissionsAsync();
-            finalStatus = reqStatus;
-            Alert.alert("Permission Requested", reqStatus);
-        }
-
-        if (finalStatus !== "granted") {
-            Alert.alert("Error", "Permission denied.");
-            return;
-        }
-
-        Alert.alert("Debug", "Getting Expo push token...");
-
-        const tokenData = await Notifications.getExpoPushTokenAsync({
-            projectId: Constants.expoConfig?.extra?.eas?.projectId,
-        });
-
-        setDeviceToken(tokenData.data);
-        Alert.alert("Device Token", tokenData.data);
-
-        console.log("Expo Device Token:", tokenData.data);
-
-        await saveDeviceToken(tokenData.data);
     };
 
-    const saveDeviceToken = async (token = deviceToken) => {
-        if (!token) {
-            Alert.alert("Debug", "No token available yet.");
-            return;
-        }
-
-        Alert.alert("Debug", "Saving device token to backend...");
-
+    // -------------------------------
+    // ALWAYS SEND TOKEN TO BACKEND
+    // -------------------------------
+    const saveDeviceToken = async (passedToken = null) => {
+        setLoading(true);
         try {
+            let finalToken = passedToken;
+
+            if (!finalToken) {
+                // Try to fetch from storage
+                finalToken = await AsyncStorage.getItem("device_token");
+            }
+
+            if (!finalToken) {
+                Alert.alert("Debug", "Still no token available.");
+                setLoading(false);
+                return;
+            }
+
+            Alert.alert("Debug", `Saving token: ${finalToken}`);
+
             const authToken = await getToken("token");
 
             const response = await fetch(`${BASE_URL}/device-token`, {
@@ -95,7 +102,7 @@ export default function NotificationsScreen() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    device_token: token,
+                    device_token: finalToken,
                     push_request: pushRequest,
                     push_earnings: pushEarnings,
                     push_offers: pushOffers,
@@ -106,143 +113,139 @@ export default function NotificationsScreen() {
             });
 
             if (!response.ok) {
-                Alert.alert("Backend Error", "Failed to save notification settings.");
+                Alert.alert(
+                    "Backend Error",
+                    "Failed to save notification settings."
+                );
+                setLoading(false);
                 return;
             }
 
             Alert.alert("Success", "Notification settings updated.");
         } catch (err) {
-            console.log("Error saving token:", err);
             Alert.alert("Error", "Could not save device token.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const updateSettings = async (type, value) => {
-        Alert.alert("Updating", `Changed: ${type} to ${value}`);
+    // -------------------------------
+    // On Screen Open → Register Token
+    // -------------------------------
+    useFocusEffect(
+        useCallback(() => {
+            registerForPushNotifications();
+        }, [])
+    );
 
-        switch (type) {
-            case "pushRequest": setPushRequest(value); break;
-            case "pushEarnings": setPushEarnings(value); break;
-            case "pushOffers": setPushOffers(value); break;
-            case "emailRequest": setEmailRequest(value); break;
-            case "emailEarnings": setEmailEarnings(value); break;
-            case "emailOffers": setEmailOffers(value); break;
-        }
-
-        saveDeviceToken();
+    // -------------------------------
+    // Toggle Handler
+    // -------------------------------
+    const handleToggle = async (setter, value) => {
+        setter(value);
+        await saveDeviceToken(); // No token passed — it pulls from storage
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.headerRow}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="chevron-back" size={24} color="#000" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Notifications</Text>
-                    <View style={{ width: 24 }} />
-                </View>
+        <ScrollView style={styles.container}>
+            <Text style={styles.title}>Notification Settings</Text>
 
+            {loading && (
+                <ActivityIndicator size="large" style={{ marginVertical: 10 }} />
+            )}
+
+            {/* Push Notifications */}
+            <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Push Notifications</Text>
 
-                <ToggleRow
-                    title="Request updates"
-                    desc="Receive alerts for new requests or status changes."
-                    value={pushRequest}
-                    onValueChange={(v) => updateSettings("pushRequest", v)}
-                />
+                <View style={styles.row}>
+                    <Text style={styles.label}>Requests</Text>
+                    <Switch
+                        value={pushRequest}
+                        onValueChange={(v) => handleToggle(setPushRequest, v)}
+                    />
+                </View>
 
-                <ToggleRow
-                    title="Earnings and transactions"
-                    desc="Be notified instantly for earnings and withdrawals."
-                    value={pushEarnings}
-                    onValueChange={(v) => updateSettings("pushEarnings", v)}
-                />
+                <View style={styles.row}>
+                    <Text style={styles.label}>Earnings</Text>
+                    <Switch
+                        value={pushEarnings}
+                        onValueChange={(v) => handleToggle(setPushEarnings, v)}
+                    />
+                </View>
 
-                <ToggleRow
-                    title="Promotions and offers"
-                    desc="Stay informed about deals and new features."
-                    value={pushOffers}
-                    onValueChange={(v) => updateSettings("pushOffers", v)}
-                />
+                <View style={styles.row}>
+                    <Text style={styles.label}>Offers</Text>
+                    <Switch
+                        value={pushOffers}
+                        onValueChange={(v) => handleToggle(setPushOffers, v)}
+                    />
+                </View>
+            </View>
 
+            {/* Email Notifications */}
+            <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Email Notifications</Text>
 
-                <ToggleRow
-                    title="Request updates"
-                    desc="Receive alerts for new requests or status changes."
-                    value={emailRequest}
-                    onValueChange={(v) => updateSettings("emailRequest", v)}
-                />
+                <View style={styles.row}>
+                    <Text style={styles.label}>Requests</Text>
+                    <Switch
+                        value={emailRequest}
+                        onValueChange={(v) => handleToggle(setEmailRequest, v)}
+                    />
+                </View>
 
-                <ToggleRow
-                    title="Earnings and transactions"
-                    desc="Be notified instantly for earnings and withdrawals."
-                    value={emailEarnings}
-                    onValueChange={(v) => updateSettings("emailEarnings", v)}
-                />
+                <View style={styles.row}>
+                    <Text style={styles.label}>Earnings</Text>
+                    <Switch
+                        value={emailEarnings}
+                        onValueChange={(v) => handleToggle(setEmailEarnings, v)}
+                    />
+                </View>
 
-                <ToggleRow
-                    title="Promotions and offers"
-                    desc="Get important product updates and offers."
-                    value={emailOffers}
-                    onValueChange={(v) => updateSettings("emailOffers", v)}
-                />
-            </ScrollView>
-        </SafeAreaView>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Offers</Text>
+                    <Switch
+                        value={emailOffers}
+                        onValueChange={(v) => handleToggle(setEmailOffers, v)}
+                    />
+                </View>
+            </View>
+        </ScrollView>
     );
 }
 
-const ToggleRow = ({ title, desc, value, onValueChange }) => (
-    <View style={styles.row}>
-        <View style={{ flex: 1 }}>
-            <Text style={styles.rowTitle}>{title}</Text>
-            <Text style={styles.rowDesc}>{desc}</Text>
-        </View>
-        <Switch value={value} onValueChange={onValueChange} />
-    </View>
-);
-
+// -------------------------------
+// STYLES
+// -------------------------------
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: 18,
         backgroundColor: "#fff",
-        paddingHorizontal: 20
     },
-    headerRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 20,
-        marginTop: 10
-    },
-    headerTitle: {
-        fontSize: 18,
+    title: {
+        fontSize: 22,
         fontWeight: "700",
-        color: "#000"
+        marginBottom: 15,
+    },
+    section: {
+        marginBottom: 25,
+        padding: 15,
+        backgroundColor: "#f6f6f6",
+        borderRadius: 10,
     },
     sectionTitle: {
-        fontSize: 15,
-        fontWeight: "700",
-        marginTop: 20,
+        fontSize: 18,
+        fontWeight: "600",
         marginBottom: 10,
-        color: "#000"
     },
     row: {
         flexDirection: "row",
-        alignItems: "center",
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
-        paddingVertical: 15
+        justifyContent: "space-between",
+        paddingVertical: 12,
     },
-    rowTitle: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#000"
+    label: {
+        fontSize: 16,
     },
-    rowDesc: {
-        fontSize: 12,
-        color: "#777",
-        marginTop: 3
-    }
 });

@@ -15,17 +15,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BASE_URL } from "@/app/constants/url";
 import { useRequest } from "@/app/context/requestContext";
 import { PAYSTACK_SECRET_KEY } from "@/app/utils/key";
+import { saveCurrentRequestId } from "@/app/utils/requestStorage";
 import { getToken } from "@/app/utils/secureStore";
-
 export default function ConfirmPublish() {
     const router = useRouter();
-    const { request } = useRequest();
+    const { request, saveRequestId } = useRequest(); // ✅ get saveRequestId
     const [loading, setLoading] = useState(false);
     const [showPaystack, setShowPaystack] = useState(false);
 
     const walletBalance = 2000; // User wallet balance (dynamic later)
-
-    // Convert reward from string to usable format
     const reward = 1000;
     const rewardNum = Number(reward);
     const serviceFee = rewardNum * 0.2;
@@ -39,32 +37,29 @@ export default function ConfirmPublish() {
         }
         postRequestToBackend();
     };
+
+
     const postRequestToBackend = async () => {
         setLoading(true);
         try {
             const token = await getToken("token");
-
             if (!token) {
                 alert("You are not logged in. Please log in again.");
                 return;
             }
 
-            // Build FormData
             const formData = new FormData();
             formData.append("location", request.location);
             formData.append("description", request.description);
             formData.append("duration", request.duration);
             formData.append("allow_comment", request.allow_comment);
-            formData.append("reward", reward); // string is fine
-
-            console.log("Sending FormData:", formData);
+            formData.append("reward", reward);
 
             const response = await fetch(`${BASE_URL}/create-request`, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${token.replace(/"/g, "")}`,
-                    // ❌ DO NOT SET Content-Type
                 },
                 body: formData,
             });
@@ -77,6 +72,12 @@ export default function ConfirmPublish() {
                 return;
             }
 
+            // ✅ Save request_id in context
+            if (data?.data?.id) {
+                await saveCurrentRequestId(data.data.id);
+            }
+
+
             router.push("/(root)/(tabs)/requests/success");
         } catch (error) {
             console.error("Submit error:", error);
@@ -86,11 +87,9 @@ export default function ConfirmPublish() {
         }
     };
 
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
             <ScrollView contentContainerStyle={styles.container}>
-                {/* Back Button */}
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
@@ -143,7 +142,7 @@ export default function ConfirmPublish() {
                     </View>
                 </TouchableOpacity>
 
-                {/* Summary */}
+                {/* Payment summary */}
                 <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Payment summary</Text>
                 {[
                     ["Reward amount:", rewardNum],
@@ -160,7 +159,6 @@ export default function ConfirmPublish() {
                     Jo Service charges 20% of reward as service fee.
                 </Text>
 
-                {/* Submit button */}
                 <TouchableOpacity
                     style={[styles.submitButton, loading && { opacity: 0.7 }]}
                     disabled={loading}
@@ -174,16 +172,11 @@ export default function ConfirmPublish() {
                 </TouchableOpacity>
             </ScrollView>
 
-            {/* Paystack Webview Popup */}
             {showPaystack && (
-                <PaystackProvider
-                    publicKey={PAYSTACK_SECRET_KEY}
-                    currency="NGN"
-                    debug
-                >
+                <PaystackProvider publicKey={PAYSTACK_SECRET_KEY} currency="NGN" debug>
                     <PaystackWebView
-                        paystackKey={PAYSTACK_SECRET_KEY} // your public key
-                        amount={rewardNum * 100}          // Paystack expects kobo
+                        paystackKey={PAYSTACK_SECRET_KEY}
+                        amount={rewardNum * 100}
                         billingEmail="yusufmuhammadbashir2005@gmail.com"
                         onCancel={() => {
                             alert("Payment cancelled");
@@ -193,9 +186,9 @@ export default function ConfirmPublish() {
                             console.log("Payment success:", response);
                             alert("Payment successful! Continuing...");
                             setShowPaystack(false);
-                            postRequestToBackend(); // continue submission
+                            postRequestToBackend();
                         }}
-                        autoStart={true} // automatically start payment when rendered
+                        autoStart={true}
                     />
                 </PaystackProvider>
             )}

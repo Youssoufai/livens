@@ -17,7 +17,7 @@ export default function Onboarding3() {
                     </Text>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => router.push('create-account')}
+                        onPress={() => router.push('createAccount')}
                     >
                         <Text style={styles.buttonText}>Get Started</Text>
                     </TouchableOpacity>

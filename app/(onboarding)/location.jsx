@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
@@ -19,97 +18,112 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
     const [address, setAddress] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isGettingLocation, setIsGettingLocation] = useState(false);
-    const router = useRouter();
 
-    const updateLocation = async (locationData) => {
+    /**
+     * 🔐 Send location to backend
+     * Backend expects: { location: string }
+     */
+    const updateLocation = async () => {
+        if (!address.trim()) {
+            Alert.alert("Error", "Location is required.");
+            return;
+        }
+
         try {
             setIsLoading(true);
 
-            // 🔁 Replace with your actual URL
-
-            console.log("Body:", JSON.stringify(locationData, null, 2));
             const token = await getToken("token");
+            if (!token) {
+                Alert.alert(
+                    "Session expired",
+                    "Please log in again to continue."
+                );
+                return;
+            }
+
+            const payload = {
+                location: address.trim(),
+            };
+
+            console.log("Sending payload:", payload);
+
             const response = await fetch(`${BASE_URL}/update-location`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token.replace(/"/g, "")}`,
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(locationData),
+                body: JSON.stringify(payload),
             });
 
-            const text = await response.text();
-            console.log("Response:", response.status, text);
+            const data = await response.text();
+            console.log("Response:", response.status, data);
 
             if (!response.ok) {
-                throw new Error(`Request failed: ${text}`);
+                throw new Error(data || "Failed to update location");
             }
 
             Alert.alert("Success", "Location updated successfully!");
             onNextStep?.();
-        } catch (err) {
-            const message =
-                err instanceof Error
-                    ? err.message
-                    : "Failed to update location. Please try again.";
-            console.error("Update error:", message);
-            Alert.alert("Error", message);
+        } catch (error) {
+            console.error("Location update error:", error);
+            Alert.alert(
+                "Error",
+                error.message || "Unable to update location. Try again."
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleManualLocation = () => {
-        if (!address.trim()) {
-            Alert.alert("Error", "Please enter an address");
-            return;
-        }
-
-        // The API expects "location" key
-        updateLocation({ location: address });
-    };
-
+    /**
+     * 📍 Get current location (NO auto-submit)
+     */
     const getCurrentLocation = async () => {
         try {
             setIsGettingLocation(true);
 
-            const { status } = await Location.requestForegroundPermissionsAsync();
+            const { status } =
+                await Location.requestForegroundPermissionsAsync();
+
             if (status !== "granted") {
                 Alert.alert(
-                    "Permission Denied",
-                    "We need location permission to access your current location."
+                    "Permission denied",
+                    "Location permission is required."
                 );
                 return;
             }
 
             const { coords } = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Highest,
+                accuracy: Location.Accuracy.Balanced,
             });
-            console.log("Coordinates:", coords);
 
             const geocode = await Location.reverseGeocodeAsync({
                 latitude: coords.latitude,
                 longitude: coords.longitude,
             });
 
-            if (geocode.length > 0) {
-                const a = geocode[0];
-                const formatted = [a.name, a.street, a.city, a.region, a.country]
-                    .filter(Boolean)
-                    .join(", ");
-
-                setAddress(formatted);
-
-                // Automatically send to API
-                updateLocation({ location: formatted });
-            } else {
-                throw new Error("Unable to get address from coordinates");
+            if (!geocode.length) {
+                throw new Error("Unable to resolve address");
             }
+
+            const a = geocode[0];
+
+            const formattedAddress = [
+                a.street,
+                a.city,
+                a.region,
+                a.country,
+            ]
+                .filter(Boolean)
+                .join(", ");
+
+            setAddress(formattedAddress);
         } catch (error) {
-            console.error("Location error:", error);
+            console.error("Get location error:", error);
             Alert.alert(
                 "Error",
-                "Failed to get your current location. Please enter it manually."
+                "Could not get your location. Please enter it manually."
             );
         } finally {
             setIsGettingLocation(false);
@@ -118,10 +132,15 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
 
     return (
         <View style={styles.container}>
-            <ProgressBar activeIndex={activeIndex} totalSteps={totalSteps} />
+            <ProgressBar
+                activeIndex={activeIndex}
+                totalSteps={totalSteps}
+            />
 
             <View style={styles.content}>
-                <Text style={styles.title}>Last step! Where do you live?</Text>
+                <Text style={styles.title}>
+                    Last step! Where do you live?
+                </Text>
                 <Text style={styles.description}>
                     We’ll recommend requests with the best offers for you.
                 </Text>
@@ -134,7 +153,7 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                         style={styles.searchIcon}
                     />
                     <TextInput
-                        placeholder="Search address"
+                        placeholder="Enter your address"
                         placeholderTextColor="#999"
                         style={styles.input}
                         value={address}
@@ -148,21 +167,34 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                     disabled={isGettingLocation}
                 >
                     {isGettingLocation ? (
-                        <ActivityIndicator color="#EF4444" style={{ marginRight: 8 }} />
+                        <ActivityIndicator
+                            color="#EF4444"
+                            style={{ marginRight: 8 }}
+                        />
                     ) : (
-                        <Ionicons name="location-outline" size={18} color="#EF4444" />
+                        <Ionicons
+                            name="location-outline"
+                            size={18}
+                            color="#EF4444"
+                        />
                     )}
                     <Text style={styles.locationText}>
-                        {isGettingLocation ? "Getting location..." : "Use current location"}
+                        {isGettingLocation
+                            ? "Getting location..."
+                            : "Use current location"}
                     </Text>
                 </TouchableOpacity>
             </View>
 
             <View style={styles.buttonGroup}>
                 <TouchableOpacity
-                    style={[styles.button, isLoading && styles.disabledButton]}
-                    onPress={handleManualLocation}
-                    disabled={isLoading}
+                    style={[
+                        styles.button,
+                        (!address.trim() || isLoading) &&
+                        styles.disabledButton,
+                    ]}
+                    onPress={updateLocation}
+                    disabled={!address.trim() || isLoading}
                 >
                     {isLoading ? (
                         <ActivityIndicator color="#fff" />
@@ -176,7 +208,9 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                     onPress={onNextStep}
                     disabled={isLoading}
                 >
-                    <Text style={styles.skipButtonText}>Skip for now</Text>
+                    <Text style={styles.skipButtonText}>
+                        Skip for now
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -215,7 +249,11 @@ const styles = StyleSheet.create({
         height: 50,
     },
     searchIcon: { marginRight: 8 },
-    input: { flex: 1, fontSize: 16, color: "#111827" },
+    input: {
+        flex: 1,
+        fontSize: 16,
+        color: "#111827",
+    },
     locationButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -225,23 +263,26 @@ const styles = StyleSheet.create({
     locationText: {
         color: "#EF4444",
         fontWeight: "500",
-        marginLeft: 5,
+        marginLeft: 6,
     },
-    buttonGroup: { marginBottom: 20 },
+    buttonGroup: {
+        marginBottom: 20,
+    },
     button: {
         backgroundColor: "#EF4444",
         paddingVertical: 16,
         borderRadius: 25,
         marginBottom: 20,
     },
-    disabledButton: { backgroundColor: "#E5E7EB" },
+    disabledButton: {
+        backgroundColor: "#E5E7EB",
+    },
     buttonText: {
         color: "#fff",
         fontSize: 16,
         fontWeight: "600",
         textAlign: "center",
     },
-    skipButton: {},
     skipButtonText: {
         color: "#6B7280",
         fontSize: 14,

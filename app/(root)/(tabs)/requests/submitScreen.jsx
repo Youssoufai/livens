@@ -1,4 +1,8 @@
 import { BASE_URL } from "@/app/constants/url";
+import {
+    clearCurrentRequestId,
+    getCurrentRequestId,
+} from "@/app/utils/requestStorage";
 import { getToken } from "@/app/utils/secureStore";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -17,7 +21,6 @@ export default function SubmitContentScreen() {
     const params = useLocalSearchParams();
     const media = params.media ? JSON.parse(params.media) : [];
     const comment = params.comment || "";
-    const requestId = params.request_id; // 🔥 must exist
 
     const [loading, setLoading] = useState(false);
 
@@ -25,21 +28,27 @@ export default function SubmitContentScreen() {
         router.push({
             pathname: "/submit/capture",
             params: {
-                media: JSON.stringify(media.map((m) => m.uri)),
-                request_id: 2,
-                comment,
+                media: JSON.stringify(media),
             },
         });
     }
 
     async function onSubmit() {
+        const requestId = await getCurrentRequestId();
+
         if (!requestId) {
-            Alert.alert("Error", "Missing request id.");
+            Alert.alert(
+                "Error",
+                "Missing request id. Please restart the request flow."
+            );
             return;
         }
 
         if (!media.length && !comment) {
-            Alert.alert("Error", "Please add images or a comment before submitting.");
+            Alert.alert(
+                "Error",
+                "Please add images or a comment before submitting."
+            );
             return;
         }
 
@@ -47,25 +56,28 @@ export default function SubmitContentScreen() {
 
         try {
             const token = await getToken("token");
-
             if (!token) {
                 Alert.alert("Error", "Authentication failed.");
-                setLoading(false);
                 return;
             }
 
             const formData = new FormData();
 
-            media.forEach((photo, index) => {
-                const uri = photo.uri.startsWith("file://") ? photo.uri : `file://${photo.uri}`;
+            media.forEach((uri, index) => {
+                if (!uri || typeof uri !== "string") return;
+
+                const fileUri = uri.startsWith("file://")
+                    ? uri
+                    : `file://${uri}`;
+
                 formData.append("media[]", {
-                    uri,
+                    uri: fileUri,
                     name: `photo_${index}.jpg`,
                     type: "image/jpeg",
                 });
             });
 
-            formData.append("comment", comment || "");
+            formData.append("comment", String(comment));
             formData.append("request_id", requestId.toString());
 
             const response = await fetch(`${BASE_URL}/submit-response`, {
@@ -80,21 +92,30 @@ export default function SubmitContentScreen() {
             console.log("📥 Server Response:", data);
 
             if (!response.ok) {
-                Alert.alert("Submission Failed", JSON.stringify(data.errors || data.message));
-            } else {
-                Alert.alert("Success", "Response submitted!");
-                router.push({
-                    pathname: "/requests/confirmation",
-                    params: {
-                        media: JSON.stringify(media),
-                        comment,
-                        request_id: requestId,
-                    },
-                });
+                Alert.alert(
+                    "Submission Failed",
+                    JSON.stringify(data.errors || data.message)
+                );
+                return;
             }
+
+            // ✅ Clear stored request id after successful submit
+            await clearCurrentRequestId();
+
+            Alert.alert("Success", "Response submitted!");
+            router.push({
+                pathname: "/requests/confirmation",
+                params: {
+                    media: JSON.stringify(media),
+                    comment,
+                },
+            });
         } catch (err) {
             console.error("🚨 Submission error:", err);
-            Alert.alert("Network Error", "Please check your internet or try again.");
+            Alert.alert(
+                "Network Error",
+                "Please check your internet or try again."
+            );
         } finally {
             setLoading(false);
         }
@@ -104,14 +125,22 @@ export default function SubmitContentScreen() {
         <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
             <ScrollView contentContainerStyle={{ padding: 20 }}>
                 <Text style={{ fontSize: 12, color: "#555" }}>Step 3 of 3</Text>
-                <Text style={{ fontSize: 22, fontWeight: "bold" }}>Submit content</Text>
+                <Text style={{ fontSize: 22, fontWeight: "bold" }}>
+                    Submit content
+                </Text>
 
                 {media.length > 0 && (
-                    <View style={{ marginTop: 20, flexDirection: "row", flexWrap: "wrap" }}>
-                        {media.map((photo, i) => (
+                    <View
+                        style={{
+                            marginTop: 20,
+                            flexDirection: "row",
+                            flexWrap: "wrap",
+                        }}
+                    >
+                        {media.map((uri, i) => (
                             <Image
                                 key={i}
-                                source={{ uri: photo.uri }}
+                                source={{ uri }}
                                 style={{
                                     width: 90,
                                     height: 90,
@@ -126,11 +155,15 @@ export default function SubmitContentScreen() {
                 )}
 
                 <TouchableOpacity onPress={goBackEditPhotos}>
-                    <Text style={{ color: "#007AFF", marginTop: 8 }}>Edit photos</Text>
+                    <Text style={{ color: "#007AFF", marginTop: 8 }}>
+                        Edit photos
+                    </Text>
                 </TouchableOpacity>
 
                 <View style={{ marginTop: 20 }}>
-                    <Text style={{ fontSize: 16, fontWeight: "700" }}>Comment</Text>
+                    <Text style={{ fontSize: 16, fontWeight: "700" }}>
+                        Comment
+                    </Text>
                     <Text style={{ color: "#555", marginTop: 4 }}>
                         {comment || "No comment provided"}
                     </Text>
@@ -151,8 +184,19 @@ export default function SubmitContentScreen() {
                         justifyContent: "center",
                     }}
                 >
-                    {loading && <ActivityIndicator color="#fff" style={{ marginRight: 10 }} />}
-                    <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
+                    {loading && (
+                        <ActivityIndicator
+                            color="#fff"
+                            style={{ marginRight: 10 }}
+                        />
+                    )}
+                    <Text
+                        style={{
+                            color: "#fff",
+                            fontWeight: "600",
+                            fontSize: 16,
+                        }}
+                    >
                         {loading ? "Submitting..." : "Submit content"}
                     </Text>
                 </TouchableOpacity>
