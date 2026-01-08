@@ -1,5 +1,4 @@
 import { router } from 'expo-router'
-import React from 'react'
 import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -7,7 +6,7 @@ export default function Onboarding2() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground
-                source={require('@/assets/images/onboarding1.png')}
+                source={require('@/app/assets/images/logo.png')}
                 style={styles.background}
                 resizeMode="cover"
             >

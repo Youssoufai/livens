@@ -1,26 +1,51 @@
 {
   "project_info": {
-    "project_number": "423889979292",
-    "project_id": "livelens-963c0",
-    "storage_bucket": "livelens-963c0.firebasestorage.app"
+    "project_number": "850951594746",
+    "project_id": "livelens-89079",
+    "storage_bucket": "livelens-89079.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:423889979292:android:2e6690bc0c891b24542a59",
+        "mobilesdk_app_id": "1:850951594746:android:bb227cc954ab2cec125f43",
         "android_client_info": {
-          "package_name": "livelens.inc"
+          "package_name": "com.eegour.livelens"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "850951594746-9a1ejl5aeos1keoj2dc0q9b6sob2d172.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eegour.livelens",
+            "certificate_hash": "8b254f69edeb77aa8b3caf6104ae1028f9f45e4c"
+          }
+        },
+        {
+          "client_id": "850951594746-nmpehcc6so6bedll8k4ohrj7uca14fu2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyCtSA721dqVBnXIGhuJ-4xU6T80WYDvioY"
+          "current_key": "AIzaSyA0QHM80_rzv7gptOfUkCitd75tDv1T0w8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "850951594746-nmpehcc6so6bedll8k4ohrj7uca14fu2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "850951594746-mb81ei6srl3f79dlh9josu5f4bsthan9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.eegour.livelens"
+              }
+            }
+          ]
         }
       }
     }

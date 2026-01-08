@@ -1,12 +1,11 @@
 import { router } from "expo-router";
-import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function RequestSuccess() {
     return (
         <View style={styles.container}>
             <Image
-                source={require("@/assets/images/group.png")}
+                source={require("@/app/assets/success.png")}
                 style={styles.image}
                 resizeMode="contain"
             />

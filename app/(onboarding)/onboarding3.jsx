@@ -1,16 +1,15 @@
 import { router } from 'expo-router'
-import React from 'react'
 import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 export default function Onboarding3() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground
-                source={require('@/assets/images/onboarding2.png')}
+                source={require('@/app/assets/images/onboarding1.png')}
                 style={styles.background}
                 resizeMode="cover"
             >
+
                 <View style={styles.overlay}>
                     <Text style={styles.title}>
                         Earn cash by{'\n'}sharing insights{'\n'}about specific{'\n'}locations.
@@ -23,7 +22,7 @@ export default function Onboarding3() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.loginButton}
-                        onPress={() => router.push('/login')}
+                        onPress={() => router.push("/(onboarding)/createAccount")}
                     >
                         <Text style={styles.loginButtonText}>Login to account</Text>
                     </TouchableOpacity>

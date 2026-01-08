@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>850951594746-mb81ei6srl3f79dlh9josu5f4bsthan9.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.850951594746-mb81ei6srl3f79dlh9josu5f4bsthan9</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>850951594746-9a1ejl5aeos1keoj2dc0q9b6sob2d172.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBwAlnYVuRr9i9A3PSBixzYWhXCMw9yGds</string>
+	<key>GCM_SENDER_ID</key>
+	<string>850951594746</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.eegour.livelens</string>
+	<key>PROJECT_ID</key>
+	<string>livelens-89079</string>
+	<key>STORAGE_BUCKET</key>
+	<string>livelens-89079.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:850951594746:ios:a980041751ea2030125f43</string>
+</dict>
+</plist>

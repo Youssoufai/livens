@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 export default function Onboarding() {
@@ -16,7 +16,7 @@ export default function Onboarding() {
     return (
         <View style={styles.container}>
             <Image
-                source={require('@/assets/images/logo.png')}
+                source={require("@/app/assets/images/icon.png")}
                 style={styles.pin}
                 resizeMode="contain"
             />

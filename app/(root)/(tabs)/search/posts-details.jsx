@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import {
     FlatList,
     Image,
@@ -10,9 +9,9 @@ import {
 } from "react-native";
 
 const images = [
-    require("@/assets/images/logo.png"),
-    require("@/assets/images/logo.png"),
-    require("@/assets/images/logo.png"),
+    require("@/app/assets/images/logo.png"),
+    require("@/app/assets/images/logo.png"),
+    require("@/app/assets/images/logo.png"),
 ];
 
 export default function PostDetails() {
