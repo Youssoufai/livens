@@ -9,7 +9,7 @@ export default function Onboarding3() {
                 style={styles.background}
                 resizeMode="cover"
             >
-                {/* bang */}
+                {/* banfg */}
                 <View style={styles.overlay}>
                     <Text style={styles.title}>
                         Earn cash by{'\n'}sharing insights{'\n'}about specific{'\n'}locations.
