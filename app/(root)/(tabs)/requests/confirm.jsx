@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     ActivityIndicator,
     ScrollView,
@@ -14,7 +14,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BASE_URL } from "@/app/constants/url";
 import { useRequest } from "@/app/context/requestContext";
-import { PAYSTACK_SECRET_KEY } from "@/app/utils/key";
 import { saveCurrentRequestId } from "@/app/utils/requestStorage";
 import { getToken } from "@/app/utils/secureStore";
 export default function ConfirmPublish() {
@@ -22,7 +21,7 @@ export default function ConfirmPublish() {
     const { request, saveRequestId } = useRequest(); // ✅ get saveRequestId
     const [loading, setLoading] = useState(false);
     const [showPaystack, setShowPaystack] = useState(false);
-
+    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
     const walletBalance = 2000; // User wallet balance (dynamic later)
     const reward = 1000;
     const rewardNum = Number(reward);

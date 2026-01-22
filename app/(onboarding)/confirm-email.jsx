@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -10,6 +10,7 @@ import {
     View,
 } from "react-native";
 import ProgressBar from "../components/progressBar";
+import { BASE_URL } from "../constants/url";
 
 export default function ConfirmEmail({ activeIndex, totalSteps, onNextStep }) {
     // ✅ Get the email from route params
@@ -37,7 +38,7 @@ export default function ConfirmEmail({ activeIndex, totalSteps, onNextStep }) {
         setLoading(true);
         try {
             const response = await fetch(
-                "https://livelenns.online/public/api/verify-email",
+                `${BASE_URL}/verify-email`,
                 {
                     method: "POST",
                     headers: {
