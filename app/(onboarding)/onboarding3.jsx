@@ -22,7 +22,7 @@ export default function Onboarding3() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.loginButton}
-                        onPress={() => router.push("/(onboarding)/createAccount")}
+                        onPress={() => router.push("/(onboarding)/login")}
                     >
                         <Text style={styles.loginButtonText}>Login to account</Text>
                     </TouchableOpacity>

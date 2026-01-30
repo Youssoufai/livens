@@ -9,14 +9,26 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.eegour.livelens",
       "supportsTablet": true,
+      "googleServicesFile": "./google-services.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
-        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos to your library"
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos to your library",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       },
-      "googleServicesFile": "./google-services.plist"
+      "entitlements": {
+        "aps-environment": "development",
+        "com.apple.security.application-groups": [
+          "group.com.eegour.livelens.onesignal"
+        ]
+      }
     },
     "android": {
+      "package": "com.eegour.livelens",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
@@ -31,11 +43,15 @@
         "monochromeImage": "./app/assets/images/logo.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.eegour.livelens",
-      "googleServicesFile": "./google-services.json"
+      "predictiveBackGestureEnabled": false
     },
     "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
+      ],
       [
         "expo-camera",
         {
@@ -59,7 +75,6 @@
       "expo-secure-store",
       "expo-font",
       "expo-router",
-      "@react-native-firebase/app",
       [
         "expo-build-properties",
         {

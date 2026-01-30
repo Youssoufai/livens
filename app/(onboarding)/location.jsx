@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -10,6 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import ProgressBar from "../components/progressBar";
 import { BASE_URL } from "../constants/url";
 import { getToken } from "../utils/secureStore";
@@ -19,9 +20,11 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isGettingLocation, setIsGettingLocation] = useState(false);
 
+    // ✅ Safe area insets (KEY FIX)
+    const insets = useSafeAreaInsets();
+
     /**
      * 🔐 Send location to backend
-     * Backend expects: { location: string }
      */
     const updateLocation = async () => {
         if (!address.trim()) {
@@ -41,23 +44,16 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                 return;
             }
 
-            const payload = {
-                location: address.trim(),
-            };
-
-            console.log("Sending payload:", payload);
-
             const response = await fetch(`${BASE_URL}/update-location`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({ location: address.trim() }),
             });
 
             const data = await response.text();
-            console.log("Response:", response.status, data);
 
             if (!response.ok) {
                 throw new Error(data || "Failed to update location");
@@ -66,7 +62,6 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
             Alert.alert("Success", "Location updated successfully!");
             onNextStep?.();
         } catch (error) {
-            console.error("Location update error:", error);
             Alert.alert(
                 "Error",
                 error.message || "Unable to update location. Try again."
@@ -77,7 +72,7 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
     };
 
     /**
-     * 📍 Get current location (NO auto-submit)
+     * 📍 Get current location
      */
     const getCurrentLocation = async () => {
         try {
@@ -119,8 +114,7 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                 .join(", ");
 
             setAddress(formattedAddress);
-        } catch (error) {
-            console.error("Get location error:", error);
+        } catch {
             Alert.alert(
                 "Error",
                 "Could not get your location. Please enter it manually."
@@ -131,89 +125,96 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
     };
 
     return (
-        <View style={styles.container}>
-            <ProgressBar
-                activeIndex={activeIndex}
-                totalSteps={totalSteps}
-            />
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={styles.container}>
+                <ProgressBar
+                    activeIndex={activeIndex}
+                    totalSteps={totalSteps}
+                />
 
-            <View style={styles.content}>
-                <Text style={styles.title}>
-                    Last step! Where do you live?
-                </Text>
-                <Text style={styles.description}>
-                    We’ll recommend requests with the best offers for you.
-                </Text>
+                <View style={styles.content}>
+                    <Text style={styles.title}>
+                        Last step! Where do you live?
+                    </Text>
+                    <Text style={styles.description}>
+                        We’ll recommend requests with the best offers for you.
+                    </Text>
 
-                <View style={styles.searchContainer}>
-                    <Ionicons
-                        name="search"
-                        size={18}
-                        color="#999"
-                        style={styles.searchIcon}
-                    />
-                    <TextInput
-                        placeholder="Enter your address"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        value={address}
-                        onChangeText={setAddress}
-                    />
+                    <View style={styles.searchContainer}>
+                        <Ionicons
+                            name="search"
+                            size={18}
+                            color="#999"
+                            style={styles.searchIcon}
+                        />
+                        <TextInput
+                            placeholder="Enter your address"
+                            placeholderTextColor="#999"
+                            style={styles.input}
+                            value={address}
+                            onChangeText={setAddress}
+                        />
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.locationButton}
+                        onPress={getCurrentLocation}
+                        disabled={isGettingLocation}
+                    >
+                        {isGettingLocation ? (
+                            <ActivityIndicator
+                                color="#EF4444"
+                                style={{ marginRight: 8 }}
+                            />
+                        ) : (
+                            <Ionicons
+                                name="location-outline"
+                                size={18}
+                                color="#EF4444"
+                            />
+                        )}
+                        <Text style={styles.locationText}>
+                            {isGettingLocation
+                                ? "Getting location..."
+                                : "Use current location"}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity
-                    style={styles.locationButton}
-                    onPress={getCurrentLocation}
-                    disabled={isGettingLocation}
-                >
-                    {isGettingLocation ? (
-                        <ActivityIndicator
-                            color="#EF4444"
-                            style={{ marginRight: 8 }}
-                        />
-                    ) : (
-                        <Ionicons
-                            name="location-outline"
-                            size={18}
-                            color="#EF4444"
-                        />
-                    )}
-                    <Text style={styles.locationText}>
-                        {isGettingLocation
-                            ? "Getting location..."
-                            : "Use current location"}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.buttonGroup}>
-                <TouchableOpacity
+                {/* ✅ FIXED BUTTON AREA */}
+                <View
                     style={[
-                        styles.button,
-                        (!address.trim() || isLoading) &&
-                        styles.disabledButton,
+                        styles.buttonGroup,
+                        { paddingBottom: insets.bottom + 16 },
                     ]}
-                    onPress={updateLocation}
-                    disabled={!address.trim() || isLoading}
                 >
-                    {isLoading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.buttonText}>Confirm</Text>
-                    )}
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            (!address.trim() || isLoading) &&
+                            styles.disabledButton,
+                        ]}
+                        onPress={updateLocation}
+                        disabled={!address.trim() || isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Confirm</Text>
+                        )}
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.skipButton}
-                    onPress={onNextStep}
-                    disabled={isLoading}
-                >
-                    <Text style={styles.skipButtonText}>
-                        Skip for now
-                    </Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={onNextStep}
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.skipButtonText}>
+                            Skip for now
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
         marginLeft: 6,
     },
     buttonGroup: {
-        marginBottom: 20,
+        paddingTop: 10,
     },
     button: {
         backgroundColor: "#EF4444",
