@@ -1,17 +1,16 @@
 {
   "expo": {
-    "name": "livlns",
-    "slug": "livlns",
+    "name": "Livelens",
+    "slug": "livelens",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/images/logo.png",
-    "scheme": "livelens",
+    "scheme": "com.eegour.livelens",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.eegour.livelens",
       "supportsTablet": true,
-      "googleServicesFile": "./google-services.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
         "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos to your library",
@@ -20,30 +19,21 @@
         ]
       },
       "entitlements": {
-        "aps-environment": "development",
-        "com.apple.security.application-groups": [
-          "group.com.eegour.livelens.onesignal"
-        ]
+        "aps-environment": "development"
       }
     },
     "android": {
       "package": "com.eegour.livelens",
-      "googleServicesFile": "./google-services.json",
       "permissions": [
         "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./app/assets/images/logo.png",
-        "backgroundImage": "./app/assets/images/logo.png",
-        "monochromeImage": "./app/assets/images/logo.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+        "backgroundColor": "#E6F4FE"
+      }
     },
     "plugins": [
       [
@@ -55,20 +45,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": ""
-        }
-      ],
-      [
-        "expo-splash-screen",
-        {
-          "image": "./app/assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ],
       "expo-web-browser",
@@ -85,14 +62,31 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
-      "router": {},
       "eas": {
-        "projectId": "30c038c2-200d-40d0-bb9a-126b8ad17a08"
-      }
-    }
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.eegour.livelens.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.eegour.livelens.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "8fbc9bfa-fe29-4a98-8ae4-00dbf973823f"
+      },
+      "router": {}
+    },
+    "owner": "eegour"
   }
 }

@@ -4,17 +4,17 @@ import { useState } from "react";
 import {
     ActivityIndicator,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import PaystackWebView, { PaystackProvider } from "react-native-paystack-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BASE_URL } from "@/app/constants/url";
 import { useRequest } from "@/app/context/requestContext";
-import { saveCurrentRequestId } from "@/app/utils/requestStorage";
+import { styles } from '@/app/styles/confirmStyle';
+import { getCurrentRequestId, saveCurrentRequestId } from "@/app/utils/requestStorage";
 import { getToken } from "@/app/utils/secureStore";
 export default function ConfirmPublish() {
     const router = useRouter();
@@ -37,22 +37,25 @@ export default function ConfirmPublish() {
         postRequestToBackend();
     };
 
-
     const postRequestToBackend = async () => {
         setLoading(true);
+
         try {
             const token = await getToken("token");
+
             if (!token) {
                 alert("You are not logged in. Please log in again.");
                 return;
             }
 
             const formData = new FormData();
-            formData.append("location", request.location);
+            formData.append("location", request.title);
             formData.append("description", request.description);
             formData.append("duration", request.duration);
             formData.append("allow_comment", request.allow_comment);
             formData.append("reward", reward);
+
+            console.log("📤 Submitting request to backend...");
 
             const response = await fetch(`${BASE_URL}/create-request`, {
                 method: "POST",
@@ -62,29 +65,48 @@ export default function ConfirmPublish() {
                 },
                 body: formData,
             });
+            const verify = await getCurrentRequestId("CURRENT_REQUEST_ID");
+            console.log("🔥 VERIFIED STORED ID:", verify);
+            const rawText = await response.text();
+            console.log("📥 RAW backend response:", rawText);
 
-            const data = await response.json();
-            console.log("Backend Response:", data);
+            let data = null;
+            try {
+                data = rawText ? JSON.parse(rawText) : null;
+            } catch (err) {
+                console.error("❌ JSON parse error:", err);
+            }
+
+            console.log("✅ Parsed backend response:", data);
 
             if (!response.ok) {
                 alert(data?.message || "Submission failed, try again.");
                 return;
             }
 
-            // ✅ Save request_id in context
             if (data?.data?.id) {
-                await saveCurrentRequestId(data.data.id);
+                const requestId = data.data.id;
+
+                console.log("🆔 Request created with ID:", requestId);
+
+                await saveCurrentRequestId(requestId);
+
+                const verify = await getCurrentRequestId();
+                console.log("🔥 VERIFIED STORED ID AFTER SAVE:", verify);
             }
 
 
+
             router.push("/(root)/(tabs)/requests/success");
+
         } catch (error) {
-            console.error("Submit error:", error);
+            console.error("❌ Submit error:", error);
             alert("Network or server error.");
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -195,46 +217,4 @@ export default function ConfirmPublish() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { padding: 16, paddingBottom: 40 },
-    backButton: { marginBottom: 10 },
-    stepText: { color: "#777", fontSize: 14, marginBottom: 6 },
-    title: { fontSize: 22, fontWeight: "600", marginBottom: 20 },
-    sectionTitle: { fontSize: 18, fontWeight: "600", marginBottom: 12, marginTop: 12 },
-    summaryItem: { marginBottom: 14 },
-    summaryLabel: { color: "#777", fontSize: 14 },
-    summaryValue: { fontSize: 16, fontWeight: "500", marginTop: 4 },
-    walletCard: {
-        borderWidth: 1,
-        borderColor: "#E60023",
-        borderRadius: 12,
-        padding: 14,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    walletTitle: { fontSize: 16, fontWeight: "600" },
-    walletSubtitle: { color: "#777", fontSize: 13 },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: "#aaa",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    radioOuterActive: { borderColor: "#E60023" },
-    radioInner: { width: 10, height: 10, borderRadius: 6, backgroundColor: "#E60023" },
-    summaryRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 },
-    summaryLeft: { color: "#555", fontSize: 15 },
-    summaryRight: { fontSize: 15, fontWeight: "600" },
-    infoText: { fontSize: 13, color: "#777", marginTop: 10 },
-    submitButton: {
-        backgroundColor: "#E60023",
-        paddingVertical: 16,
-        borderRadius: 30,
-        marginTop: 30,
-    },
-    submitText: { color: "#fff", fontSize: 17, textAlign: "center", fontWeight: "600" },
-});
+

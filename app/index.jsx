@@ -12,14 +12,18 @@ export default function Index() {
         const token = await getToken("token");
         console.log("TOKEN FOUND IN INDEX:", token);
 
+        // Defer navigation until router/RootLayout is mounted.
+        // Using setTimeout lets the router finish initializing.
         if (token && token.length > 0) {
-          router.replace("/(root)/(tabs)/search");
+
+          setTimeout(() => router.replace("/(root)/(tabs)/search"), 50);
+
         } else {
-          router.replace("/(onboarding)/onboarding");
+          setTimeout(() => router.replace("/(onboarding)/onboarding"), 50);
         }
       } catch (error) {
         console.log("Token check error:", error);
-        router.replace("/(auth)/login");
+        setTimeout(() => router.replace("/(auth)/login"), 50);
       } finally {
         setLoading(false);
       }

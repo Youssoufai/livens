@@ -12,6 +12,9 @@
       "distribution": "internal"
     },
     "production": {
+      "env": {
+        "GOOGLE_ANDROID_CLIENT_ID": "850951594746-5n96ghgrb5gulf5k7oukc09i7t369idq.apps.googleusercontent.com"
+      },
       "distribution": "store",
       "android": {
         "buildType": "apk"

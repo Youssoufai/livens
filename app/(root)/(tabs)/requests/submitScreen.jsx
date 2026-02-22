@@ -34,8 +34,11 @@ export default function SubmitContentScreen() {
     }
 
     async function onSubmit() {
-        const requestId = await getCurrentRequestId();
-
+        const requestId = await getCurrentRequestId("CURRENT_REQUEST_ID");
+        console.log("RAW requestId from storage:", requestId);
+        console.log("Params requestId:", params.requestId);
+        const storedId = await getCurrentRequestId("CURRENT_REQUEST_ID");
+        console.log("Stored requestId:", storedId);
         if (!requestId) {
             Alert.alert(
                 "Error",
@@ -78,6 +81,8 @@ export default function SubmitContentScreen() {
             });
 
             formData.append("comment", String(comment));
+            console.log("🚀 Sending request_id:", requestId, typeof requestId);
+
             formData.append("request_id", requestId.toString());
 
             const response = await fetch(`${BASE_URL}/submit-response`, {

@@ -1,105 +1,67 @@
 import { BASE_URL } from "@/app/constants/url";
+import { styles } from "@/app/styles/requestTabStyle";
 import { getToken } from "@/app/utils/secureStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const Tab = createMaterialTopTabNavigator();
 
-// 🟢 Available Requests 
-
-const SAVED_KEY = "SAVED_REQUESTS";
-
-// Save request ID
-const saveRequest = async (id) => {
-    try {
-        const stored = await AsyncStorage.getItem(SAVED_KEY);
-        const parsed = stored ? JSON.parse(stored) : [];
-
-        if (!parsed.includes(id)) {
-            parsed.push(id);
-            await AsyncStorage.setItem(SAVED_KEY, JSON.stringify(parsed));
-        }
-    } catch (err) {
-        console.log(err);
-    }
-};
-
-// Remove saved request
-const removeRequest = async (id) => {
-    try {
-        const stored = await AsyncStorage.getItem(SAVED_KEY);
-        let parsed = stored ? JSON.parse(stored) : [];
-
-        parsed = parsed.filter(item => item !== id);
-        await AsyncStorage.setItem(SAVED_KEY, JSON.stringify(parsed));
-    } catch (err) {
-        console.log(err);
-    }
-};
-
-// Get saved IDs
-const getSavedRequests = async () => {
-    const stored = await AsyncStorage.getItem(SAVED_KEY);
-    return stored ? JSON.parse(stored) : [];
-};
 
 function AvailableRequests() {
+
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [savedIds, setSavedIds] = useState([]);
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [userLoaded, setUserLoaded] = useState(false);
 
-    const loadSaved = async () => {
-        const ids = await getSavedRequests();
-        setSavedIds(ids);
-    };
+    /* ---------------- LOAD USER ---------------- */
 
     const loadCurrentUser = async () => {
         try {
             const userId = await AsyncStorage.getItem("user_id");
+
+            console.log("Current User ID:", userId);
+
             if (userId) {
                 setCurrentUserId(String(userId));
             }
         } catch (err) {
             console.log("Error loading user_id:", err);
+        } finally {
+            setUserLoaded(true);
         }
     };
 
-    const toggleSave = async (id) => {
-        if (savedIds.includes(id)) {
-            await removeRequest(id);
-            setSavedIds(savedIds.filter(item => item !== id));
-        } else {
-            await saveRequest(id);
-            setSavedIds([...savedIds, id]);
-        }
-    };
+    /* ---------------- FETCH REQUESTS ---------------- */
 
     const fetchRequests = async () => {
         try {
             const token = await getToken("token");
-            const res = await fetch(`${BASE_URL}/get-requests`, {
+
+            const res = await fetch(`${BASE_URL}/all-requests`, {
                 headers: {
                     Accept: "application/json",
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token.replace(/"/g, "")}`,
                 },
             });
 
             const data = await res.json();
+
             console.log("Fetched Requests:", data);
-            setRequests(data.data || []);
+
+            setRequests(data?.data || []);
+
         } catch (error) {
             console.error("Error fetching requests:", error);
         } finally {
@@ -107,60 +69,70 @@ function AvailableRequests() {
         }
     };
 
+    /* ---------------- INIT ---------------- */
+
     useEffect(() => {
-        fetchRequests();
-        loadSaved();
         loadCurrentUser();
+        fetchRequests();
     }, []);
 
-    if (loading) {
+    /* ---------------- WAIT UNTIL BOTH LOADED ---------------- */
+
+    if (loading || !userLoaded) {
         return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
     }
+
+    /* ---------------- UI ---------------- */
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             {requests.map((req) => {
-                const isSaved = savedIds.includes(req.id);
-                const isOwner =
-                    String(currentUserId) === String(req.user_id || req.user?.id);
 
+                // ✅ ONLY compare user_id
+                const isOwner =
+                    String(currentUserId) === String(req.user_id);
+
+                console.log(
+                    "Compare:",
+                    currentUserId,
+                    req.user_id,
+                    "Owner:",
+                    isOwner
+                );
 
                 return (
                     <View key={req.id} style={styles.card}>
-                        {/* 🔘 Save Button */}
-                        <TouchableOpacity
-                            style={{ position: "absolute", top: 12, right: 12 }}
-                            onPress={() => toggleSave(req.id)}
-                        >
-                            <Ionicons
-                                name={isSaved ? "bookmark" : "bookmark-outline"}
-                                size={24}
-                                color={isSaved ? "#FF9900" : "#777"}
-                            />
-                        </TouchableOpacity>
-
-                        {/* 🔘 Card Press */}
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
+
                                 if (!req?.id) return;
 
-                                router.push({
-                                    pathname: isOwner
-                                        ? "/requests/requestDetails"
-                                        : "/requests/accept-request",
-                                    params: {
-                                        request: JSON.stringify(req),
-                                    },
-                                });
+                                if (isOwner) {
+
+                                    router.push(
+                                        `/requests/requestDetails/${req.id}`
+                                    );
+
+                                } else {
+
+                                    router.push({
+                                        pathname: `/requests/accept-request/${req.id}`,
+                                        params: {
+                                            request_id: String(req.id),
+                                        },
+                                    });
+                                }
                             }}
                         >
                             <View style={styles.userRow}>
                                 <View style={styles.avatar} />
+
                                 <View>
                                     <Text style={styles.name}>
                                         {req.user?.name || "Unknown User"}
                                     </Text>
+
                                     <Text style={styles.subText}>
                                         {req.location || "Unknown location"}
                                     </Text>
@@ -172,9 +144,9 @@ function AvailableRequests() {
                             </Text>
 
                             <Text style={styles.locationText}>
-                                Request location:{" "}
+                                Request location:
                                 <Text style={styles.locationLink}>
-                                    {req.location}
+                                    {" "}{req.location}
                                 </Text>
                             </Text>
                         </TouchableOpacity>
@@ -184,7 +156,6 @@ function AvailableRequests() {
         </ScrollView>
     );
 }
-
 
 // 🔵 Posted Requests
 function PostedRequests() {
@@ -290,148 +261,3 @@ export default function RequestsTabs() {
     );
 }
 
-const styles = StyleSheet.create({
-    header: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
-    },
-    headerTitle: {
-        fontSize: 22,
-        fontWeight: "700",
-        color: "#000",
-    },
-    scrollContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 10,
-        paddingBottom: 100,
-    },
-    card: {
-        backgroundColor: "#fff",
-        padding: 16,
-        marginBottom: 12,
-        borderRadius: 12,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 5,
-        shadowOffset: { width: 0, height: 3 },
-        elevation: 2,
-        borderWidth: 1,
-        borderColor: "#eee",
-    },
-    userRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 10,
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "#ddd",
-        marginRight: 12,
-    },
-    name: { fontWeight: "600", fontSize: 16, color: "#000" },
-    subText: { color: "#888", fontSize: 13 },
-    description: { color: "#444", fontSize: 14, marginBottom: 8 },
-    locationText: { fontSize: 13, color: "#666" },
-    locationLink: { color: "#007AFF", fontWeight: "500" },
-
-    sectionHeader: {
-        backgroundColor: "#F6F7FB",
-        padding: 8,
-        borderRadius: 6,
-        marginBottom: 10,
-    },
-    sectionHeaderText: {
-        color: "#6C6C6C",
-        fontWeight: "600",
-        fontSize: 14,
-    },
-    sectionHeaderActive: {
-        backgroundColor: "#FF3B30",
-        padding: 8,
-        borderRadius: 6,
-        marginTop: 20,
-    },
-    sectionHeaderActiveText: {
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: 14,
-    },
-    sectionHeaderCompleted: {
-        backgroundColor: "#E9E9E9",
-        padding: 8,
-        borderRadius: 6,
-        marginTop: 20,
-    },
-    sectionHeaderCompletedText: {
-        color: "#8A8A8A",
-        fontWeight: "600",
-    },
-    lightCard: {
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        padding: 14,
-        borderWidth: 1,
-        borderColor: "#eee",
-        marginBottom: 16,
-    },
-    activeCard: {
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        padding: 14,
-        marginTop: 10,
-        borderWidth: 1,
-        borderColor: "#FF3B30",
-    },
-    completedCard: {
-        backgroundColor: "#f9f9f9",
-        borderRadius: 10,
-        padding: 14,
-        borderWidth: 1,
-        borderColor: "#ddd",
-        opacity: 0.9,
-        marginTop: 10,
-    },
-    cardTitle: { fontSize: 15, fontWeight: "600", marginBottom: 4 },
-    cardDescription: { color: "#555", fontSize: 13 },
-    viewButton: {
-        backgroundColor: "#FF3B30",
-        paddingVertical: 8,
-        borderRadius: 6,
-        alignItems: "center",
-        marginTop: 10,
-    },
-    viewButtonText: { color: "#fff", fontWeight: "600" },
-    fab: {
-        position: "absolute",
-        bottom: 25,
-        right: 25,
-        backgroundColor: "#000",
-        width: 54,
-        height: 54,
-        borderRadius: 27,
-        justifyContent: "center",
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#fff",
-    },
-    emptyTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#333",
-        marginTop: 10,
-    },
-    emptyText: { fontSize: 14, color: "#888", marginTop: 4 },
-});

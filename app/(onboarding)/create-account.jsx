@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -42,6 +43,8 @@ export default function CreateAccount({
         password.length >= 8 &&
         passwordsMatch;
 
+
+
     const handleRegister = async () => {
         if (!isFormValid) {
             Alert.alert("Invalid Form", "Please fix the errors before continuing.");
@@ -77,12 +80,20 @@ export default function CreateAccount({
                 return;
             }
 
+            // 🔐 Save token ONLY if backend returns one
+            if (data?.access_token) {
+                await saveToken(data.access_token);
+            }
+
+            // (Optional but useful later)
+            await SecureStore.setItemAsync("email", email.trim());
+
             router.push({
                 pathname: "/(onboarding)/confirm-email",
                 params: { email },
             });
 
-            onNextStep && onNextStep();
+            onNextStep?.();
         } catch (error) {
             setLoading(false);
             Alert.alert(
@@ -91,6 +102,7 @@ export default function CreateAccount({
             );
         }
     };
+
 
     return (
         <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>

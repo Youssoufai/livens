@@ -1,10 +1,10 @@
 import { useRequest } from '@/app/context/requestContext';
+import { styles } from '@/app/styles/cameraScreen';
 import { getToken } from '@/app/utils/secureStore'; // We'll use this to persist requestId
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
+import { Button, Text, TouchableOpacity, View } from 'react-native';
 export default function CameraScreen() {
     const cameraRef = useRef(null);
     const [cameraReady, setCameraReady] = useState(false);
@@ -17,12 +17,20 @@ export default function CameraScreen() {
     useEffect(() => {
         async function loadRequestId() {
             if (!requestId) {
-                const storedId = await getToken("pending_request_id");
-                if (storedId) saveRequestId(storedId);
+                const storedId = await getToken("CURRENT_REQUEST_ID");
+
+                if (storedId) {
+                    const parsedId = JSON.parse(storedId);
+                    saveRequestId(parsedId);
+
+                    console.log("Loaded Request ID:", parsedId);
+                }
             }
         }
+
         loadRequestId();
-    }, []);
+    }, [requestId]);
+
     async function takePhoto() {
         if (!cameraRef.current || !cameraReady) return;
 
@@ -102,17 +110,3 @@ export default function CameraScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'black' },
-    message: { textAlign: 'center', paddingBottom: 10, color: 'white' },
-    camera: { flex: 1, width: '100%' },
-    topBar: { position: 'absolute', top: 0, width: '100%', paddingTop: 40, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', zIndex: 10 },
-    time: { color: 'white', fontSize: 16 },
-    topRight: { flexDirection: 'row', gap: 20 },
-    icon: { fontSize: 20, color: 'white' },
-    closeButton: { position: 'absolute', top: 40, left: 20, zIndex: 20 },
-    closeText: { fontSize: 24, color: 'white', fontWeight: 'bold' },
-    bottomBar: { position: 'absolute', bottom: 40, width: '100%', alignItems: 'center' },
-    toggleMode: { color: 'white', fontSize: 17, marginBottom: 25 },
-    shutterBtn: { width: 80, height: 80, borderRadius: 50, backgroundColor: 'white', borderWidth: 5, borderColor: '#222' },
-});

@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 
 export default function Overveiw({ data }) {
     const {
-        title = "Jabi Lake Mall",
+
         location = "Jabi Lake Mall",
         address = "Plot 235, Adewale Adetokunbo St, Abuja",
         duration = "24 hours",
@@ -17,7 +17,7 @@ export default function Overveiw({ data }) {
 
         <>
             <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 6 }}>
-                {title}
+
             </Text>
             <Text style={{ fontSize: 14, color: "#555", marginBottom: 16 }}>
                 By {name}

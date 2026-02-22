@@ -2,7 +2,7 @@ import { BASE_URL } from "@/app/constants/url";
 import { getToken } from "@/app/utils/secureStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,8 +18,7 @@ export default function FundWalletScreen() {
         try {
             setLoading(true);
 
-            const rawToken = await getToken();
-            const token = rawToken ? JSON.parse(rawToken) : null;
+            const token = await getToken("token");
 
             const amountInKobo = parseInt(amount);
 

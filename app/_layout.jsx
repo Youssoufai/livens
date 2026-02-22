@@ -20,16 +20,19 @@ const tokenCache = {
 
 export default function RootLayout() {
   useEffect(() => {
-    // 🔍 Verbose logging for development (remove in production)
-    OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+    const init = async () => {
+      OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 
-    // 🚀 Initialize OneSignal
-    OneSignal.initialize(process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID);
+      await OneSignal.initialize("ab35b02e-e56d-4e83-86ca-ca3ad162e87a");
 
-    // 🔔 Request notification permission (iOS)
-    // Recommended only for testing — later use In-App Messages
-    OneSignal.Notifications.requestPermission(false);
+      await OneSignal.Notifications.requestPermission(false);
+    };
+
+    init();
+
   }, []);
+
+
 
   return (
     <RequestProvider>

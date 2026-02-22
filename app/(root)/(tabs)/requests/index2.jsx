@@ -1,21 +1,21 @@
 import { useRequest } from "@/app/context/requestContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../../../styles/requestIndex";
 export default function CreateRequest() {
-    const [location, setLocation] = useState("");
+    const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const { updateRequest } = useRequest();
     const handleNext = () => {
-        if (!location || !description) {
+        if (!title || !description) {
             Alert.alert("Missing Fields", "Please fill in all fields before proceeding.");
             return;
         }
 
-        updateRequest({ location, description });
+        updateRequest({ title, description });
 
         // Navigate to Request screen (Step 2)
         router.push('/(root)/(tabs)/requests/requestCondition');
@@ -40,8 +40,8 @@ export default function CreateRequest() {
                     style={styles.input}
                     placeholder="Choose location"
                     placeholderTextColor="#999"
-                    value={location}
-                    onChangeText={setLocation}
+                    value={title}
+                    onChangeText={setTitle}
                 />
             </View>
 

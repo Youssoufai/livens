@@ -4,19 +4,18 @@ import { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import ProgressBar from "../components/progressBar";
 import { BASE_URL } from "../constants/url";
+import { styles } from "../styles/locationStyle";
 import { getToken } from "../utils/secureStore";
-
 export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
-    const [address, setAddress] = useState("");
+    const [location, setLocation] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isGettingLocation, setIsGettingLocation] = useState(false);
 
@@ -27,20 +26,32 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
      * 🔐 Send location to backend
      */
     const updateLocation = async () => {
-        if (!address.trim()) {
+        const trimmedAddress = location?.trim();
+
+        if (!trimmedAddress) {
             Alert.alert("Error", "Location is required.");
             return;
         }
 
-        try {
-            setIsLoading(true);
+        // ✅ Convert commas to spaces + remove extra spaces
+        const backendLocation = trimmedAddress
+            .replace(/,/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
 
+        setIsLoading(true);
+
+        try {
             const token = await getToken("token");
+
+            // ✅ Handle missing token properly
             if (!token) {
                 Alert.alert(
                     "Session expired",
                     "Please log in again to continue."
                 );
+
+                router.replace("/login");
                 return;
             }
 
@@ -48,19 +59,37 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Accept: "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ location: address.trim() }),
+                body: JSON.stringify({
+                    location: backendLocation, // ✅ send space-separated location
+                }),
             });
 
-            const data = await response.text();
+            // ✅ Handle JSON or text responses safely
+            let data;
+            const contentType = response.headers.get("content-type");
+
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                data = await response.text();
+            }
 
             if (!response.ok) {
-                throw new Error(data || "Failed to update location");
+                const message =
+                    typeof data === "string"
+                        ? data
+                        : data?.message || "Failed to update location";
+
+                throw new Error(message);
             }
 
             Alert.alert("Success", "Location updated successfully!");
+
             onNextStep?.();
+
         } catch (error) {
             Alert.alert(
                 "Error",
@@ -70,6 +99,8 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
             setIsLoading(false);
         }
     };
+
+
 
     /**
      * 📍 Get current location
@@ -113,7 +144,7 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                 .filter(Boolean)
                 .join(", ");
 
-            setAddress(formattedAddress);
+            setLocation(formattedAddress);
         } catch {
             Alert.alert(
                 "Error",
@@ -151,8 +182,8 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                             placeholder="Enter your address"
                             placeholderTextColor="#999"
                             style={styles.input}
-                            value={address}
-                            onChangeText={setAddress}
+                            value={location}
+                            onChangeText={setLocation}
                         />
                     </View>
 
@@ -191,11 +222,11 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            (!address.trim() || isLoading) &&
+                            (!location.trim() || isLoading) &&
                             styles.disabledButton,
                         ]}
                         onPress={updateLocation}
-                        disabled={!address.trim() || isLoading}
+                        disabled={!location.trim() || isLoading}
                     >
                         {isLoading ? (
                             <ActivityIndicator color="#fff" />
@@ -218,75 +249,4 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        paddingHorizontal: 20,
-        paddingTop: 40,
-    },
-    content: {
-        flex: 1,
-        paddingTop: 40,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: "#111827",
-    },
-    description: {
-        fontSize: 14,
-        color: "#6B7280",
-        marginTop: 6,
-        marginBottom: 30,
-    },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        height: 50,
-    },
-    searchIcon: { marginRight: 8 },
-    input: {
-        flex: 1,
-        fontSize: 16,
-        color: "#111827",
-    },
-    locationButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 16,
-    },
-    locationText: {
-        color: "#EF4444",
-        fontWeight: "500",
-        marginLeft: 6,
-    },
-    buttonGroup: {
-        paddingTop: 10,
-    },
-    button: {
-        backgroundColor: "#EF4444",
-        paddingVertical: 16,
-        borderRadius: 25,
-        marginBottom: 20,
-    },
-    disabledButton: {
-        backgroundColor: "#E5E7EB",
-    },
-    buttonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "600",
-        textAlign: "center",
-    },
-    skipButtonText: {
-        color: "#6B7280",
-        fontSize: 14,
-        textAlign: "center",
-    },
-});
+

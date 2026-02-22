@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
 import {
     ScrollView,
     StyleSheet,
@@ -19,7 +18,7 @@ export default function CaptureContent() {
                 contentContainerStyle={{ paddingBottom: 120 }}
             >
                 {/* Step Header */}
-                <Text style={styles.stepText}>Step 1 of 3</Text>
+                <Text style={styles.stepText}>Step 2 of 3</Text>
 
                 {/* Title */}
                 <Text style={styles.title}>Capture photos and videos</Text>

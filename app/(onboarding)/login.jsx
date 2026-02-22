@@ -1,29 +1,129 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Google from "expo-auth-session/providers/google";
+import { router, useSegments } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { saveToken } from "../utils/secureStore";
 
-const BASE_URL = "{{url}}"; // replace with your base url
+import { makeRedirectUri } from "expo-auth-session";
+import { BASE_URL } from "../constants/url";
+import { styles } from "../styles/loginStyle";
+import { initDeviceToken } from "../utils/deviceToken";
+import { saveToken } from "../utils/secureStore";
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
     const insets = useSafeAreaInsets();
+    const segments = useSegments();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
     const canLogin = email.trim() && password.trim();
+
+    const redirectUri = makeRedirectUri({
+        scheme: "com.eegour.livelens",
+        useProxy: false
+    });
+
+
+    // 🔹 GOOGLE CONFIG
+    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+        androidClientId: "850951594746-5n96ghgrb5gulf5k7oukc09i7t369idq.apps.googleusercontent.com",
+        webClientId: "850951594746-b7co332s3k0mk9lngdj7n2h53rqerp0l.apps.googleusercontent.com",
+        redirectUri
+    });
+    // hjbjhbjhgh
+    console.log("🔹 Redirect URI:", request?.redirectUri);
+    console.log("🔹 Redirect URI:", request?.redirectUri);
+
+    useEffect(() => {
+        console.log("🔹 Full Response:", JSON.stringify(response, null, 2));
+        console.log("🔹 Response Type:", response?.type);
+
+        if (response?.type === "success") {
+            console.log("✅ SUCCESS!");
+            console.log("🔹 Authentication object:", response.authentication);
+            console.log("🔹 ID Token:", response.authentication?.idToken);
+
+            const idToken = response.authentication?.idToken;
+            if (idToken) {
+                console.log("✅ ID Token found, calling handleGoogleLogin");
+                handleGoogleLogin(idToken);
+            } else {
+                console.error("❌ No ID token found in success response");
+                Alert.alert("Error", "ID token missing from Google response");
+            }
+        } else if (response?.type === "error") {
+            console.error("❌ ERROR Response:", response.error);
+            console.error("❌ Error details:", JSON.stringify(response.error, null, 2));
+            Alert.alert("Authentication Error", response.error?.message || "Failed to authenticate with Google");
+        } else if (response?.type === "cancel") {
+            console.log("⚠️ User cancelled authentication");
+        } else if (response?.type === "dismiss") {
+            console.log("⚠️ User dismissed authentication");
+        } else if (response?.type === "locked") {
+            console.log("⚠️ Authentication locked");
+        }
+    }, [response]);
+
+    const handleGoogleLogin = async (idToken) => {
+        try {
+            console.log("🔹 Starting backend Google login...");
+            setGoogleLoading(true);
+
+            const res = await fetch(`${BASE_URL}/auth/google`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id_token: idToken }),
+            });
+
+            console.log("🔹 Backend response status:", res.status);
+            const data = await res.json();
+            console.log("🔹 Backend response data:", data);
+
+            if (!res.ok) {
+                throw new Error(data.message || "Google login failed");
+            }
+
+            const authToken = data?.token || data?.access_token;
+
+            if (!authToken) {
+                throw new Error("Authentication token missing");
+            }
+
+            await saveToken(authToken);
+
+            if (data?.user?.id) {
+                await AsyncStorage.setItem("user_id", String(data.user.id));
+                await AsyncStorage.setItem("user", JSON.stringify(data.user));
+            }
+
+            await initDeviceToken();
+
+            Alert.alert("Success", "Logged in with Google");
+            router.replace("/(root)/(tabs)/search");
+
+        } catch (error) {
+            console.error("❌ Google login error:", error);
+            Alert.alert("Google Login Failed", error.message);
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
 
     const handleLogin = async () => {
         if (!canLogin) return;
@@ -46,11 +146,24 @@ export default function LoginScreen() {
                 throw new Error(data.message || "Invalid credentials");
             }
 
-            // ✅ Save token (only if remember me or always — your choice)
-            await saveToken(data.token);
+            const authToken = data?.access_token;
+
+            if (!authToken) {
+                throw new Error("Authentication token missing");
+            }
+
+            await saveToken(authToken);
+
+            if (data?.user?.id) {
+                await AsyncStorage.setItem("user_id", String(data.user.id));
+                await AsyncStorage.setItem("user", JSON.stringify(data.user));
+            }
+
+            await initDeviceToken();
 
             Alert.alert("Success", "Logged in successfully");
-            // router.replace("/(tabs)");
+            router.replace("/(root)/(tabs)/search");
+
         } catch (error) {
             Alert.alert("Login failed", error.message);
         } finally {
@@ -61,11 +174,9 @@ export default function LoginScreen() {
     return (
         <SafeAreaView style={styles.safe}>
             <View style={styles.container}>
-
-                {/* Header */}
                 <Text style={styles.title}>Welcome back</Text>
 
-                {/* Email */}
+                {/* EMAIL */}
                 <View style={styles.field}>
                     <Text style={styles.label}>Email address</Text>
                     <TextInput
@@ -79,7 +190,7 @@ export default function LoginScreen() {
                     />
                 </View>
 
-                {/* Password */}
+                {/* PASSWORD */}
                 <View style={styles.field}>
                     <Text style={styles.label}>Password</Text>
                     <View style={styles.passwordInput}>
@@ -91,15 +202,9 @@ export default function LoginScreen() {
                             value={password}
                             onChangeText={setPassword}
                         />
-                        <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}
-                        >
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                             <Ionicons
-                                name={
-                                    showPassword
-                                        ? "eye-off-outline"
-                                        : "eye-outline"
-                                }
+                                name={showPassword ? "eye-off-outline" : "eye-outline"}
                                 size={20}
                                 color="#6B7280"
                             />
@@ -107,42 +212,28 @@ export default function LoginScreen() {
                     </View>
                 </View>
 
-                {/* Remember + Forgot */}
-                <View style={styles.row}>
-                    <TouchableOpacity
-                        style={styles.remember}
-                        onPress={() => setRememberMe(!rememberMe)}
-                    >
-                        <View
-                            style={[
-                                styles.checkbox,
-                                rememberMe && styles.checkboxActive,
-                            ]}
-                        >
-                            {rememberMe && (
-                                <Ionicons
-                                    name="checkmark"
-                                    size={12}
-                                    color="#fff"
-                                />
-                            )}
-                        </View>
-                        <Text style={styles.rememberText}>
-                            Remember me
-                        </Text>
-                    </TouchableOpacity>
+                {/* GOOGLE BUTTON */}
+                <TouchableOpacity
+                    style={[styles.googleBtn, googleLoading && styles.disabledBtn]}
+                    onPress={() => {
+                        console.log("🔹 Google button pressed");
+                        promptAsync();
+                    }}
+                    disabled={!request || googleLoading}
+                >
+                    {googleLoading ? (
+                        <ActivityIndicator />
+                    ) : (
+                        <>
+                            <Ionicons name="logo-google" size={18} color="#DB4437" />
+                            <Text style={styles.googleText}>Continue with Google</Text>
+                        </>
+                    )}
+                </TouchableOpacity>
 
-                    <TouchableOpacity>
-                        <Text style={styles.forgot}>
-                            Forgot password?
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Spacer pushes button to bottom */}
                 <View style={{ flex: 1 }} />
 
-                {/* Login Button (BOTTOM) */}
+                {/* LOGIN BUTTON */}
                 <View style={{ paddingBottom: insets.bottom + 16 }}>
                     <TouchableOpacity
                         style={[
@@ -159,106 +250,7 @@ export default function LoginScreen() {
                         )}
                     </TouchableOpacity>
                 </View>
-
             </View>
         </SafeAreaView>
     );
 }
-const styles = StyleSheet.create({
-    safe: {
-        flex: 1,
-        backgroundColor: "#fff",
-    },
-    container: {
-        flex: 1,
-        paddingHorizontal: 20,
-        paddingTop: 60,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "700",
-        textAlign: "center",
-        marginBottom: 30,
-        color: "#111827",
-    },
-    field: {
-        marginBottom: 18,
-    },
-    label: {
-        fontSize: 13,
-        marginBottom: 6,
-        color: "#111827",
-        fontWeight: "500",
-    },
-    input: {
-        height: 48,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        fontSize: 15,
-        color: "#111827",
-    },
-    passwordInput: {
-        flexDirection: "row",
-        alignItems: "center",
-        height: 48,
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-    },
-    passwordText: {
-        flex: 1,
-        fontSize: 15,
-        color: "#111827",
-    },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 6,
-    },
-    remember: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    checkbox: {
-        width: 16,
-        height: 16,
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: "#D1D5DB",
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 8,
-    },
-    checkboxActive: {
-        backgroundColor: "#EF4444",
-        borderColor: "#EF4444",
-    },
-    rememberText: {
-        fontSize: 13,
-        color: "#374151",
-    },
-    forgot: {
-        fontSize: 13,
-        color: "#111827",
-        fontWeight: "500",
-    },
-    loginBtn: {
-        height: 52,
-        borderRadius: 26,
-        backgroundColor: "#EF4444",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    disabledBtn: {
-        backgroundColor: "#E5E7EB",
-    },
-    loginText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "600",
-    },
-});
