@@ -16,7 +16,7 @@ export default function Onboarding() {
     return (
         <View style={styles.container}>
             <Image
-                source={require("@/app/assets/images/icon.png")}
+                source={require("@/app/assets/images/logo.png")}
                 style={styles.pin}
                 resizeMode="contain"
             />

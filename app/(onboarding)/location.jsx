@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -87,7 +88,7 @@ export default function LocationSetup({ activeIndex, totalSteps, onNextStep }) {
             }
 
             Alert.alert("Success", "Location updated successfully!");
-
+            router.replace("/(root)/(tabs)/search")
             onNextStep?.();
 
         } catch (error) {

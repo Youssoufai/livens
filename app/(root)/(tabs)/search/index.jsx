@@ -108,34 +108,7 @@ export default function SearchScreen() {
                 </TouchableOpacity>
 
                 {/* Option 2 */}
-                <TouchableOpacity
-                    style={styles.option}
-                    onPress={() =>
-                        router.push("/(root)/(tabs)/requests")
-                    }
-                >
-                    <View style={styles.iconCircle}>
-                        <Ionicons
-                            name="chatbubble-ellipses"
-                            size={20}
-                            color="#EF4444"
-                        />
-                    </View>
 
-                    <View style={styles.optionText}>
-                        <Text style={styles.optionTitle}>Ask the public</Text>
-                        <Text style={styles.optionDesc}>
-                            Get answers from locals about what’s happening in a
-                            location.
-                        </Text>
-                    </View>
-
-                    <Ionicons
-                        name="chevron-forward"
-                        size={18}
-                        color="#9CA3AF"
-                    />
-                </TouchableOpacity>
             </View>
         </ScrollView>
     );

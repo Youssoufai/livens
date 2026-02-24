@@ -5,7 +5,7 @@ export default function Onboarding3() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground
-                source={require('@/app/assets/images/onboarding1.png')}
+                source={require('@/app/assets/images/onboarding2.png')}
                 style={styles.background}
                 resizeMode="cover"
             >

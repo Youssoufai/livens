@@ -177,7 +177,7 @@ export default function ConfirmPublish() {
                 ))}
 
                 <Text style={styles.infoText}>
-                    Jo Service charges 20% of reward as service fee.
+                    Livelens Service charges 20% of reward as service fee.
                 </Text>
 
                 <TouchableOpacity

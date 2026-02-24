@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { RequestProvider } from "./context/requestContext";
 
 // ✅ OneSignal imports
+import { StatusBar } from "react-native";
 import { LogLevel, OneSignal } from "react-native-onesignal";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -36,6 +37,7 @@ export default function RootLayout() {
 
   return (
     <RequestProvider>
+      <StatusBar style="dark" hidden={false} />
       <Stack screenOptions={{ headerShown: false }} />
     </RequestProvider>
   );

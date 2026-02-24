@@ -6,7 +6,7 @@ export default function Onboarding2() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground
-                source={require('@/app/assets/images/logo.png')}
+                source={require('@/app/assets/images/onboarding1.png')}
                 style={styles.background}
                 resizeMode="cover"
             >
@@ -15,7 +15,7 @@ export default function Onboarding2() {
                         Know whats{'\n'}happening right{'\n'}now, anywhere in{'\n'}Nigeria.
                     </Text>
                     <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/onboarding3')}>
-                        <Text style={styles.buttonText}>Get started</Text>
+                        <Text style={styles.buttonText}>Next</Text>
                     </TouchableOpacity>
                 </View>
             </ImageBackground>

@@ -53,6 +53,7 @@ export const styles = StyleSheet.create({
     focusedInput: {
         borderColor: COLORS.primary,
         backgroundColor: "#FFF",
+
     },
 
     passwordContainer: {
@@ -69,6 +70,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 14,
         fontSize: 15,
+        color: "#333",
     },
 
     helperText: {

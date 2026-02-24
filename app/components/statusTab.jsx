@@ -8,7 +8,10 @@ import { getToken } from "../utils/secureStore";
 export default function StatusTab({ requestId }) {
     const [menuVisible, setMenuVisible] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
+    const [loadingMainResponse, setLoadingMainResponse] = useState(true);
+
     const [statusResponse, setStatusResponse] = useState(null);
+    const [mainResponse, setMainResponse] = useState(null);
 
     /* ---------------- FETCH TEMP RESPONSES ---------------- */
 
@@ -41,13 +44,49 @@ export default function StatusTab({ requestId }) {
         }
     };
 
+    /* ---------------- FETCH MAIN RESPONSE ---------------- */
+
+    const fetchMainResponse = async () => {
+        try {
+            if (!requestId) return;
+
+            const token = await getToken("token");
+
+            const res = await fetch(
+                `${BASE_URL}/get-response/${requestId}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.replace(/"/g, "")}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            console.log("Main Response:", data);
+
+            setMainResponse(data?.data || data);
+        } catch (error) {
+            console.log("Main response fetch error:", error);
+        } finally {
+            setLoadingMainResponse(false);
+        }
+    };
+
+    /* ---------------- USE EFFECT ---------------- */
+
     useEffect(() => {
-        fetchTempResponses();
+        if (requestId) {
+            fetchTempResponses();
+            fetchMainResponse();
+        }
     }, [requestId]);
 
     /* ---------------- LOADING ---------------- */
 
-    if (loadingStatus) {
+    if (loadingStatus || loadingMainResponse) {
         return (
             <Text style={{ textAlign: "center", marginTop: 40, color: "#777" }}>
                 Loading status...
@@ -63,7 +102,7 @@ export default function StatusTab({ requestId }) {
             : {
                 id: null,
                 name: "No responder yet",
-                address: "Waiting for approval",
+                location: "Waiting for approval",
                 uploads: [],
                 isStatic: true,
             };
@@ -76,18 +115,16 @@ export default function StatusTab({ requestId }) {
         try {
             const token = await getToken("token");
 
-            // 1️⃣ Get all conversations
             const res = await fetch(`${BASE_URL}/conversations`, {
                 headers: {
                     Accept: "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${token.replace(/"/g, "")}`,
                 },
             });
 
             const data = await res.json();
             const conversations = data?.data || data;
 
-            // 2️⃣ Check if conversation already exists
             const existingConversation = conversations.find((conv) =>
                 conv.users?.some(
                     (user) =>
@@ -101,13 +138,12 @@ export default function StatusTab({ requestId }) {
             if (existingConversation) {
                 conversationId = existingConversation.id;
             } else {
-                // 3️⃣ Create new conversation
                 const createRes = await fetch(`${BASE_URL}/conversations`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         Accept: "application/json",
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${token.replace(/"/g, "")}`,
                     },
                     body: JSON.stringify({
                         user_ids: [responder.user?.id || responder.id],
@@ -116,10 +152,10 @@ export default function StatusTab({ requestId }) {
                 });
 
                 const createData = await createRes.json();
-                conversationId = createData?.data?.id || createData?.id;
+                conversationId =
+                    createData?.data?.id || createData?.id;
             }
 
-            // 4️⃣ Navigate
             router.push({
                 pathname: "/requests/chat",
                 params: {
@@ -127,12 +163,10 @@ export default function StatusTab({ requestId }) {
                     user: JSON.stringify(responder),
                 },
             });
-
         } catch (err) {
             console.log("Conversation error:", err);
         }
     };
-
 
     /* ---------------- UI ---------------- */
 
@@ -166,7 +200,9 @@ export default function StatusTab({ requestId }) {
 
                 <View style={{ flex: 1 }}>
                     <Text style={{ fontWeight: "600", fontSize: 15 }}>
-                        {responder?.user?.name || responder?.name || "Unknown"}
+                        {responder?.user?.name ||
+                            responder?.name ||
+                            "Unknown"}
                     </Text>
 
                     <Text style={{ fontSize: 13, color: "#777" }}>
@@ -176,7 +212,6 @@ export default function StatusTab({ requestId }) {
                     </Text>
                 </View>
 
-                {/* MESSAGE BUTTON */}
                 <TouchableOpacity
                     disabled={responder?.isStatic}
                     onPress={startConversation}
@@ -190,14 +225,21 @@ export default function StatusTab({ requestId }) {
                         opacity: responder?.isStatic ? 0.5 : 1,
                     }}
                 >
-                    <Text style={{ fontWeight: "500" }}>Message</Text>
+                    <Text style={{ fontWeight: "500" }}>
+                        Message
+                    </Text>
                 </TouchableOpacity>
 
                 {!responder?.isStatic && (
                     <TouchableOpacity
-                        onPress={() => setMenuVisible(!menuVisible)}
+                        onPress={() =>
+                            setMenuVisible(!menuVisible)
+                        }
                     >
-                        <Ionicons name="ellipsis-horizontal" size={20} />
+                        <Ionicons
+                            name="ellipsis-horizontal"
+                            size={20}
+                        />
                     </TouchableOpacity>
                 )}
             </View>
@@ -209,7 +251,12 @@ export default function StatusTab({ requestId }) {
 
             {!Array.isArray(responder?.uploads) ||
                 responder.uploads.length === 0 ? (
-                <Text style={{ color: "#777", marginBottom: 12 }}>
+                <Text
+                    style={{
+                        color: "#777",
+                        marginBottom: 12,
+                    }}
+                >
                     No content uploaded yet.
                 </Text>
             ) : (
@@ -234,9 +281,15 @@ export default function StatusTab({ requestId }) {
                 Comments
             </Text>
 
-            <Text style={{ color: "#777" }}>
-                No comment has been added yet.
-            </Text>
+            {mainResponse?.comment ? (
+                <Text style={{ color: "#444" }}>
+                    {mainResponse.comment}
+                </Text>
+            ) : (
+                <Text style={{ color: "#777" }}>
+                    No comment has been added yet.
+                </Text>
+            )}
         </View>
     );
 }
