@@ -42,9 +42,9 @@ export default function LoginScreen() {
 
     // 🔹 GOOGLE CONFIG
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-        androidClientId: "850951594746-5n96ghgrb5gulf5k7oukc09i7t369idq.apps.googleusercontent.com",
-        webClientId: "850951594746-b7co332s3k0mk9lngdj7n2h53rqerp0l.apps.googleusercontent.com",
-        redirectUri
+        clientId: "850951594746-5n96ghgrb5gulf5k7oukc09i7t369idq.apps.googleusercontent.com",
+        redirectUri,
+        useProxy: false,
     });
     // hjbjhbjhgh
     console.log("🔹 Redirect URI:", request?.redirectUri);

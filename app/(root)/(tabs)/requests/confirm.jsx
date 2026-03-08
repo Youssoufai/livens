@@ -2,38 +2,35 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
     ScrollView,
+    StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from "react-native";
-import PaystackWebView, { PaystackProvider } from "react-native-paystack-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BASE_URL } from "@/app/constants/url";
 import { useRequest } from "@/app/context/requestContext";
-import { styles } from '@/app/styles/confirmStyle';
-import { getCurrentRequestId, saveCurrentRequestId } from "@/app/utils/requestStorage";
+import { saveCurrentRequestId } from "@/app/utils/requestStorage";
 import { getToken } from "@/app/utils/secureStore";
+
 export default function ConfirmPublish() {
+
     const router = useRouter();
-    const { request, saveRequestId } = useRequest(); // ✅ get saveRequestId
+    const { request } = useRequest();
+
     const [loading, setLoading] = useState(false);
-    const [showPaystack, setShowPaystack] = useState(false);
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
-    const walletBalance = 2000; // User wallet balance (dynamic later)
+
+    const walletBalance = 2000;
     const reward = 1000;
+
     const rewardNum = Number(reward);
+
     const serviceFee = rewardNum * 0.2;
     const userPayout = rewardNum - serviceFee;
 
     const handlePostRequest = async () => {
-        if (walletBalance < rewardNum) {
-            alert("Insufficient wallet balance. Redirecting to Paystack...");
-            setShowPaystack(true);
-            return;
-        }
         postRequestToBackend();
     };
 
@@ -43,19 +40,13 @@ export default function ConfirmPublish() {
         try {
             const token = await getToken("token");
 
-            if (!token) {
-                alert("You are not logged in. Please log in again.");
-                return;
-            }
-
             const formData = new FormData();
-            formData.append("location", request.title);
+
+            formData.append("location", request.location);
             formData.append("description", request.description);
             formData.append("duration", request.duration);
             formData.append("allow_comment", request.allow_comment);
             formData.append("reward", reward);
-
-            console.log("📤 Submitting request to backend...");
 
             const response = await fetch(`${BASE_URL}/create-request`, {
                 method: "POST",
@@ -65,156 +56,312 @@ export default function ConfirmPublish() {
                 },
                 body: formData,
             });
-            const verify = await getCurrentRequestId("CURRENT_REQUEST_ID");
-            console.log("🔥 VERIFIED STORED ID:", verify);
-            const rawText = await response.text();
-            console.log("📥 RAW backend response:", rawText);
 
-            let data = null;
-            try {
-                data = rawText ? JSON.parse(rawText) : null;
-            } catch (err) {
-                console.error("❌ JSON parse error:", err);
-            }
-
-            console.log("✅ Parsed backend response:", data);
-
-            if (!response.ok) {
-                alert(data?.message || "Submission failed, try again.");
-                return;
-            }
+            const data = await response.json();
 
             if (data?.data?.id) {
-                const requestId = data.data.id;
-
-                console.log("🆔 Request created with ID:", requestId);
-
-                await saveCurrentRequestId(requestId);
-
-                const verify = await getCurrentRequestId();
-                console.log("🔥 VERIFIED STORED ID AFTER SAVE:", verify);
+                await saveCurrentRequestId(data.data.id);
             }
-
-
 
             router.push("/(root)/(tabs)/requests/success");
 
         } catch (error) {
-            console.error("❌ Submit error:", error);
-            alert("Network or server error.");
+            console.log(error);
         } finally {
             setLoading(false);
         }
     };
 
-
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-            <ScrollView contentContainerStyle={styles.container}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color="#000" />
-                </TouchableOpacity>
+        <SafeAreaView style={styles.safe}>
+            <View style={{ flex: 1 }}>
 
-                <Text style={styles.stepText}>Step 4 of 4</Text>
-                <Text style={styles.title}>Confirm and publish</Text>
-
-                {/* Summary */}
-                <Text style={styles.sectionTitle}>Request summary</Text>
-                {["location", "description", "duration"].map((key) => (
-                    <View key={key} style={styles.summaryItem}>
-                        <Text style={styles.summaryLabel}>
-                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </Text>
-                        <Text style={styles.summaryValue}>{request[key]}</Text>
-                    </View>
-                ))}
-                <View style={styles.summaryItem}>
-                    <Text style={styles.summaryLabel}>Comments</Text>
-                    <Text style={styles.summaryValue}>
-                        {request.allow_comment === "1" ? "Allowed" : "Not allowed"}
-                    </Text>
-                </View>
-                <View style={styles.summaryItem}>
-                    <Text style={styles.summaryLabel}>Reward</Text>
-                    <Text style={styles.summaryValue}>₦{rewardNum.toLocaleString()}</Text>
-                </View>
-
-                {/* Payment option */}
-                <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Payment method</Text>
-                <TouchableOpacity style={styles.walletCard}>
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Ionicons
-                            name="wallet-outline"
-                            size={22}
-                            color="#E60023"
-                            style={{ marginRight: 10 }}
-                        />
-                        <View>
-                            <Text style={styles.walletTitle}>
-                                Wallet (₦{walletBalance.toLocaleString()})
-                            </Text>
-                            <Text style={styles.walletSubtitle}>
-                                Default payment method.
-                            </Text>
-                        </View>
-                    </View>
-                    <View style={[styles.radioOuter, true && styles.radioOuterActive]}>
-                        <View style={styles.radioInner} />
-                    </View>
-                </TouchableOpacity>
-
-                {/* Payment summary */}
-                <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Payment summary</Text>
-                {[
-                    ["Reward amount:", rewardNum],
-                    ["Service fee (20%):", serviceFee],
-                    ["User payout:", userPayout],
-                ].map(([label, value]) => (
-                    <View key={label} style={styles.summaryRow}>
-                        <Text style={styles.summaryLeft}>{label}</Text>
-                        <Text style={styles.summaryRight}>₦{Math.round(value).toLocaleString()}</Text>
-                    </View>
-                ))}
-
-                <Text style={styles.infoText}>
-                    Livelens Service charges 20% of reward as service fee.
-                </Text>
-
-                <TouchableOpacity
-                    style={[styles.submitButton, loading && { opacity: 0.7 }]}
-                    disabled={loading}
-                    onPress={handlePostRequest}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.container}
                 >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.submitText}>Post Request</Text>
-                    )}
-                </TouchableOpacity>
-            </ScrollView>
 
-            {showPaystack && (
-                <PaystackProvider publicKey={PAYSTACK_SECRET_KEY} currency="NGN" debug>
-                    <PaystackWebView
-                        paystackKey={PAYSTACK_SECRET_KEY}
-                        amount={rewardNum * 100}
-                        billingEmail="yusufmuhammadbashir2005@gmail.com"
-                        onCancel={() => {
-                            alert("Payment cancelled");
-                            setShowPaystack(false);
-                        }}
-                        onSuccess={(response) => {
-                            console.log("Payment success:", response);
-                            alert("Payment successful! Continuing...");
-                            setShowPaystack(false);
-                            postRequestToBackend();
-                        }}
-                        autoStart={true}
-                    />
-                </PaystackProvider>
-            )}
+                    <Text style={styles.title}>Confirm & Publish</Text>
+
+                    {/* REQUEST SUMMARY */}
+                    <View style={styles.card}>
+
+                        <Text style={styles.sectionTitle}>Request summary</Text>
+
+                        <Item label="Location" value={request.location} />
+                        <Item label="Description" value={request.description} />
+                        <Item label="Duration" value={request.duration} />
+                        <Item
+                            label="Comments"
+                            value={request.allow_comment === "1" ? "Allowed" : "Not allowed"}
+                        />
+                        <Item
+                            label="Reward"
+                            value={`₦${rewardNum.toLocaleString()}`}
+                        />
+
+                    </View>
+
+                    {/* PAYMENT DETAILS */}
+                    <Text style={styles.sectionHeader}>Payment details</Text>
+
+                    <View style={styles.walletCard}>
+
+                        <View style={styles.walletLeft}>
+
+                            <View style={styles.walletIcon}>
+                                <Ionicons name="wallet-outline" size={20} color="#000" />
+                            </View>
+
+                            <View>
+                                <Text style={styles.walletTitle}>
+                                    Wallet (₦{rewardNum.toLocaleString()})
+                                </Text>
+
+                                <Text style={styles.walletSub}>
+                                    Default payment method
+                                </Text>
+                            </View>
+
+                        </View>
+
+                        <View style={styles.radioOuter}>
+                            <View style={styles.radioInner} />
+                        </View>
+
+                    </View>
+
+                    {/* POLICY */}
+                    <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>Deposit & Refund Policy</Text>
+
+                        <Text style={styles.policyText}>
+                            Deposited funds remain secured until the request is completed or cancelled.
+                            Refunds will be processed according to our dispute and cancellation policies.
+                        </Text>
+
+                    </View>
+
+                    {/* PAYMENT SUMMARY */}
+                    <View style={styles.card}>
+
+                        <Text style={styles.sectionTitle}>Payment summary</Text>
+
+                        <SummaryRow
+                            label="Reward amount"
+                            value={`₦${rewardNum.toLocaleString()}`}
+                        />
+
+                        <View style={styles.line} />
+
+                        <SummaryRow
+                            label="Total"
+                            value={`₦${rewardNum.toLocaleString()}`}
+                            bold
+                        />
+
+                    </View>
+
+                </ScrollView>
+
+                {/* BOTTOM BUTTON */}
+
+                <View style={styles.bottom}>
+
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handlePostRequest}
+                    >
+                        <Text style={styles.buttonText}>
+                            {loading ? "Posting..." : "Post Request"}
+                        </Text>
+                    </TouchableOpacity>
+
+                </View>
+
+            </View>
         </SafeAreaView>
     );
 }
 
+function Item({ label, value }) {
+    return (
+        <View style={styles.item}>
+            <Text style={styles.label}>{label}</Text>
+            <Text style={styles.value}>{value}</Text>
+        </View>
+    );
+}
 
+function SummaryRow({ label, value, bold }) {
+    return (
+        <View style={styles.summaryRow}>
+            <Text style={[styles.summaryLeft, bold && { fontWeight: "700" }]}>
+                {label}
+            </Text>
+            <Text style={[styles.summaryRight, bold && { fontWeight: "700" }]}>
+                {value}
+            </Text>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+
+    safe: {
+        flex: 1,
+        backgroundColor: "#F6F7FB",
+    },
+
+    container: {
+        padding: 20,
+        paddingBottom: 140,
+    },
+
+    title: {
+        fontSize: 22,
+        fontWeight: "700",
+        marginBottom: 18,
+    },
+
+    sectionHeader: {
+        fontSize: 16,
+        fontWeight: "600",
+        marginBottom: 10,
+        marginTop: 10,
+    },
+
+    card: {
+        backgroundColor: "#FFF",
+        borderRadius: 14,
+        padding: 18,
+        marginBottom: 16,
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 3,
+    },
+
+    sectionTitle: {
+        fontSize: 15,
+        fontWeight: "600",
+        marginBottom: 12,
+    },
+
+    item: {
+        marginBottom: 12,
+    },
+
+    label: {
+        fontSize: 12,
+        color: "#777",
+        marginBottom: 2,
+    },
+
+    value: {
+        fontSize: 15,
+        fontWeight: "500",
+    },
+
+    walletCard: {
+        backgroundColor: "#FFF",
+        borderRadius: 14,
+        padding: 16,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 18,
+        elevation: 3,
+    },
+
+    walletLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    walletIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        backgroundColor: "#F2F2F2",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 10,
+    },
+
+    walletTitle: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+
+    walletSub: {
+        fontSize: 12,
+        color: "#777",
+    },
+
+    radioOuter: {
+        width: 20,
+        height: 20,
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: "#000",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    radioInner: {
+        width: 10,
+        height: 10,
+        borderRadius: 10,
+        backgroundColor: "#000",
+    },
+
+    policyText: {
+        fontSize: 13,
+        color: "#555",
+        lineHeight: 20,
+    },
+
+    summaryRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 12,
+    },
+
+    summaryLeft: {
+        fontSize: 14,
+    },
+
+    summaryRight: {
+        fontSize: 14,
+    },
+
+    line: {
+        height: 1,
+        backgroundColor: "#EEE",
+        marginVertical: 10,
+    },
+
+    bottom: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        backgroundColor: "#FFF",
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#EEE",
+    },
+
+    button: {
+        backgroundColor: "#000",
+        padding: 16,
+        borderRadius: 12,
+        alignItems: "center",
+    },
+
+    buttonText: {
+        color: "#FFF",
+        fontWeight: "600",
+        fontSize: 16,
+    },
+});

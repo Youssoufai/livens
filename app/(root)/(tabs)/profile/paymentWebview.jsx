@@ -1,23 +1,26 @@
-import { useLocalSearchParams } from 'expo-router';
-import React from 'react';
-import { Text } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { WebView } from 'react-native-webview';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Alert } from "react-native";
+import { WebView } from "react-native-webview";
 
-export default function PaymentWebview() {
-    const { url } = useLocalSearchParams();
+export default function PaymentWebviewScreen() {
+    const router = useRouter();
+    const params = useLocalSearchParams();
+    const { url, onSuccessRedirect } = params;
 
-    if (!url) {
-        return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>No payment URL provided</Text>
-            </SafeAreaView>
-        );
-    }
+    const handleWebViewNavigationStateChange = (navState) => {
+        const { url: currentUrl } = navState;
 
-    return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <WebView source={{ uri: url }} />
-        </SafeAreaView>
-    );
+        // Paystack usually appends ?status=success on success
+        if (currentUrl.includes("status=success")) {
+            Alert.alert("Payment Successful", "Your wallet has been funded.");
+            router.replace(onSuccessRedirect || "/(root)/(tabs)/profile");
+        }
+
+        if (currentUrl.includes("status=failed")) {
+            Alert.alert("Payment Failed", "Your transaction could not be completed.");
+            router.back();
+        }
+    };
+
+    return <WebView source={{ uri: url }} onNavigationStateChange={handleWebViewNavigationStateChange} />;
 }

@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 8,
     },
     picker: {
-        height: 44,
+        height: 50,
         fontSize: 15,
         color: '#000',
     },

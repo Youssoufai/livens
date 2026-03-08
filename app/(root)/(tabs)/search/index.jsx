@@ -46,7 +46,7 @@ export default function SearchScreen() {
                 <View style={styles.heroContent}>
                     <Text style={styles.title}>
                         Search a place in{" "}
-                        <Text style={styles.underline}>Abuja</Text>
+                        Abuja
                     </Text>
                     <Text style={styles.subtitle}>
                         Search any location to see what’s happening there.

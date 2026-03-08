@@ -140,7 +140,7 @@ export default function Profile() {
     }
 
     // Decide which image to show
-    const displayImage = localImage || null; // only local picked image, otherwise fallback to default
+    const displayImage = localImage || `https://livelenns.online/public/images/${profile.profile_photo || "default.jpg"}`; // only local picked image, otherwise fallback to default
 
     return (
         <SafeAreaView style={styles.container}>
@@ -228,11 +228,6 @@ export default function Profile() {
                         label="Location & privacy"
                         desc="Control alerts for live updates and requests."
                         onPress={() => router.push("/(onboarding)/location")}
-                    />
-                    <ProfileOption
-                        icon="gift-outline"
-                        label="Refer users and earn"
-                        desc="Invite friends and earn rewards."
                     />
                     <ProfileOption
                         icon="help-circle-outline"

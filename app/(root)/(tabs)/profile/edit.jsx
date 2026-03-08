@@ -28,11 +28,31 @@ export default function EditProfile() {
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const [user, setUser] = useState(null);
+    const [localImage, setLocalImage] = useState(null);
+    const IMAGE_BASE_URL = "https://livelenns.online/public/images";
     useEffect(() => {
         requestPermission();
+        fetchProfile();
     }, []);
+    const fetchProfile = async () => {
+        const response = await fetch(`${BASE_URL}/profile`, {
+            headers: {
+                Authorization: `Bearer ${await getToken("token")}`,
+            },
+        });
+        const result = await response.json();
+        const photo = result.data.profile_photo;
 
+        if (photo) {
+            setImage(`${IMAGE_BASE_URL}/${photo}`);
+        }
+        console.log("PROFILE RESULT:", result);
+        console.log("IMAGE URL:", image);
+        if (result.status === "success") {
+            setUser(result.data); // 🔥 store the data properly
+        }
+    };
     const requestPermission = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
@@ -178,6 +198,7 @@ export default function EditProfile() {
 
                     <View style={styles.avatarSection}>
                         {image ? (
+
                             <Image
                                 key={image}
                                 source={{ uri: image }}

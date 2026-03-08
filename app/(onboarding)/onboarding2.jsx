@@ -1,7 +1,6 @@
 import { router } from 'expo-router'
 import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 export default function Onboarding2() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -14,7 +13,7 @@ export default function Onboarding2() {
                     <Text style={styles.title}>
                         Know whats{'\n'}happening right{'\n'}now, anywhere in{'\n'}Nigeria.
                     </Text>
-                    <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/onboarding3')}>
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/redirect')}>
                         <Text style={styles.buttonText}>Next</Text>
                     </TouchableOpacity>
                 </View>
