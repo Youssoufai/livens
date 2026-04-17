@@ -1,0 +1,2 @@
+export const BASE_SCREEN_HEIGHT = 812,
+  BASE_SCREEN_WIDTH = 375

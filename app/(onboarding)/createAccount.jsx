@@ -1,4 +1,4 @@
-import { auth } from "@/app/lib/firebase";
+import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import * as Google from "expo-auth-session/providers/google";
 import { router } from "expo-router";
@@ -7,7 +7,7 @@ import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { useEffect } from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { styles } from "../styles/createAccount";
+import { styles } from "../../styles/createAccount";
 
 // Complete any in-progress auth sessions
 WebBrowser.maybeCompleteAuthSession();

@@ -14,7 +14,7 @@ import {
     View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ProgressBar from "../components/progressBar";
+import ProgressBar from "../../components/progress-bar";
 import { BASE_URL } from "../constants/url";
 import { styles } from "../styles/create-account";
 import { saveToken } from "../utils/secureStore";

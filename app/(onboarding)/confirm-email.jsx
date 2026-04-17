@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import ProgressBar from "../components/progressBar";
+import ProgressBar from "../../components/progress-bar";
 import { BASE_URL } from "../constants/url";
 import { getToken } from "../utils/secureStore";
 

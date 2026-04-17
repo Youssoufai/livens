@@ -15,7 +15,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { makeRedirectUri } from "expo-auth-session";
-import { BASE_URL } from "../constants/url";
+import { BASE_URL } from "../../constants/url";
 import { styles } from "../styles/loginStyle";
 import { initDeviceToken } from "../utils/deviceToken";
 import { saveToken } from "../utils/secureStore";

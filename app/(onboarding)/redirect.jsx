@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Image, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 // Make sure you import BASE_URL // Adjust to your style file
-import { BASE_URL } from "../constants/url";
+import { BASE_URL } from "../../constants/url";
 import { styles } from "../styles/redirectStyle";
 import { initDeviceToken } from "../utils/deviceToken";
 // Import if needed
