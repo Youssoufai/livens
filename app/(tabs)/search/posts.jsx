@@ -1,5 +1,4 @@
-import { getToken } from "@/app/utils/secureStore";
-import { BASE_URL } from "@/constants/url";
+
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -11,7 +10,9 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { styles } from "../../../styles/postStyle";
+import { styles } from "@/styles/postStyle";
+import { getToken } from "@/utils/secureStore";
+import { BASE_URL } from "@/constants/url";
 
 export default function SearchPostsScreen() {
     const [posts, setPosts] = useState([]);

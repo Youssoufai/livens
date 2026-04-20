@@ -4,16 +4,16 @@
     "slug": "livelens",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./app/assets/images/logo.png",
+    "icon": "./assets/images/logo.png",
     "splash": {
-      "image": "./app/assets/images/logo.png",
+      "image": "./assets/images/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "scheme": "com.eegour.livelens",
-    "userInterfaceStyle": "automatic",
+    "scheme": "com.livelens.app",
+    "userInterfaceStyle": "light",
     "ios": {
-      "bundleIdentifier": "com.eegour.livelens",
+      "bundleIdentifier": "com.livelens.app",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
@@ -27,7 +27,7 @@
       }
     },
     "android": {
-      "package": "com.eegour.livelens",
+      "package": "com.livelens.app",
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
@@ -35,7 +35,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/images/logo.png",
+        "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#E6F4FE"
       }
     },
@@ -82,6 +82,24 @@
                       "group.com.eegour.livelens.onesignal"
                     ]
                   }
+                },
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.eegour.livelens.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.eegour.livelens.onesignal"
+                    ]
+                  }
+                },
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.livelens.app.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.livelens.app.onesignal"
+                    ]
+                  }
                 }
               ]
             }
@@ -91,6 +109,6 @@
       },
       "router": {}
     },
-    "owner": "eegour"
+    "owner": "livelens-mobile"
   }
 }

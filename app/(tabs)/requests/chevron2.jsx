@@ -3,7 +3,9 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from '../../../styles/requestIndex';
+
+import { styles } from '@/styles/requestIndex';
+
 export default function Chevron() {
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');

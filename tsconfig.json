@@ -12,7 +12,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "./types/global.d.ts",
+    "./types/svg.type.d.ts",
+    "expo-env.d.ts",
+    "metro.config.js"
   ],
   
 }

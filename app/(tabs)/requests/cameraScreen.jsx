@@ -1,10 +1,13 @@
-import { getToken } from '@/app/utils/secureStore'; // We'll use this to persist requestId
-import { useRequest } from '@/context/requestContext';
-import { styles } from '@/styles/cameraScreen';
+
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Button, Text, TouchableOpacity, View } from 'react-native';
+
+import { getToken } from '@/utils/secureStore'; // We'll use this to persist requestId
+import { useRequest } from '@/context/requestContext';
+import { styles } from '@/styles/cameraScreen';
+
 export default function CameraScreen() {
     const cameraRef = useRef(null);
     const [cameraReady, setCameraReady] = useState(false);

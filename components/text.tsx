@@ -10,7 +10,7 @@ import { TextProps } from './components.types'
 const Text = ({
   size = 16,
   lineHeight,
-  fontFamily = 'satoshi',
+  fontFamily = 'dm_sans',
   weight = 400,
   children,
   color = 'grey-800',
@@ -18,12 +18,11 @@ const Text = ({
   style,
 }: TextProps) => {
   const customFontProps = useMemo(() => {
-    let selectedFont = FONTS.satoshi[400]
-    if (fontFamily === 'satoshi' && weight in FONTS.satoshi) {
-      selectedFont = (FONTS.satoshi as Record<number, string>)[weight]
-    } else if (fontFamily === 'inter' && weight in FONTS.inter) {
-      selectedFont = (FONTS.inter as Record<number, string>)[weight]
+    let selectedFont = FONTS.dm_sans[400]
+    if (fontFamily === 'dm_sans' && weight in FONTS.dm_sans) {
+      selectedFont = (FONTS.dm_sans as Record<number, string>)[weight]
     }
+
     return {
       fontSize: size ? actuateFontSize(size) : undefined,
       lineHeight: lineHeight ? actuateLineHeight(size, lineHeight) : undefined,

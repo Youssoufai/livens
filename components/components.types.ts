@@ -1,6 +1,8 @@
-import { FONTS } from '@/constants/fonts'
 import { ReactNode } from 'react'
 import { TextStyle, ViewStyle } from 'react-native'
+import { OtpInputProps } from 'react-native-otp-entry'
+
+import { FONTS } from '@/constants/fonts'
 
 export type ColorType =
   | 'primary-50'
@@ -30,6 +32,7 @@ export type ColorType =
   // | "grey-dark"
   | 'white'
   | 'danger'
+  | 'black'
 
 export interface TextProps {
   nativeId?: string
@@ -37,7 +40,7 @@ export interface TextProps {
   size?: number
   lineHeight?: number
   fontFamily?: keyof typeof FONTS
-  weight?: 400 | 500 | 700 | 900
+  weight?: 400 | 500 | 600 | 700
   align?: TextStyle['textAlign']
   style?: TextStyle | (TextStyle | undefined)[]
   children: ReactNode
@@ -47,4 +50,13 @@ export interface ProgressBarProps {
   progress: number
   color?: string
   containerStyle?: ViewStyle
+}
+
+export interface OTPEntryProps {
+  inputNumber?: number
+  secureEntry?: boolean
+  onChange?: (value: string) => void
+  onFilled?: (value: string) => void
+  type?: OtpInputProps['type']
+  error?: string
 }

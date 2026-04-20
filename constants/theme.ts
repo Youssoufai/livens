@@ -13,6 +13,7 @@ export const COLORS = {
     300: '#76787D',
     400: '#5C5E64',
     500: '#33363D',
+    700: '#E9EBF8',
     800: '#1C1E22',
   },
   green: {
@@ -30,5 +31,6 @@ export const COLORS = {
     500: '#FFC40C',
   },
   white: '#FFFFFF',
+  black: '#000000',
   danger: '#FF3333',
 }

@@ -1,44 +1,57 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from 'react'
 
-const RequestContext = createContext();
+export interface RequestState {
+  location: string
+  description: string
+  duration: string
+  allow_comment: '0' | '1'
+  reward: number
+}
 
-export const useRequest = () => useContext(RequestContext);
+interface RequestContextValue {
+  request: RequestState
+  requestId: string | null
+  updateRequest: (data: Partial<RequestState>) => void
+  resetRequest: () => void
+  saveRequestId: (id: string) => void
+}
 
-export const RequestProvider = ({ children }) => {
-    const [request, setRequest] = useState({
-        location: "",
-        description: "",
-        duration: "",
-        allow_comment: "1",
-        reward: 1000,
-    });
+const DEFAULT_REQUEST: RequestState = {
+  location: '',
+  description: '',
+  duration: '',
+  allow_comment: '1',
+  reward: 1000,
+}
 
-    const [requestId, setRequestId] = useState(null); // ✅ store backend request ID
+const RequestContext = createContext<RequestContextValue | undefined>(undefined)
 
-    const updateRequest = (data) => {
-        setRequest((prev) => ({ ...prev, ...data }));
-    };
+export function useRequest(): RequestContextValue {
+  const ctx = useContext(RequestContext)
+  if (!ctx) throw new Error('useRequest must be used within a RequestProvider')
+  return ctx
+}
 
-    const resetRequest = () => {
-        setRequest({
-            location: "",
-            description: "",
-            duration: "",
-            allow_comment: "1",
-            reward: 1000,
-        });
-        setRequestId(null); // reset ID too
-    };
+export function RequestProvider({ children }: { children: ReactNode }) {
+  const [request, setRequest] = useState<RequestState>(DEFAULT_REQUEST)
+  const [requestId, setRequestId] = useState<string | null>(null)
 
-    const saveRequestId = (id:string) => {
-        setRequestId(id);
-    };
+  const updateRequest = (data: Partial<RequestState>) => {
+    setRequest((prev) => ({ ...prev, ...data }))
+  }
 
-    return (
-        <RequestContext.Provider
-            value={{ request, updateRequest, resetRequest, requestId, saveRequestId }}
-        >
-            {children}
-        </RequestContext.Provider>
-    );
-};
+  const resetRequest = () => {
+    setRequest(DEFAULT_REQUEST)
+    setRequestId(null)
+  }
+
+  const saveRequestId = (id: string) => {
+    setRequestId(id)
+  }
+
+  return (
+    <RequestContext.Provider value={{ request, updateRequest, resetRequest, requestId, saveRequestId }}>
+      {children}
+    </RequestContext.Provider>
+  )
+}

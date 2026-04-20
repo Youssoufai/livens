@@ -9,9 +9,9 @@ import {
 } from "react-native";
 
 const images = [
-    require("@/app/assets/images/logo.png"),
-    require("@/app/assets/images/logo.png"),
-    require("@/app/assets/images/logo.png"),
+    require("@/assets/images/logo.png"),
+    require("@/assets/images/logo.png"),
+    require("@/assets/images/logo.png"),
 ];
 
 export default function PostDetails() {

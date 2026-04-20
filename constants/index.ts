@@ -1,0 +1,3 @@
+export const OTPCODE_LENGTH = 6
+
+export const GLOBAL_HORIZONTAL_PADDING = 16
