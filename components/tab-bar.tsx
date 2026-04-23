@@ -59,19 +59,13 @@ function TabBar({
             pressColor={COLORS.grey[200]}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={styles.tabItem}
+            style={[
+              styles.tabItem,
+              isFocused && { backgroundColor: COLORS.primary[50] },
+            ]}
             key={label}
           >
             {icon}
-
-            <Text
-              color={isFocused ? 'green-500' : 'grey-700'}
-              size={12}
-              weight={700}
-              style={styles.tabLabel}
-            >
-              {label}
-            </Text>
           </PlatformPressable>
         )
       })}
@@ -97,9 +91,9 @@ const styles = StyleSheet.create({
   tabItem: {
     alignItems: 'center',
     gap: 4,
-    borderRadius: 60,
-    paddingVertical: 7,
-    paddingHorizontal: actuateNormalize(15, 'height'),
+    borderRadius: 30,
+    paddingVertical: 4,
+    paddingHorizontal: actuateNormalize(18, 'width'),
     overflow: 'hidden',
   },
   tabLabel: {
