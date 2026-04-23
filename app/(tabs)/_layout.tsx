@@ -4,67 +4,49 @@ import { useEffect, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 
 import { getToken } from '@/utils/secureStore'
+import { COLORS } from '@/constants/theme'
+import SearchIcon from '@/assets/icons/search.svg'
+import AccountIcon from '@/assets/icons/account_circle.svg'
+import HelpIcon from '@/assets/icons/live_help.svg'
+import ScheduleIcon from '@/assets/icons/schedule_send.svg'
+import TabBar from '@/components/tab-bar'
+
+const tabsIcons = (isFocused: boolean) => {
+  const color = isFocused ? COLORS.primary[500] : COLORS.grey[700]
+
+  return {
+    home: <SearchIcon fill={color} width={24} height={24} />,
+    requests: <HelpIcon fill={color} width={24} height={24} />,
+    schedule: <ScheduleIcon fill={color} width={24} height={24} />,
+    profile: <AccountIcon fill={color} width={24} height={24} />,
+  }
+}
 
 export default function TabsLayout() {
-  const [loading, setLoading] = useState(true)
-  const [authenticated, setAuthenticated] = useState(false)
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = await getToken('token')
-      if (!token || String(token).length === 0) {
-        router.replace('/(auth)/login' as never)
-      } else {
-        setAuthenticated(true)
-      }
-      setLoading(false)
-    }
-    checkAuth()
-  }, [])
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#de1c1c" />
-      </View>
-    )
-  }
-
-  if (!authenticated) return null
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: 'red',
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 0.5,
-          borderTopColor: '#ddd',
-          height: 70,
-          paddingBottom: 12,
-          marginBottom: 4,
-        },
-      }}>
+      }}
+      tabBar={(props) => <TabBar icons={tabsIcons} {...props} />}
+    >
       <Tabs.Screen
-        name="search"
+        name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="requests"
         options={{
           title: 'Request',
-          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} />,
         }}
       />
+      <Tabs.Screen name="schedule" />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
     </Tabs>

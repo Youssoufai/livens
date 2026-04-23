@@ -1,79 +1,82 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as Google from 'expo-auth-session/providers/google'
-import { makeRedirectUri } from 'expo-auth-session'
-import { router } from 'expo-router'
-import * as WebBrowser from 'expo-web-browser'
-import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Link, router } from 'expo-router'
+import { useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Alert, StyleSheet, View } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
 
-import FormField from '@/components/form-field'
-import PasswordField from '@/components/password-field'
 import Button from '@/components/ui/button'
 import Text from '@/components/text'
-import api from '@/lib/api'
 import { AuthResponse } from '@/models/auth'
 import { loginSchema, LoginFormValues } from '@/schemas/auth'
 import { initDeviceToken } from '@/utils/deviceToken'
 import { saveToken } from '@/utils/secureStore'
-
-WebBrowser.maybeCompleteAuthSession()
+import PasswordInput from '@/components/password-input'
+import AppStorage from '@/utils/storage'
+import { STORE_KEYS } from '@/constants'
+import { OnboardingStatus } from '@/modules/auth/auth.types'
+import { useBoundStore } from '@/state'
+import { useGoogleSignIn } from '@/hooks/use-google-signin'
+import { API_ENDPOINTS } from '@/constants/endpoints'
+import { COLORS } from '@/constants/theme'
+import GoogleLogo from '@/assets/icons/logos_google.svg'
+import Input from '@/components/ui/input'
+import { ThemedView } from '@/components/themed-view'
+import AppLogo from '@/assets/icons/in-app-logo.svg'
+import Checkbox from '@/components/check-box'
+import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
+import { FONTS } from '@/constants/fonts'
+import { API } from '@/services'
+import { showToastMessage } from '@/components/notification'
+import { catchErr } from '@/utils/error-handlers'
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets()
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false)
+  const [rememberMeChecked, setRememberMeChecked] = useState(false)
+
+  const getUser = useBoundStore((state) => state.getUser)
+
+  // const { loginWithGoogle } = useGoogleSignIn()
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
   } = useForm<LoginFormValues>({
     resolver: yupResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   })
 
-  const redirectUri = makeRedirectUri({
-    scheme: 'com.eegour.livelens',
-  })
+  const storage = useRef(new AppStorage()).current
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: '850951594746-5n96ghgrb5gulf5k7oukc09i7t369idq.apps.googleusercontent.com',
-    redirectUri,
-  })
+  const completeSignin = async (token: string) => {
+    storage.setItem(STORE_KEYS.token, token)
+    storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const idToken = response.authentication?.idToken
-      if (idToken) handleGoogleLogin(idToken)
-      else Alert.alert('Error', 'ID token missing from Google response')
-    } else if (response?.type === 'error') {
-      Alert.alert('Authentication Error', response.error?.message || 'Failed to authenticate with Google')
-    }
-  }, [response])
+    await getUser()
 
-  const handleGoogleLogin = async (idToken: string) => {
-    try {
-      const { data } = await api.post<AuthResponse>('/auth/google', { id_token: idToken })
-      const authToken = data?.token || data?.access_token
-      if (!authToken) throw new Error('Authentication token missing')
-
-      await saveToken(authToken)
-      if (data?.user?.id) {
-        await AsyncStorage.setItem('user_id', String(data.user.id))
-        await AsyncStorage.setItem('user', JSON.stringify(data.user))
-      }
-      await initDeviceToken()
-      router.replace({ pathname: '../(tabs)/search' })
-    } catch (error) {
-      Alert.alert('Google Login Failed', 'Please try again.')
-    }
+    router.push('/(tabs)/home')
   }
+
+  // const handleGoogleLogin = async () => {
+  //   try {
+  //     setIsLoadingGoogle(true)
+  //     const token = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
+
+  //     if (!token) return
+
+  //     completeSignin(token)
+  //   } catch (error) {
+  //   } finally {
+  //     setIsLoadingGoogle(false)
+  //   }
+  // }
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      const { data } = await api.post<AuthResponse>('/login', {
+      const { data } = await API.post<AuthResponse>(API_ENDPOINTS.auth.login, {
         email: values.email.trim(),
         password: values.password,
       })
@@ -81,103 +84,116 @@ export default function LoginScreen() {
       const authToken = data?.access_token
       if (!authToken) throw new Error('Authentication token missing')
 
-      await saveToken(authToken)
-      if (data?.user?.id) {
-        await AsyncStorage.setItem('user_id', String(data.user.id))
-        await AsyncStorage.setItem('user', JSON.stringify(data.user))
-      }
-      await initDeviceToken()
-      router.push('../(tabs)/search')
-    } catch {
-      Alert.alert('Login failed', 'Invalid email or password.')
+      completeSignin(authToken)
+    } catch (error) {
+      showToastMessage(catchErr(error).message ?? '', 'error')
     }
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <ThemedView hasBottomPadding>
       <View style={styles.container}>
-        <Text size={28} weight={700} color="grey-800" style={styles.title}>
-          Welcome back
-        </Text>
-
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <FormField
-              label="Email address"
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.email?.message}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <PasswordField
-              label="Password"
-              placeholder="Enter password"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.password?.message}
-            />
-          )}
-        />
-
-        <TouchableOpacity
-          style={styles.googleBtn}
-          onPress={() => promptAsync()}
-          disabled={!request}>
-          <Ionicons name="logo-google" size={18} color="#DB4437" />
-          <Text size={14} weight={500} color="grey-800" style={{ marginLeft: 8 }}>
-            Continue with Google
+        <View style={styles.header}>
+          <AppLogo />
+          <Text
+            size={28}
+            weight={700}
+            color="black"
+            align="center"
+            style={styles.title}
+          >
+            Welcome back
           </Text>
-        </TouchableOpacity>
+        </View>
 
-        <View style={{ flex: 1 }} />
+        <View style={styles.formField}>
+          <Input
+            control={control}
+            name="email"
+            label="Email address"
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={errors.email?.message}
+          />
 
-        <View style={{ paddingBottom: insets.bottom + 16 }}>
+          <PasswordInput
+            control={control}
+            name="password"
+            label="Password"
+            placeholder="Enter password"
+            error={errors.password?.message}
+            addPadding={false}
+          />
+          <View style={styles.supplementaryContent}>
+            <Checkbox
+              label="Remember me"
+              checked={rememberMeChecked}
+              onPress={() =>
+                setRememberMeChecked((prevChecked) => !prevChecked)
+              }
+            />
+            <Link
+              href="/(auth)/forgot-password"
+              style={styles.forgotPasswordLink}
+            >
+              Forgot password?
+            </Link>
+          </View>
+        </View>
+
+        {/* <Button
+          label="Continue with Google"
+          icon={<GoogleLogo />}
+          alignIcon="left"
+          labelColor="black"
+          btnStyle={styles.socialButton}
+          onPress={handleGoogleLogin}
+        /> */}
+
+        <View style={{ paddingBottom: 16 }}>
           <Button
             label="Log in"
             onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}
-            disabled={isSubmitting}
+            disabled={!isValid || isSubmitting}
           />
         </View>
       </View>
-    </SafeAreaView>
+    </ThemedView>
   )
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: 6,
+  },
+  header: {
+    rowGap: 32,
+    alignItems: 'center',
   },
   title: {
     marginBottom: 28,
   },
-  googleBtn: {
+  formField: {
+    flex: 1,
+  },
+  socialButton: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#CDCDCD',
+  },
+  forgotPasswordLink: {
+    fontSize: actuateFontSize(14),
+    lineHeight: actuateLineHeight(14, 18),
+    color: COLORS.black,
+    fontFamily: FONTS.dm_sans[600],
+  },
+  supplementaryContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingVertical: 13,
-    marginTop: 4,
+    justifyContent: 'space-between',
+    paddingTop: 12,
   },
 })

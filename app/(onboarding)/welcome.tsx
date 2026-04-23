@@ -1,23 +1,57 @@
 import { Image, StyleSheet, View } from 'react-native'
 import { Link, useRouter } from 'expo-router'
+import { useRef, useState } from 'react'
+import { Divider } from 'react-native-paper'
 
 import { ThemedView } from '@/components/themed-view'
 import Text from '@/components/text'
 import ScrollView from '@/components/scrollview'
 import Button from '@/components/ui/button'
-
 import AppLogo from '@/assets/icons/in-app-logo.svg'
 import GoogleLogo from '@/assets/icons/logos_google.svg'
 import FacebookLogo from '@/assets/icons/logos_facebook.svg'
-import { Divider } from 'react-native-paper'
 import { COLORS } from '@/constants/theme'
+import { useBoundStore } from '@/state'
+import { useGoogleSignIn } from '@/hooks/use-google-signin'
+import { API_ENDPOINTS } from '@/constants/endpoints'
+import AppStorage from '@/utils/storage'
+import { STORE_KEYS } from '@/constants'
+import { OnboardingStatus } from '@/modules/auth/auth.types'
 
 const snipImage = require('@/assets/images/snip.png')
 
 const Welcome = () => {
   const router = useRouter()
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false)
 
-  const loginWithGoogle = () => {}
+  const getUser = useBoundStore((state) => state.getUser)
+
+  const { loginWithGoogle } = useGoogleSignIn()
+
+  const storage = useRef(new AppStorage()).current
+
+  const completeSignin = async (token: string) => {
+    storage.setItem(STORE_KEYS.token, token)
+    storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
+
+    await getUser()
+
+    router.push('/(tabs)/home')
+  }
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoadingGoogle(true)
+      const token = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
+
+      if (!token) return
+
+      completeSignin(token)
+    } catch (error) {
+    } finally {
+      setIsLoadingGoogle(false)
+    }
+  }
 
   const loginWithFacebook = () => {}
 
@@ -32,7 +66,8 @@ const Welcome = () => {
               lineHeight={36}
               weight={700}
               align="center"
-              color="black">
+              color="black"
+            >
               Welcome to Livelens
             </Text>
             <Text size={16} lineHeight={24} align="center" color="grey-400">
@@ -46,7 +81,7 @@ const Welcome = () => {
         <View style={styles.buttonWrapper}>
           <Button
             label="Create a new account"
-            onPress={() => router.push('/(onboarding)/create-account')}
+            onPress={() => router.push('/(auth)/create-account')}
           />
           <Button
             label="Continue with Google"
@@ -54,7 +89,8 @@ const Welcome = () => {
             alignIcon="left"
             labelColor="black"
             btnStyle={styles.socialButton}
-            onPress={loginWithGoogle}
+            onPress={handleGoogleLogin}
+            loading={isLoadingGoogle}
           />
           <Button
             label="Contiue with Facebook"
@@ -76,7 +112,8 @@ const Welcome = () => {
             lineHeight={20}
             weight={600}
             align="center"
-            color="black">
+            color="black"
+          >
             Already have an account?{' '}
             <Link href="/(auth)/login" style={styles.link}>
               Sign in

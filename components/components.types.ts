@@ -11,6 +11,7 @@ export type ColorType =
   | 'primary-300'
   | 'primary-400'
   | 'primary-500'
+  | 'primary-600'
   | 'yellow-100'
   | 'yellow-200'
   | 'yellow-300'
@@ -26,7 +27,7 @@ export type ColorType =
   | 'grey-300'
   | 'grey-400'
   | 'grey-500'
-  // | "grey-700"
+  | 'grey-700'
   | 'grey-800'
   // | "grey-900"
   // | "grey-dark"
@@ -52,6 +53,16 @@ export interface ProgressBarProps {
   containerStyle?: ViewStyle
 }
 
+export interface PasswordInputProps {
+  name: string
+  control: any
+  label: string
+  addPadding?: boolean
+  hasFormError?: boolean
+  placeholder: string
+  error?: string
+}
+
 export interface OTPEntryProps {
   inputNumber?: number
   secureEntry?: boolean
@@ -59,4 +70,11 @@ export interface OTPEntryProps {
   onFilled?: (value: string) => void
   type?: OtpInputProps['type']
   error?: string
+}
+
+export interface CheckboxProps {
+  label: string
+  checked: boolean
+  alignLabel?: 'left' | 'right'
+  onPress: VoidFunction
 }

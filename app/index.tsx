@@ -1,14 +1,16 @@
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Dimensions, ImageBackground, StyleSheet, View } from 'react-native'
 // import { LinearGradient } from 'expo-linear-gradient'
 import Animated, { SlideInRight, SlideOutLeft } from 'react-native-reanimated'
-import { overlay } from 'react-native-paper'
 
 import { ThemedView } from '@/components/themed-view'
 import { ONBOARDING_DATA } from '@/modules/onboarding/onboarding.data'
 import Text from '@/components/text'
 import Button from '@/components/ui/button'
+import AppStorage from '@/utils/storage'
+import { STORE_KEYS } from '@/constants'
+import { OnboardingStatus } from '@/modules/auth/auth.types'
 
 // import { getToken } from "./utils/secureStore";
 
@@ -49,36 +51,36 @@ SlideOutLeft.springify().damping(30).mass(5).stiffness(10).overshootClamping(10)
 
 export default function Onboarding() {
   const [step, setStep] = useState(0)
+  const [loading, setLoading] = useState(false)
+
+  const storage = useRef(new AppStorage()).current
 
   const contentData = ONBOARDING_DATA[step]
 
   const router = useRouter()
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       const token = await getToken("token");
-  //       console.log("TOKEN FOUND IN INDEX:", token);
+  useEffect(() => {
+    try {
+      setLoading(true)
+      const onboarding = storage.getItem<'string'>(STORE_KEYS.onboarding) as
+        | OnboardingType
+        | undefined
 
-  //       // Defer navigation until router/RootLayout is mounted.
-  //       // Using setTimeout lets the router finish initializing.
-  //       if (token && token.length > 0) {
-
-  //         setTimeout(() => router.replace("/(root)/(tabs)/search"), 50);
-
-  //       } else {
-  //         setTimeout(() => router.replace("/(onboarding)/onboarding"), 50);
-  //       }
-  //     } catch (error) {
-  //       console.log("Token check error:", error);
-  //       setTimeout(() => router.replace("/(auth)/login"), 50);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   checkAuth();
-  // }, []);
+      if (!onboarding) {
+        return
+      } else if (onboarding === OnboardingStatus.in_progress) {
+        router.push('/(onboarding)/welcome')
+        return
+      } else if (onboarding === OnboardingStatus.completed) {
+        router.push('/(auth)/login')
+        return
+      }
+    } catch (error) {
+      console.error('Failed to resolve onboarding state:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [router, storage])
 
   const handleNextStep = () => {
     setStep((prevStep) => {
@@ -91,15 +93,19 @@ export default function Onboarding() {
     })
   }
 
+  if (loading) return null
+
   return (
     <Animated.View
       key={step}
       entering={SlideInRight}
       exiting={SlideOutLeft}
-      style={styles.imageBackground}>
+      style={styles.imageBackground}
+    >
       <ImageBackground
         source={contentData.image}
-        style={styles.imageBackground}>
+        style={styles.imageBackground}
+      >
         {/* <LinearGradient
           colors={['#00000000', '#000000']}
           style={styles.overlay}> */}
@@ -107,7 +113,8 @@ export default function Onboarding() {
           lightColor="transparent"
           hasTopPadding
           hasBottomPadding
-          style={styles.content}>
+          style={styles.content}
+        >
           <Text size={40} lineHeight={46} color="white" weight={500}>
             {contentData.content}
           </Text>

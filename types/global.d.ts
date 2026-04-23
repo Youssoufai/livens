@@ -1,6 +1,18 @@
 import { COLORS } from '@/constants/theme'
+import { ReactNode } from 'react'
 
 global {
+  export interface User {
+    id: number
+    name: string
+    email: string
+    phone: string
+    profile_photo?: string | null
+    balance?: number | string
+    location: string | null
+    created_at: string
+    updated_at: string
+  }
   interface NetworkResponse<T> {
     data?: T
     status: number
@@ -28,6 +40,11 @@ global {
     name: string
   }
 
+  type HeaderType = {
+    title: string
+    description?: ReactNode
+  }
+
   type ColorsType = typeof COLORS
 
   type FirstColorFieldType = keyof ColorsType
@@ -40,6 +57,8 @@ global {
 
   type SecondColorFieldType<K extends FirstColorFieldType> =
     K extends keyof NestedColorFields ? NestedColorFields[K] : never
+
+  type OnboardingType = 'IN_PROGRESS' | 'COMPLETED'
 }
 
 export {}

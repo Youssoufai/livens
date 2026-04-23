@@ -2,6 +2,7 @@ import { TestFunction } from 'yup'
 
 import { COLORS } from '@/constants/theme'
 import parsePhoneNumberFromString from 'libphonenumber-js'
+import { Platform } from 'react-native'
 
 export const getResolvedColor = (color: string) => {
   const colors = color.split('-')
@@ -61,3 +62,11 @@ export const getResolvedPhoneNumber: TestFunction<string | undefined> =
       return this.createError({ message: 'Phone number is not valid' })
     }
   }
+
+export const getMapApiKey = () => {
+  return Platform.select({
+    // ios: process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY_IOS,
+    // android: process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY_ANDROID,
+    default: process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY,
+  })
+}

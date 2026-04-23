@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "splash": {
-      "image": "./assets/images/logo.png",
+      "image": "./assets/images/splash-icon-main.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -52,6 +52,7 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ],
+      
       "expo-web-browser",
       "expo-secure-store",
       "expo-font",

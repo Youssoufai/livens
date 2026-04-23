@@ -1,15 +1,3 @@
-export interface User {
-  id: number
-  name: string
-  email: string
-  phone: string
-  profile_photo: string | null
-  balance: number | string
-  location: string | null
-  created_at: string
-  updated_at: string
-}
-
 export interface AuthResponse {
   access_token: string
   token?: string

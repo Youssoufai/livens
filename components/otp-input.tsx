@@ -27,14 +27,14 @@ export default function OtpEntry({
       ...styles,
       pinCodeContainerStyle: {
         ...styles.pinCodeContainerStyle,
-        borderColor: erred ? COLORS.danger : COLORS.grey[700],
+        borderColor: erred ? COLORS.danger : COLORS.grey[100],
       },
       focusedPinCodeContainerStyle: {
         ...styles.focusedPinCodeContainerStyle,
-        borderColor: erred ? COLORS.danger : COLORS.primary[200],
+        borderColor: erred ? COLORS.danger : COLORS.grey[400],
       },
     }),
-    [erred],
+    [erred]
   )
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function OtpEntry({
           accessibilityLabel: 'One-Time Code',
         }}
         textProps={{ accessibilityRole: 'text' }}
-        focusColor={COLORS.primary[200]}
+        focusColor={COLORS.grey[400]}
         theme={theme}
         onTextChange={handleTextChange}
         onFilled={(text: string) => onFilled?.(text)}
@@ -85,24 +85,24 @@ const contentStyle = StyleSheet.create({
 
 const styles = StyleSheet.create({
   pinCodeContainerStyle: {
-    borderRadius: 3,
-    backgroundColor: '#F5F6F7',
-    height: 44,
-    minWidth: 44,
+    borderRadius: 4,
+    backgroundColor: COLORS.white,
+    height: 55,
+    minWidth: 45,
     borderWidth: 1,
-    borderColor: COLORS.grey[400],
+    borderColor: COLORS.grey[100],
     flex: 1,
   },
   focusedPinCodeContainerStyle: {
     borderWidth: 1,
-    borderColor: COLORS.primary[200],
+    borderColor: COLORS.grey[400],
   },
   filledPinCodeContainerStyle: {
-    borderColor: COLORS.primary[200],
+    borderColor: COLORS.grey[400],
   },
   containerStyle: {
     borderWidth: 0,
-    gap: 12,
+    gap: 8,
     justifyContent: undefined,
     height: 45,
     paddingHorizontal: 9.5,
@@ -110,5 +110,6 @@ const styles = StyleSheet.create({
   pinCodeTextStyle: {
     fontFamily: FONTS.dm_sans[500],
     fontSize: actuateFontSize(16),
+    color: COLORS.grey[400],
   },
 })

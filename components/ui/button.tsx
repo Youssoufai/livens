@@ -13,7 +13,7 @@ const Button = ({
   labelStyle,
   contentStyle,
   icon,
-  disabledColor = COLORS.grey[400],
+  disabledColor = COLORS.grey[50],
   buttonColor = 'primary-500',
   labelColor = 'white',
   loaderColor,
@@ -34,8 +34,9 @@ const Button = ({
             size={14}
             lineHeight={20}
             weight={600}
-            color={disabled ? 'grey-200' : labelColor}
-            style={labelStyle}>
+            color={disabled ? 'grey-300' : labelColor}
+            style={labelStyle}
+          >
             {label}
           </Text>
           {alignIcon === 'right' && icon}
@@ -55,12 +56,13 @@ const Button = ({
         {
           opacity: pressed ? 0.75 : undefined,
           backgroundColor: disabled
-            ? disabledColor || '#4257D075'
+            ? disabledColor || COLORS.grey[50]
             : btnColor || COLORS.primary[500],
         },
         btnStyle,
       ]}
-      disabled={disabled || loading}>
+      disabled={disabled || loading}
+    >
       {content}
     </Pressable>
   )
@@ -72,7 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     overflow: 'hidden',
     width: '100%',
-    height: 56,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },

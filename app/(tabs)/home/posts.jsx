@@ -137,7 +137,7 @@ export default function SearchPostsScreen() {
                             activeOpacity={0.7}
                             onPress={() =>
                                 router.push({
-                                    pathname: "/(root)/(tabs)/search/posts-details",
+                                    pathname: "/(root)/(tabs)/home/posts-details",
                                     params: { id: post.id },
                                 })
                             }

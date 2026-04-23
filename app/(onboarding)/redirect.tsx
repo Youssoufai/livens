@@ -23,7 +23,7 @@ export default function AuthScreen() {
   const [googleLoading, setGoogleLoading] = useState(false)
 
   const redirectUri = makeRedirectUri({
-    scheme: 'com.eegour.livelens',
+    scheme: 'com.livelens.app',
   })
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -89,7 +89,7 @@ export default function AuthScreen() {
 
       // Navigate directly without setTimeout
       console.log('Navigating to main app...')
-      router.replace('/(root)/(tabs)/search')
+      router.replace('/(tabs)/home')
       console.log('Navigation function called')
     } catch (error) {
       Alert.alert('Google Login Failed', error.message)
@@ -109,14 +109,15 @@ export default function AuthScreen() {
       <Text style={styles.title}>Welcome to Livelens</Text>
       <Text style={styles.subtitle}>Location insights at your fingertips.</Text>
 
-      <View style={styles.cardWrapper}>
+      {/* <View style={styles.cardWrapper}>
         <Image source={require('@/assets/images/splash-icon.png')} />
-      </View>
+      </View> */}
 
       <TouchableOpacity
         onPress={() => router.push('/(onboarding)/create-account')}
         activeOpacity={0.8}
-        style={styles.primaryButton}>
+        style={styles.primaryButton}
+      >
         <Text style={styles.primaryButtonText}>Create a new account</Text>
       </TouchableOpacity>
 
@@ -124,7 +125,8 @@ export default function AuthScreen() {
         onPress={() => promptAsync()}
         disabled={!request || googleLoading}
         activeOpacity={0.8}
-        style={styles.outlineButton}>
+        style={styles.outlineButton}
+      >
         <Text style={styles.outlineButtonText}>
           {googleLoading ? 'Signing in...' : 'Continue with Google'}
         </Text>
@@ -139,7 +141,8 @@ export default function AuthScreen() {
       <TouchableOpacity
         onPress={() => router.push('/(onboarding)/login')}
         activeOpacity={0.8}
-        style={styles.bottomText}>
+        style={styles.bottomText}
+      >
         <Text>Already have an account? </Text>
         <Text style={styles.signIn}>Sign in</Text>
       </TouchableOpacity>
