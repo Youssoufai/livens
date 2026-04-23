@@ -1,8 +1,9 @@
-import { ReactNode } from 'react'
+import { ReactElement, ReactNode } from 'react'
 import { TextStyle, ViewStyle } from 'react-native'
 import { OtpInputProps } from 'react-native-otp-entry'
 
 import { FONTS } from '@/constants/fonts'
+import { ExternalPathString, Href, RelativePathString } from 'expo-router'
 
 export type ColorType =
   | 'primary-50'
@@ -27,6 +28,7 @@ export type ColorType =
   | 'grey-300'
   | 'grey-400'
   | 'grey-500'
+  | 'grey-600'
   | 'grey-700'
   | 'grey-800'
   // | "grey-900"
@@ -77,4 +79,25 @@ export interface CheckboxProps {
   checked: boolean
   alignLabel?: 'left' | 'right'
   onPress: VoidFunction
+}
+
+export interface ActionRowProps {
+  isEnabled?: boolean
+  title: string
+  description?: string
+  textColor?: string
+  actionValue?: string
+  icon: () => ReactElement
+  link?: Href | RelativePathString | ExternalPathString
+  hasBorder?: boolean
+  onPress?: VoidFunction
+}
+
+export interface SearchInputProps {
+  value: string
+  onChangeText: (text: string) => void
+  onClear: () => void
+  placeholder?: string
+  suggestions?: string[]
+  onSelectSuggestion?: (item: string) => void
 }

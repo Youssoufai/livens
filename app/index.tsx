@@ -51,7 +51,7 @@ SlideOutLeft.springify().damping(30).mass(5).stiffness(10).overshootClamping(10)
 
 export default function Onboarding() {
   const [step, setStep] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const storage = useRef(new AppStorage()).current
 
@@ -60,25 +60,23 @@ export default function Onboarding() {
   const router = useRouter()
 
   useEffect(() => {
+    let redirecting = false
     try {
-      setLoading(true)
       const onboarding = storage.getItem<'string'>(STORE_KEYS.onboarding) as
         | OnboardingType
         | undefined
 
-      if (!onboarding) {
-        return
-      } else if (onboarding === OnboardingStatus.in_progress) {
-        router.push('/(onboarding)/welcome')
-        return
+      if (onboarding === OnboardingStatus.in_progress) {
+        redirecting = true
+        router.replace('/(onboarding)/welcome')
       } else if (onboarding === OnboardingStatus.completed) {
-        router.push('/(auth)/login')
-        return
+        redirecting = true
+        router.replace('/(auth)/login')
       }
     } catch (error) {
       console.error('Failed to resolve onboarding state:', error)
     } finally {
-      setLoading(false)
+      if (!redirecting) setLoading(false)
     }
   }, [router, storage])
 

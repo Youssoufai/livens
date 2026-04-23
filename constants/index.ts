@@ -6,6 +6,8 @@ export const INPUT_HEIGHT = 52
 
 export const STORE_KEYS = {
   token: 'livens_token',
+  user: 'livens_user',
+  userId: 'livens_user_id',
   onboarding: 'livens_onboarding',
   preference: 'livens_preference',
 }

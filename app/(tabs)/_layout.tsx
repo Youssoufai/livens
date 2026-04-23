@@ -5,14 +5,14 @@ import { ActivityIndicator, View } from 'react-native'
 
 import { getToken } from '@/utils/secureStore'
 import { COLORS } from '@/constants/theme'
-import SearchIcon from '@/assets/icons/search.svg'
-import AccountIcon from '@/assets/icons/account_circle.svg'
-import HelpIcon from '@/assets/icons/live_help.svg'
-import ScheduleIcon from '@/assets/icons/schedule_send.svg'
 import TabBar from '@/components/tab-bar'
+import HelpIcon from '@/components/icons/help'
+import ScheduleIcon from '@/components/icons/schedule'
+import SearchIcon from '@/components/icons/search'
+import AccountIcon from '@/components/icons/account'
 
 const tabsIcons = (isFocused: boolean) => {
-  const color = isFocused ? COLORS.primary[500] : COLORS.grey[700]
+  const color = isFocused ? COLORS.primary[500] : COLORS.grey[200]
 
   return {
     home: <SearchIcon fill={color} width={24} height={24} />,

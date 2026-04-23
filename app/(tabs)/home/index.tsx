@@ -1,103 +1,141 @@
-import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
-import { useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  ImageBackground,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { useCallback, useMemo, useState } from 'react'
+import { ImageBackground, StyleSheet, View } from 'react-native'
+import { useDebounce } from 'use-debounce'
 
 import Text from '@/components/text'
-import { getToken } from '@/utils/secureStore'
+import ParallaxScrollView from '@/components/parallax-scroll-view'
+import { HOME_OPTIONS } from '@/modules/search/search.data'
+import ActionRow from '@/components/action-row'
+import SearchInput from '@/components/search-input-menu'
+import { COLORS } from '@/constants/theme'
+import { showToastMessage } from '@/components/notification'
+import { catchErr } from '@/utils/error-handlers'
+
+const MOCK_SUGGESTIONS = [
+  'Wuse Market, Abuja',
+  'Wuse Zone 4, Abuja',
+  'Wuse Zone 5, Abuja',
+  'Garki Area 1, Abuja',
+  'Garki Area 2, Abuja',
+  'Gwarinpa, Abuja',
+  'Maitama, Abuja',
+  'Asokoro, Abuja',
+]
 
 export default function SearchScreen() {
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedValue] = useDebounce(searchQuery, 1000)
+
+  const suggestions = useMemo(() => {
+    const querySuggestions = debouncedValue
+      ? MOCK_SUGGESTIONS.filter((s) =>
+          s.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : []
+
+    return querySuggestions
+  }, [debouncedValue])
+
+  const headerImage = (
+    <View style={styles.headerText}>
+      <Text size={28} lineHeight={32} weight={700} color="white">
+        Search a place in Abuja
+      </Text>
+      <Text size={16} lineHeight={24} color="white">
+        Search any location to see what's happening there.
+      </Text>
+    </View>
+  )
+
+  const selectQueryItem = useCallback(async (item: string) => {
+    setSearchQuery(item)
+    try {
+    } catch (error) {
+      showToastMessage(catchErr(error).message ?? '', 'error')
+    }
+  }, [])
 
   return (
-    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-      <ImageBackground
-        source={require('@/assets/images/search.png')}
-        style={styles.hero}
-        resizeMode="cover"
+    <ImageBackground
+      source={require('@/assets/images/search.png')}
+      style={styles.hero}
+      imageStyle={{ height: 336 }}
+      resizeMode="cover"
+    >
+      <ParallaxScrollView
+        headerImage={headerImage}
+        headerheight={316}
+        backgroundColor="transparent"
+        contentBackgroundColor="white"
       >
-        <View style={styles.heroContent}>
-          <Text
-            size={30}
-            weight={700}
-            style={{ color: '#fff', lineHeight: 36 }}
-          >
-            Search a place in Abuja
-          </Text>
-          <Text
-            size={15}
-            style={{
-              color: '#F3F4F6',
-              lineHeight: 22,
-              marginBottom: 16,
-              marginTop: 6,
-            }}
-          >
-            Search any location to see what's happening there.
-          </Text>
+        <View style={styles.main}>
+          <SearchInput
+            value={searchQuery}
+            placeholder="Search places, areas, events"
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+            suggestions={suggestions}
+            onSelectSuggestion={selectQueryItem}
+          />
 
-          <TouchableOpacity
-            style={styles.searchBar}
-            activeOpacity={0.85}
-            onPress={() => router.push('/search/posts' as never)}
-          >
-            <Text size={15} color="grey-400">
-              Search places, areas, events
-            </Text>
-            <Ionicons name="search" size={18} color="#9CA3AF" />
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
-
-      <View style={styles.whiteSection}>
-        <Text
-          size={18}
-          weight={700}
-          color="grey-800"
-          style={styles.sectionTitle}
-        >
-          Get started with Livelens
-        </Text>
-        <Text size={14} color="grey-400" style={styles.sectionDesc}>
-          You can also start on your own and choose one of these options later.
-        </Text>
-
-        <TouchableOpacity
-          style={styles.option}
-          onPress={() => router.push('/search/posts' as never)}
-        >
-          <View style={styles.iconCircle}>
-            <Ionicons name="search" size={20} color="#EF4444" />
-          </View>
-          <View style={styles.optionText}>
-            <Text size={15} weight={600} color="grey-800">
-              Search a place
+          <View>
+            <Text
+              size={20}
+              lineHeight={24}
+              weight={600}
+              color="black"
+              style={styles.sectionTitle}
+            >
+              Get started with Livelens
             </Text>
             <Text
-              size={13}
+              size={14}
+              lineHeight={20}
               color="grey-400"
-              style={{ marginTop: 2, lineHeight: 18 }}
+              style={styles.sectionDesc}
             >
-              See the most recent news and updates about a place.
+              You can also start on your own and choose one of these options
+              later.
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+
+          <View style={styles.optionsRow}>
+            {HOME_OPTIONS.map((option, index) => (
+              <ActionRow
+                key={`${option.title}_${index}`}
+                title={option.title}
+                description={option.description}
+                link={option.link}
+                icon={option.icon}
+              />
+            ))}
+          </View>
+        </View>
+      </ParallaxScrollView>
+    </ImageBackground>
   )
 }
 
 const styles = StyleSheet.create({
-  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  hero: { height: 360, width: '100%' },
+  headerText: {
+    rowGap: 4,
+    paddingHorizontal: 16,
+    paddingBottom: 13,
+    justifyContent: 'flex-end',
+    height: '100%',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hero: {
+    width: '100%',
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
   heroContent: {
     flex: 1,
     padding: 20,
@@ -117,29 +155,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  whiteSection: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 24,
-    minHeight: 400,
+  main: {
+    paddingHorizontal: 16,
+    // paddingTop: 24,
+    rowGap: 24,
   },
-  sectionTitle: { marginBottom: 6 },
-  sectionDesc: { marginBottom: 20, lineHeight: 20 },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+  optionsRow: {
+    rowGap: 12,
   },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FEE2E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  optionText: { flex: 1 },
+  sectionTitle: { marginBottom: 8 },
+  sectionDesc: {},
 })
