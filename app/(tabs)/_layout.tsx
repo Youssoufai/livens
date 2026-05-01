@@ -1,7 +1,5 @@
-import { Ionicons } from '@expo/vector-icons'
 import { router, Tabs } from 'expo-router'
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { Platform } from 'react-native'
 
 import { getToken } from '@/utils/secureStore'
 import { COLORS } from '@/constants/theme'
@@ -10,6 +8,7 @@ import HelpIcon from '@/components/icons/help'
 import ScheduleIcon from '@/components/icons/schedule'
 import SearchIcon from '@/components/icons/search'
 import AccountIcon from '@/components/icons/account'
+import { useAuthGuard } from '@/hooks/use-auth-guard'
 
 const tabsIcons = (isFocused: boolean) => {
   const color = isFocused ? COLORS.primary[500] : COLORS.grey[200]
@@ -25,6 +24,8 @@ const tabsIcons = (isFocused: boolean) => {
 export default function TabsLayout() {
   return (
     <Tabs
+      detachInactiveScreens={Platform.OS === 'android' ? false : true}
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
       }}

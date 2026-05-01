@@ -4,6 +4,12 @@ import { FONTS } from '@/constants/fonts'
 import { COLORS } from '@/constants/theme'
 import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 
+export const globalStyles = StyleSheet.create({
+  pressedOpacity: {
+    opacity: 0.75,
+  },
+})
+
 export const phoneStyles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.white,

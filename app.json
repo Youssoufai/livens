@@ -64,6 +64,12 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.850951594746-obmitsnsu02semv5itrg90la46peq9ee"
+        }
       ]
     ],
     "experiments": {

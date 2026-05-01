@@ -62,14 +62,18 @@ export default function Onboarding() {
   useEffect(() => {
     let redirecting = false
     try {
-      const onboarding = storage.getItem<'string'>(STORE_KEYS.onboarding) as
-        | OnboardingType
-        | undefined
+      const onboarding = storage.getItem<'string'>(
+        STORE_KEYS.onboarding
+      ) as OnboardingType
+      const token = storage.getItem<'string'>(STORE_KEYS.token)
 
       if (onboarding === OnboardingStatus.in_progress) {
         redirecting = true
         router.replace('/(onboarding)/welcome')
-      } else if (onboarding === OnboardingStatus.completed) {
+      } else if (onboarding === OnboardingStatus.completed && token) {
+        redirecting = true
+        router.replace('/(tabs)/home')
+      } else if (onboarding === OnboardingStatus.completed && !token) {
         redirecting = true
         router.replace('/(auth)/login')
       }

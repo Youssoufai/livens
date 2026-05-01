@@ -25,6 +25,7 @@ export interface InputPropType {
   placeholder?: string
   control?: any
   name?: string
+  value?: string
   defaultValue?: string
   maxLength?: number
   error?: string
@@ -35,6 +36,16 @@ export interface InputPropType {
   style?: ViewStyle
   labelStyle?: TextStyle
   containerStyle?: ViewStyle
+  inputFieldStyle?: ViewStyle
   onPress?: VoidFunction
   formatter?: (value: string) => string
+}
+
+export interface Modalprops {
+  visible: boolean
+  fullHeight?: boolean
+  modalStyle?: ViewStyle
+  contentStyle?: ViewStyle
+  onDismiss?: VoidFunction
+  showCloseButton?: boolean
 }

@@ -9,7 +9,11 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASEURL": "https://livelenns.online/public/api",
+        "EXPO_PUBLIC_GOOGLE_MAP_API_KEY": "AIzaSyBRKbYE5qKC-6qMzodizKgYcoHqP5UdeL4"
+      }
     },
     "production": {
       "env": {

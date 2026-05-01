@@ -18,6 +18,7 @@ const ActionRow = ({
   onPress,
 }: ActionRowProps) => {
   const router = useRouter()
+
   const content = (
     <TouchableOpacity
       style={styles.option}

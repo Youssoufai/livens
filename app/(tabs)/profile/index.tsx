@@ -16,7 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import Text from '@/components/text'
 import api from '@/lib/api'
-import { User } from '@/models/auth'
 import { styles } from '@/styles/profile'
 
 const IMAGE_BASE_URL = 'https://livelenns.online/public/images'
@@ -61,7 +60,7 @@ export default function Profile() {
         }
       }
       fetchProfile()
-    }, []),
+    }, [])
   )
 
   const logout = async () => {
@@ -77,7 +76,11 @@ export default function Profile() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 100 }} />
+        <ActivityIndicator
+          size="large"
+          color="#007AFF"
+          style={{ marginTop: 100 }}
+        />
       </SafeAreaView>
     )
   }
@@ -85,7 +88,12 @@ export default function Profile() {
   if (!profile) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text size={15} color="grey-500" align="center" style={{ marginTop: 100 }}>
+        <Text
+          size={15}
+          color="grey-500"
+          align="center"
+          style={{ marginTop: 100 }}
+        >
           No profile data found
         </Text>
       </SafeAreaView>
@@ -103,7 +111,8 @@ export default function Profile() {
 
         <TouchableOpacity
           style={styles.profileRow}
-          onPress={() => router.push('/profile/edit' as never)}>
+          onPress={() => router.push('/profile/edit' as never)}
+        >
           <View style={styles.avatarContainer}>
             <Image source={{ uri: displayImage }} style={styles.avatar} />
           </View>
@@ -115,7 +124,12 @@ export default function Profile() {
               {profile.email || 'No Email'}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#999" style={{ marginLeft: 'auto' }} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color="#999"
+            style={{ marginLeft: 'auto' }}
+          />
         </TouchableOpacity>
 
         <View style={styles.balanceCard}>
@@ -130,21 +144,28 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
 
-          <Text size={28} weight={700} color="grey-800" style={styles.balanceAmount}>
+          <Text
+            size={28}
+            weight={700}
+            color="grey-800"
+            style={styles.balanceAmount}
+          >
             ₦{profile.balance || '0.00'}
           </Text>
 
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={styles.withdrawButton}
-              onPress={() => router.push('/profile/withdraw' as never)}>
+              onPress={() => router.push('/profile/withdraw' as never)}
+            >
               <Text size={14} weight={600} color="grey-800">
                 Withdraw
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.fundButton}
-              onPress={() => router.push('/profile/fundWallet' as never)}>
+              onPress={() => router.push('/profile/fundWallet' as never)}
+            >
               <Text size={14} weight={600} style={{ color: '#fff' }}>
                 Fund wallet
               </Text>
@@ -181,7 +202,12 @@ export default function Profile() {
           <Text size={15} weight={600} color="danger">
             Log out
           </Text>
-          <Ionicons name="log-out-outline" size={18} color="#f00" style={{ marginLeft: 6 }} />
+          <Ionicons
+            name="log-out-outline"
+            size={18}
+            color="#f00"
+            style={{ marginLeft: 6 }}
+          />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

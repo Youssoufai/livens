@@ -4,6 +4,8 @@ import { router } from 'expo-router'
 import { API_ENDPOINTS } from '@/constants/endpoints'
 import Appstorage from '@/utils/storage'
 import { STORE_KEYS } from '@/constants'
+import { QueryClient } from '@tanstack/react-query'
+import { showToastMessage } from '@/components/notification'
 
 const storage = new Appstorage()
 
@@ -22,7 +24,9 @@ export const AuthenticatedAPI = axios.create({
   // timeout: 30000,
 })
 
-AuthenticatedAPI.interceptors.request.use(async (config) => {
+export const queryClient = new QueryClient()
+
+AuthenticatedAPI.interceptors.request.use((config) => {
   const storedToken = storage.getItem<'string'>(STORE_KEYS.token)
 
   if (storedToken) {
@@ -39,29 +43,17 @@ AuthenticatedAPI.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
+    if (error.response?.status === 401) {
+      storage.removeItem(STORE_KEYS.token)
 
-      try {
-        const token = storage.getItem<'string'>(STORE_KEYS.token)
+      // Optional: clear headers
+      delete AuthenticatedAPI.defaults.headers.common['Authorization']
 
-        if (!token) throw Error('No token found')
+      showToastMessage('Session expired. Please log in again.', 'error')
 
-        // const newTokenData = await refreshCurrentToken(token.refreshToken);
+      router.replace('/(auth)/login')
 
-        // if (!newTokenData?.accessToken) {
-        //   return Promise.reject(error);
-        // }
-
-        // originalRequest.headers["Authorization"] =
-        //   `Bearer ${newTokenData.accessToken}`;
-
-        return AuthenticatedAPI(originalRequest)
-      } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError)
-        router.replace('/(auth)/login')
-        return
-      }
+      return Promise.reject(error)
     }
 
     return Promise.reject(error)

@@ -13,7 +13,7 @@ export const HOME_OPTIONS: OptionType[] = [
         style={{ width: 45, height: 45 }}
       />
     ),
-    link: '/(tabs)/home',
+    link: '/(search)/search-result',
   },
   {
     title: 'Ask the public',
@@ -26,6 +26,14 @@ export const HOME_OPTIONS: OptionType[] = [
         style={{ width: 45, height: 45 }}
       />
     ),
-    link: '/(tabs)/home',
+    link: '/(requests)/create-request',
+  },
+  {
+    title: 'See nearby requests',
+    description: 'Earn fast cash by responding to nearby requests',
+    icon: () => (
+      <Image source={{ uri: '' }} style={{ width: 45, height: 45 }} />
+    ),
+    link: '/(tabs)/requests',
   },
 ]

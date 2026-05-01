@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Alert,
   Image,
-  SafeAreaView,
   StatusBar,
   Text,
   TouchableOpacity,
@@ -18,6 +17,7 @@ import { styles } from '@/styles/redirectStyle'
 import { initDeviceToken } from '@/utils/deviceToken'
 // Import if needed
 import * as SecureStore from 'expo-secure-store'
+import { SafeAreaView } from 'react-native-safe-area-context'
 export default function AuthScreen() {
   const handledRef = useRef(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -30,7 +30,7 @@ export default function AuthScreen() {
     clientId:
       '850951594746-5n96ghgrb5gulf5k7oukc09i7t369idq.apps.googleusercontent.com',
     redirectUri,
-    useProxy: false,
+    // useProxy: false,
   })
 
   useEffect(() => {
@@ -53,11 +53,11 @@ export default function AuthScreen() {
     }
   }, [response])
 
-  const saveToken = async (token) => {
+  const saveToken = async (token: string) => {
     await AsyncStorage.setItem('auth_token', token)
   }
 
-  const handleGoogleLogin = async (idToken) => {
+  const handleGoogleLogin = async (idToken: string) => {
     try {
       setGoogleLoading(true)
 
@@ -92,7 +92,7 @@ export default function AuthScreen() {
       router.replace('/(tabs)/home')
       console.log('Navigation function called')
     } catch (error) {
-      Alert.alert('Google Login Failed', error.message)
+      // Alert.alert('Google Login Failed', error.message)
     } finally {
       setGoogleLoading(false)
     }
@@ -114,7 +114,7 @@ export default function AuthScreen() {
       </View> */}
 
       <TouchableOpacity
-        onPress={() => router.push('/(onboarding)/create-account')}
+        onPress={() => {}}
         activeOpacity={0.8}
         style={styles.primaryButton}
       >
@@ -139,7 +139,7 @@ export default function AuthScreen() {
       </View>
 
       <TouchableOpacity
-        onPress={() => router.push('/(onboarding)/login')}
+        onPress={() => {}}
         activeOpacity={0.8}
         style={styles.bottomText}
       >
