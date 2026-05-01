@@ -20,6 +20,7 @@ import { queryClient } from '@/services'
 import AppStorage from '@/utils/storage'
 import { useBoundStore } from '@/state'
 import { STORE_KEYS } from '@/constants'
+import { envConfig } from '@/utils/config'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -27,6 +28,11 @@ SplashScreen.setOptions({
   duration: 2000,
   fade: true,
 })
+
+export const unstable_settings = {
+  anchor: '(tabs)',
+  unmountOnBlur: true,
+}
 
 // import { RequestProvider } from './context/requestContext'
 
@@ -42,10 +48,8 @@ SplashScreen.setOptions({
 // }
 
 GoogleSignin.configure({
-  webClientId:
-    '850951594746-b7co332s3k0mk9lngdj7n2h53rqerp0l.apps.googleusercontent.com',
-  iosClientId:
-    '850951594746-obmitsnsu02semv5itrg90la46peq9ee.apps.googleusercontent.com',
+  webClientId: envConfig.googleSigninWebClientId,
+  iosClientId: envConfig.googleSigninIosClientId,
   offlineAccess: true,
 })
 
@@ -121,7 +125,7 @@ const InitialLayout = () => {
         style={lightStatusRoutes.includes(pathname) ? 'light' : 'dark'}
       />
       <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
-        <Stack.Protected guard={isAuthenticated}>
+        <Stack.Protected guard={!isAuthenticated}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(onboarding)" />
