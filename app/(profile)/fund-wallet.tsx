@@ -10,6 +10,7 @@ import Button from '@/components/ui/button'
 import Text from '@/components/text'
 import api from '@/lib/api'
 import { fundWalletSchema, FundWalletFormValues } from '@/schemas/request'
+import { ThemedView } from '@/components/themed-view'
 
 export default function FundWalletScreen() {
   const {
@@ -23,7 +24,9 @@ export default function FundWalletScreen() {
 
   const onSubmit = async (values: FundWalletFormValues) => {
     try {
-      const { data } = await api.post('/paystack-init', { amount: values.amount })
+      const { data } = await api.post('/paystack-init', {
+        amount: values.amount,
+      })
       const authorizationUrl = data?.data?.authorization_url
 
       if (authorizationUrl) {
@@ -43,14 +46,15 @@ export default function FundWalletScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ThemedView>
       <ScreenHeader title="Fund wallet" />
 
       <Text size={22} weight={600} color="grey-800" style={styles.title}>
         Add funds to your wallet
       </Text>
       <Text size={14} color="grey-400" style={styles.subtitle}>
-        Select a method to add external funds to your wallet. More options coming soon.
+        Select a method to add external funds to your wallet. More options
+        coming soon.
       </Text>
 
       <Controller
@@ -78,7 +82,7 @@ export default function FundWalletScreen() {
         disabled={isSubmitting}
         btnStyle={{ marginBottom: 10, borderRadius: 30 }}
       />
-    </SafeAreaView>
+    </ThemedView>
   )
 }
 

@@ -1,47 +1,28 @@
 import { router } from 'expo-router'
-import { useCallback, useMemo, useState } from 'react'
-import { ImageBackground, StyleSheet, View } from 'react-native'
-import { useDebounce } from 'use-debounce'
+import { useCallback, useState } from 'react'
+import { ImageBackground, StyleSheet, Text as RNText, View } from 'react-native'
 
 import Text from '@/components/text'
 import ParallaxScrollView from '@/components/parallax-scroll-view'
 import { HOME_OPTIONS } from '@/modules/search/search.data'
 import ActionRow from '@/components/action-row'
-import SearchInput from '@/components/search-input-menu'
 import { COLORS } from '@/constants/theme'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
-
-const MOCK_SUGGESTIONS = [
-  'Wuse Market, Abuja',
-  'Wuse Zone 4, Abuja',
-  'Wuse Zone 5, Abuja',
-  'Garki Area 1, Abuja',
-  'Garki Area 2, Abuja',
-  'Gwarinpa, Abuja',
-  'Maitama, Abuja',
-  'Asokoro, Abuja',
-]
+import SearchModal from '@/components/search-modal'
+import { API_ENDPOINTS } from '@/constants/endpoints'
+import { useBoundStore } from '@/state'
 
 export default function SearchScreen() {
-  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedValue] = useDebounce(searchQuery, 1000)
+  const userLocation = useBoundStore((state) => state.user?.location)
 
-  const suggestions = useMemo(() => {
-    const querySuggestions = debouncedValue
-      ? MOCK_SUGGESTIONS.filter((s) =>
-          s.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : []
-
-    return querySuggestions
-  }, [debouncedValue])
+  const location = userLocation?.replace(/(Nigeria|nigeria)/g, '')
 
   const headerImage = (
     <View style={styles.headerText}>
       <Text size={28} lineHeight={32} weight={700} color="white">
-        Search a place in Abuja
+        Search a place in <RNText style={styles.location}>{location}</RNText>
       </Text>
       <Text size={16} lineHeight={24} color="white">
         Search any location to see what's happening there.
@@ -71,13 +52,11 @@ export default function SearchScreen() {
         contentBackgroundColor="white"
       >
         <View style={styles.main}>
-          <SearchInput
-            value={searchQuery}
+          <SearchModal
             placeholder="Search places, areas, events"
-            onChangeText={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-            suggestions={suggestions}
-            onSelectSuggestion={selectQueryItem}
+            endpoint={API_ENDPOINTS.search.occassion}
+            needsAuthentication
+            onSelect={selectQueryItem}
           />
 
           <View>
@@ -142,6 +121,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingBottom: 24,
   },
+  location: {
+    textTransform: 'capitalize',
+    textDecorationLine: 'underline',
+  },
   searchBar: {
     backgroundColor: '#fff',
     borderRadius: 14,
@@ -157,7 +140,7 @@ const styles = StyleSheet.create({
   },
   main: {
     paddingHorizontal: 16,
-    // paddingTop: 24,
+    paddingBottom: 24,
     rowGap: 24,
   },
   optionsRow: {

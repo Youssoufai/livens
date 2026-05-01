@@ -99,6 +99,7 @@ const LocationForm = () => {
                 debounceDelay={400}
                 selectionColor={COLORS.primary[600]}
                 spellCheck
+                includedRegionCodes={['NG']}
                 showClearButton={false}
                 style={placesStyle}
               />

@@ -31,7 +31,7 @@ export function useGoogleSignIn() {
         id_token: response.data.idToken,
       })
 
-      return apiResponse.data.access_token as string
+      return apiResponse.data.token as string
     } catch (error) {
       let errorMsg = ''
       if (error instanceof AxiosError) {

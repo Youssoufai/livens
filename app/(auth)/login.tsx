@@ -38,7 +38,7 @@ export default function LoginScreen() {
 
   const getUser = useBoundStore((state) => state.getUser)
 
-  // const { loginWithGoogle } = useGoogleSignIn()
+  const { loginWithGoogle } = useGoogleSignIn()
 
   const {
     control,
@@ -60,19 +60,19 @@ export default function LoginScreen() {
     router.push('/(tabs)/home')
   }
 
-  // const handleGoogleLogin = async () => {
-  //   try {
-  //     setIsLoadingGoogle(true)
-  //     const token = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoadingGoogle(true)
+      const token = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
 
-  //     if (!token) return
+      if (!token) return
 
-  //     completeSignin(token)
-  //   } catch (error) {
-  //   } finally {
-  //     setIsLoadingGoogle(false)
-  //   }
-  // }
+      completeSignin(token)
+    } catch (error) {
+    } finally {
+      setIsLoadingGoogle(false)
+    }
+  }
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
@@ -142,21 +142,21 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        {/* <Button
-          label="Continue with Google"
-          icon={<GoogleLogo />}
-          alignIcon="left"
-          labelColor="black"
-          btnStyle={styles.socialButton}
-          onPress={handleGoogleLogin}
-        /> */}
-
-        <View style={{ paddingBottom: 16 }}>
+        <View style={styles.buttonWrapper}>
           <Button
             label="Log in"
             onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}
             disabled={!isValid || isSubmitting}
+          />
+          <Button
+            label="Continue with Google"
+            icon={<GoogleLogo />}
+            alignIcon="left"
+            labelColor="black"
+            loading={isLoadingGoogle}
+            btnStyle={styles.socialButton}
+            onPress={handleGoogleLogin}
           />
         </View>
       </View>
@@ -189,6 +189,10 @@ const styles = StyleSheet.create({
     lineHeight: actuateLineHeight(14, 18),
     color: COLORS.black,
     fontFamily: FONTS.dm_sans[600],
+  },
+  buttonWrapper: {
+    rowGap: 16,
+    paddingBottom: 16,
   },
   supplementaryContent: {
     flexDirection: 'row',

@@ -42,7 +42,7 @@ const Button = ({
           {alignIcon === 'right' && icon}
         </>
       ) : (
-        <ActivityIndicator color={textColor} />
+        <ActivityIndicator color={disabled ? COLORS.grey[300] : textColor} />
       )}
     </View>
   )
@@ -87,13 +87,6 @@ const styles = StyleSheet.create({
   },
   label: {
     color: '#ffffff',
-  },
-  gradient: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: '100%',
-    height: '100%',
   },
 })
 

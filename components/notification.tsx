@@ -48,7 +48,7 @@ export const getToastIcon: (type: string) => ReactNode = (type) => {
 
 const toastBackground: Record<string, string> = {
   success: COLORS.primary[500],
-  error: COLORS.danger,
+  error: COLORS.red[500],
   default: COLORS.grey[500],
 }
 
@@ -70,7 +70,8 @@ const CustomToast = ({
             ? backgroundColor
             : (toastBackground[text2 || 'default'] ?? COLORS.grey[500]),
         },
-      ]}>
+      ]}
+    >
       {/* {type ? (
         // getToastIcon(iconSize || 24)[text2 ?? "default"]
       ) : (
@@ -88,7 +89,7 @@ const CustomToast = ({
 
 export function showToastMessage(
   message: string,
-  type: 'success' | 'error' = 'success',
+  type: 'success' | 'error' = 'success'
 ) {
   const options = {
     position: 'top-center' as ToastPosition,

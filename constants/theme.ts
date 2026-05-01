@@ -33,6 +33,9 @@ export const COLORS = {
     400: '#FFD03D',
     500: '#FFC40C',
   },
+  red: {
+    500: '#E60026',
+  },
   white: '#FFFFFF',
   black: '#000000',
   danger: '#FF3333',

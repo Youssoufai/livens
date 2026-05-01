@@ -4,6 +4,8 @@ export const GLOBAL_HORIZONTAL_PADDING = 16
 
 export const INPUT_HEIGHT = 52
 
+export const DROPDOWN_BOTTOM_MARGIN = 16
+
 export const STORE_KEYS = {
   token: 'livens_token',
   user: 'livens_user',

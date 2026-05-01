@@ -17,6 +17,7 @@ import { API_ENDPOINTS } from '@/constants/endpoints'
 import AppStorage from '@/utils/storage'
 import { STORE_KEYS } from '@/constants'
 import { OnboardingStatus } from '@/modules/auth/auth.types'
+import { showToastMessage } from '@/components/notification'
 
 const snipImage = require('@/assets/images/snip.png')
 
@@ -92,14 +93,15 @@ const Welcome = () => {
             onPress={handleGoogleLogin}
             loading={isLoadingGoogle}
           />
-          <Button
+          {/* LATER FACEBOOK INTEGRATION */}
+          {/* <Button
             label="Contiue with Facebook"
             icon={<FacebookLogo />}
             alignIcon="left"
             labelColor="black"
             btnStyle={styles.socialButton}
             onPress={loginWithFacebook}
-          />
+          /> */}
           <View style={styles.dividerWrapper}>
             <Divider style={styles.divider} />
             <Text size={12} lineHeight={16} weight={600} color="grey-500">

@@ -33,6 +33,7 @@ export type ColorType =
   | 'grey-800'
   // | "grey-900"
   // | "grey-dark"
+  | 'red-500'
   | 'white'
   | 'danger'
   | 'black'
@@ -78,7 +79,7 @@ export interface CheckboxProps {
   label: string
   checked: boolean
   alignLabel?: 'left' | 'right'
-  onPress: VoidFunction
+  onPress: (checked?: boolean) => void
 }
 
 export interface ActionRowProps {
@@ -95,9 +96,57 @@ export interface ActionRowProps {
 
 export interface SearchInputProps {
   value: string
+  placeholder?: string
+  focusable?: boolean
+  suggestions?: string[]
   onChangeText: (text: string) => void
   onClear: () => void
-  placeholder?: string
-  suggestions?: string[]
   onSelectSuggestion?: (item: string) => void
+}
+
+export interface LocationInputProps {
+  defaultValue?: string
+  placeholder?: string
+  label?: string
+  labelStyle?: TextStyle
+  onLocation: (value: string) => void
+}
+
+export interface SearchModalProps {
+  endpoint: string
+  placeholder?: string
+  needsAuthentication: boolean
+  extraPayload?: Record<string, string | number | boolean>
+  onSelect: (value: string) => void
+}
+
+export interface NoticeProps {
+  show?: boolean
+  content: ReactNode
+  type?: 'success' | 'error' | 'info'
+  containerStyle?: ViewStyle
+  textStyle?: TextStyle
+}
+
+export interface StepTransitionProps {
+  direction: Direction
+}
+
+export interface TooltipProps {
+  content: ReactNode
+}
+
+export interface InputMeasure {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface ToggleGroupProps {
+  groupList: ListItem[]
+  onSelect: (value: string) => void
+  containerStyle?: ViewStyle
+  buttonStyle?: ViewStyle
+  labelStyle?: TextStyle
 }

@@ -8,7 +8,6 @@ import { COLORS } from '@/constants/theme'
 import { actuateFontSize } from '@/utils/normalize'
 
 import Text from '../text'
-import InputLabel from './input_label'
 import { type InputPropType } from './ui.types'
 
 type PrimaryInputProps = InputPropType & Omit<TextInputProps, 'error'>
@@ -29,6 +28,8 @@ const Input = ({
   hasFormError,
   style,
   containerStyle,
+  labelStyle,
+  inputFieldStyle,
   ...props
 }: PrimaryInputProps) => {
   const isRHFControlled = !!control && !!name
@@ -61,9 +62,15 @@ const Input = ({
     <View
       style={[styles.container, { paddingBottom: addBottomPadding ? 12 : 0 }]}
     >
-      <View style={styles.inputFieldWrapper}>
+      <View style={[styles.inputFieldWrapper, inputFieldStyle]}>
         {label && (
-          <Text size={14} lineHeight={20} weight={600} color="grey-500">
+          <Text
+            size={14}
+            lineHeight={20}
+            weight={600}
+            color="grey-500"
+            style={labelStyle}
+          >
             {label}
           </Text>
         )}
@@ -75,6 +82,7 @@ const Input = ({
             onChangeText={handleTextChange}
             onBlur={isRHFControlled ? controller?.field.onBlur : onBlur}
             label=""
+            defaultValue={isRHFControlled ? undefined : defaultValue}
             placeholder={placeholder}
             textColor={COLORS.grey[500]}
             placeholderTextColor={COLORS.grey[300]}

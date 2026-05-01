@@ -1,9 +1,8 @@
 import { Stack, useSegments } from 'expo-router'
-import * as SecureStore from 'expo-secure-store'
 import { StatusBar } from 'expo-status-bar'
 import * as WebBrowser from 'expo-web-browser'
 import * as SplashScreen from 'expo-splash-screen'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useFonts } from 'expo-font'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -14,8 +13,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Toaster } from 'sonner-native'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { StyleSheet, View } from 'react-native'
+import { QueryClientProvider } from '@tanstack/react-query'
 
 import { toastOptions } from '@/components/notification'
+import { queryClient } from '@/services'
+import AppStorage from '@/utils/storage'
+import { useBoundStore } from '@/state'
+import { STORE_KEYS } from '@/constants'
+import { envConfig } from '@/utils/config'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -23,6 +28,11 @@ SplashScreen.setOptions({
   duration: 2000,
   fade: true,
 })
+
+export const unstable_settings = {
+  anchor: '(tabs)',
+  unmountOnBlur: true,
+}
 
 // import { RequestProvider } from './context/requestContext'
 
@@ -38,14 +48,12 @@ SplashScreen.setOptions({
 // }
 
 GoogleSignin.configure({
-  webClientId:
-    '850951594746-b7co332s3k0mk9lngdj7n2h53rqerp0l.apps.googleusercontent.com',
-  iosClientId:
-    '850951594746-obmitsnsu02semv5itrg90la46peq9ee.apps.googleusercontent.com',
-  // offlineAccess: true, // 👈 REQUIRED for idToken consistency
+  webClientId: envConfig.googleSigninWebClientId,
+  iosClientId: envConfig.googleSigninIosClientId,
+  offlineAccess: true,
 })
 
-const lightStatusRoutes = ['']
+const lightStatusRoutes = ['', '(tabs)/home']
 
 const styles = StyleSheet.create({
   container: {
@@ -65,6 +73,13 @@ const InitialLayout = () => {
 
   const segments = useSegments() as string[]
   const pathname = segments.join('/')
+
+  const storage = useRef(new AppStorage()).current
+
+  const token = storage.getItem(STORE_KEYS.token)
+  const isAuthenticated = useBoundStore((state) => state.isAuthenticated)
+
+  const isInSession = isAuthenticated || !!token
 
   const isReady = appIsReady && fontLoaded
 
@@ -110,7 +125,17 @@ const InitialLayout = () => {
         style={lightStatusRoutes.includes(pathname) ? 'light' : 'dark'}
       />
       <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
-        <Stack.Screen name="index" />
+        <Stack.Protected guard={!isAuthenticated}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
+        <Stack.Protected guard={isInSession}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(profile)" />
+          <Stack.Screen name="(requests)" />
+          <Stack.Screen name="(search)" />
+        </Stack.Protected>
       </Stack>
     </View>
   )
@@ -120,14 +145,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView>
       <SafeAreaProvider>
-        <PaperProvider>
-          <KeyboardProvider>
-            {/*<RequestProvider> */}
-            <InitialLayout />
-            <Toaster toastOptions={toastOptions} />
-            {/*  </RequestProvider> */}
-          </KeyboardProvider>
-        </PaperProvider>
+        <QueryClientProvider client={queryClient}>
+          <PaperProvider>
+            <KeyboardProvider>
+              {/*<RequestProvider> */}
+              <InitialLayout />
+              <Toaster toastOptions={toastOptions} />
+              {/*  </RequestProvider> */}
+            </KeyboardProvider>
+          </PaperProvider>
+        </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   )

@@ -69,8 +69,6 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
         payload
       )
 
-      console.log(data)
-
       if (data?.access_token) {
         storage.setItem(STORE_KEYS.token, data.access_token)
       }
@@ -139,13 +137,6 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
             modalStyles={phoneModalStyles}
             visibleCountries={['NG']}
             onEndEditing={confirmPhoneValidity}
-          />
-          <Input
-            control={control}
-            name="referral"
-            label="Referral code (optional)"
-            placeholder="Enter referral code"
-            error={errors.email?.message}
           />
         </View>
         <Button

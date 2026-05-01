@@ -38,7 +38,7 @@ export default function useGetLocation() {
       setCurrentLocation(location)
       return address[0].formattedAddress
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return ''
     }
   }

@@ -2,6 +2,7 @@ import { COLORS } from '@/constants/theme'
 import { ReactNode } from 'react'
 
 global {
+  type Direction = 'back' | 'forward'
   export interface User {
     id: number
     name: string
@@ -16,7 +17,7 @@ global {
   interface NetworkResponse<T> {
     data?: T
     status: number
-    error?: string
+    error?: ApiErrorShape | string
     message?: string
   }
 
@@ -29,9 +30,15 @@ global {
     timestamp: string
   }
 
+  type ApiErrorShape = {
+    message?: string
+    errors?: Record<string, unknown>
+  }
+
   type ListItem = {
+    id?: string
     label: string
-    value: string
+    value: string | number
   }
 
   type FileType = {
