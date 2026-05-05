@@ -1,5 +1,5 @@
 import { router } from 'expo-router'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ImageBackground, StyleSheet, Text as RNText, View } from 'react-native'
 
 import Text from '@/components/text'
@@ -16,8 +16,17 @@ import { useBoundStore } from '@/state'
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('')
   const userLocation = useBoundStore((state) => state.user?.location)
+  const getUser = useBoundStore((state) => state.getUser)
 
   const location = userLocation?.replace(/(Nigeria|nigeria)/g, '')
+
+  useEffect(() => {
+    ;(async () => {
+      if (!userLocation) {
+        await getUser()
+      }
+    })()
+  }, [userLocation])
 
   const headerImage = (
     <View style={styles.headerText}>

@@ -38,6 +38,10 @@ export default function Requests() {
 
   const data = selectedTab === REQUESTS_TABS[2].value ? userRequestData : []
 
+  const handleViewResponders = (id: string) => {
+    router.push({ pathname: '/(requests)/request-details', params: { id } })
+  }
+
   return (
     <>
       <HeaderTabs
@@ -46,7 +50,7 @@ export default function Requests() {
         onSelect={setSelectedTab}
       />
       <ThemedView style={styles.content}>
-        <RequestList list={data} />
+        <RequestList list={data} onViewResponders={handleViewResponders} />
         {data?.length ? (
           <FAB
             icon="plus"

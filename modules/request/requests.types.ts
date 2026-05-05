@@ -1,5 +1,8 @@
 import { Href } from 'expo-router'
 import { ReactElement } from 'react'
+import { ViewStyle } from 'react-native'
+
+import { RequestData } from '@/services/requests/request.types'
 
 export type OptionType = {
   title: string
@@ -12,6 +15,7 @@ export interface HeaderTabProps {
   list: ListItem[]
   selected: string
   onSelect: (value: string) => void
+  containerStyle?: ViewStyle
 }
 
 export interface CreateRequestData {
@@ -44,5 +48,27 @@ export interface RequestCardProps {
   title: string
   description: string
   buttonText?: string
-  onPress?: (id?: string) => void
+  onPress?: (id: string) => void
 }
+
+export interface ResponseCardProps {
+  id: string
+  responder: string
+  location: string
+  starRating: number
+  requestCompleted: number
+  isLoading?: boolean
+  onApprove: (id: string, name: string) => void
+}
+
+export interface RequestListProps {
+  list?: RequestData[]
+  onViewResponders: (id: string) => void
+}
+
+export interface ResponderListProps {
+  requestId: string
+  onGotoStatus: VoidFunction
+}
+
+export type RequestSuccessModalType = 'request_completed' | 'rating' | 'boost'

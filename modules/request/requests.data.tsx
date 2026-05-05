@@ -105,3 +105,20 @@ export const animatedComponentDetails = {
     forward: SlideOutLeft,
   },
 }
+
+export const getRespondersTabData = (responders: number = 0) => {
+  return [
+    {
+      label: 'Overview',
+      value: 'overview',
+    },
+    {
+      label: `Responders (${responders})`,
+      value: 'responders',
+    },
+    {
+      label: 'Status',
+      value: 'status',
+    },
+  ]
+}

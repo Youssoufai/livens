@@ -14,6 +14,7 @@ import { CustomHeader } from '@/components/custom-header'
 import { COLORS } from '@/constants/theme'
 import FullScreenModal, { Modal } from '@/components/ui/modal'
 import RequestSuccessIcon from '@/assets/icons/request-sucess.svg'
+import SuccessModal from '@/components/success-modal'
 
 const renderFormArea = (
   step: number,
@@ -93,30 +94,14 @@ const CreateRequest = () => {
           })}
         </View>
       </ThemedView>
-      <FullScreenModal
-        visible={isModalOpen}
-        showCloseButton
+      <SuccessModal
+        isOpen={isModalOpen}
+        title="Your request has been posted!"
+        description="Your request is now visible to the public, expect some responses
+              soon!"
+        icon={<RequestSuccessIcon width={158} height={118} />}
         onDismiss={dismissModal}
-      >
-        <View style={styles.successModalContent}>
-          <RequestSuccessIcon width={158} height={118} />
-          <View style={styles.sucessModalText}>
-            <Text
-              size={28}
-              lineHeight={32}
-              color="black"
-              weight={700}
-              align="center"
-            >
-              Your request has been posted!
-            </Text>
-            <Text size={16} lineHeight={24} color="black" align="center">
-              Your request is now visible to the public, expect some responses
-              soon!
-            </Text>
-          </View>
-        </View>
-      </FullScreenModal>
+      />
     </>
   )
 }
@@ -141,14 +126,5 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 8,
     paddingBottom: 24,
-  },
-  successModalContent: {
-    flex: 1,
-    paddingTop: 90,
-    alignItems: 'center',
-    rowGap: 40,
-  },
-  sucessModalText: {
-    rowGap: 12,
   },
 })

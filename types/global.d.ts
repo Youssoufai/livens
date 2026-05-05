@@ -7,12 +7,20 @@ global {
     id: number
     name: string
     email: string
-    phone: string
     profile_photo?: string | null
-    balance?: number | string
-    location: string | null
-    created_at: string
-    updated_at: string
+    email_verified_at?: string | null
+    phone?: string
+    device_token?: string | null
+    rating?: string
+    completed_requests?: string
+    location?: string | null
+    balance?: string
+    ledger?: string
+    referral_code?: string
+    referred_by?: string | null
+    last_seen?: string | null
+    created_at?: string
+    updated_at?: string
   }
   interface NetworkResponse<T> {
     data?: T

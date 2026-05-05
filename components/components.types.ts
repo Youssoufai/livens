@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from 'react'
-import { TextStyle, ViewStyle } from 'react-native'
+import { DimensionValue, TextStyle, ViewStyle } from 'react-native'
 import { OtpInputProps } from 'react-native-otp-entry'
 
 import { FONTS } from '@/constants/fonts'
@@ -94,6 +94,11 @@ export interface ActionRowProps {
   onPress?: VoidFunction
 }
 
+export interface ScreenLoaderProps {
+  isLoading: boolean
+  content: ReactNode
+}
+
 export interface SearchInputProps {
   value: string
   placeholder?: string
@@ -118,6 +123,16 @@ export interface SearchModalProps {
   needsAuthentication: boolean
   extraPayload?: Record<string, string | number | boolean>
   onSelect: (value: string) => void
+}
+
+export interface SuccessModalProps {
+  isOpen: boolean
+  title: string
+  description: string
+  icon: ReactElement
+  bottomContent?: ReactNode
+  onDismiss?: VoidFunction
+  contentStyle?: ViewStyle
 }
 
 export interface NoticeProps {
@@ -149,4 +164,11 @@ export interface ToggleGroupProps {
   containerStyle?: ViewStyle
   buttonStyle?: ViewStyle
   labelStyle?: TextStyle
+}
+
+export interface SkeletonLoaderProps {
+  children?: ReactNode
+  isLoading?: boolean
+  height?: DimensionValue
+  style?: ViewStyle
 }

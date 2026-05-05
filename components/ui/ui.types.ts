@@ -49,3 +49,10 @@ export interface Modalprops {
   onDismiss?: VoidFunction
   showCloseButton?: boolean
 }
+
+export interface SwitchProps {
+  value?: boolean
+  onValueChange?: (value: boolean) => void
+  trackColor: string
+  thumbColor: string
+}

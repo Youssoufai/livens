@@ -29,7 +29,7 @@ import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { FONTS } from '@/constants/fonts'
 import { API } from '@/services'
 import { showToastMessage } from '@/components/notification'
-import { catchErr } from '@/utils/error-handlers'
+import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets()
@@ -52,12 +52,16 @@ export default function LoginScreen() {
   const storage = useRef(new AppStorage()).current
 
   const completeSignin = async (token: string) => {
-    storage.setItem(STORE_KEYS.token, token)
-    storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
+    try {
+      storage.setItem(STORE_KEYS.token, token)
+      storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
 
-    await getUser()
+      await getUser()
 
-    router.push('/(tabs)/home')
+      router.replace('/(tabs)/home')
+    } catch (error) {
+      console.error(handleErrorInstances(error))
+    }
   }
 
   const handleGoogleLogin = async () => {

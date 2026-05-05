@@ -4,8 +4,9 @@ import { RequestData } from '@/services/requests/request.types'
 
 import EmptyState from './empty-state'
 import RequestCard from './request-card'
+import { RequestListProps } from '../requests.types'
 
-const RequestList = ({ list = [] }: { list?: RequestData[] }) => {
+const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
   return (
     <FlatList
       data={list}
@@ -13,9 +14,11 @@ const RequestList = ({ list = [] }: { list?: RequestData[] }) => {
       ListEmptyComponent={<EmptyState />}
       renderItem={({ item }) => (
         <RequestCard
+          id={item.id}
           title={item.location}
           description={item.description}
           // status={item.status}
+          onPress={onViewResponders}
         />
       )}
       contentContainerStyle={styles.contentContainer}

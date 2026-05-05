@@ -60,7 +60,6 @@ export default function Onboarding() {
   const router = useRouter()
 
   useEffect(() => {
-    let redirecting = false
     try {
       const onboarding = storage.getItem<'string'>(
         STORE_KEYS.onboarding
@@ -68,21 +67,19 @@ export default function Onboarding() {
       const token = storage.getItem<'string'>(STORE_KEYS.token)
 
       if (onboarding === OnboardingStatus.in_progress) {
-        redirecting = true
         router.replace('/(onboarding)/welcome')
-      } else if (onboarding === OnboardingStatus.completed && token) {
-        redirecting = true
-        router.replace('/(tabs)/home')
-      } else if (onboarding === OnboardingStatus.completed && !token) {
-        redirecting = true
-        router.replace('/(auth)/login')
+        return
+      }
+
+      if (onboarding === OnboardingStatus.completed && token) {
+        router.replace(token ? '/(tabs)/home' : '/(auth)/login')
       }
     } catch (error) {
       console.error('Failed to resolve onboarding state:', error)
     } finally {
-      if (!redirecting) setLoading(false)
+      setLoading(false)
     }
-  }, [router, storage])
+  }, [router])
 
   const handleNextStep = () => {
     setStep((prevStep) => {

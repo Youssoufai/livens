@@ -47,7 +47,7 @@ const RequestCard = ({
         </Text>
         <Button
           label={buttonText}
-          onPress={() => onPress(id)}
+          onPress={() => onPress(id ?? '')}
           btnStyle={styles.button}
         />
       </View>
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     alignSelf: 'center',
+    textTransform: 'capitalize',
     marginTop: 2,
   },
   content: {

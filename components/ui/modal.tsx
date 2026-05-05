@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     alignSelf: 'flex-end',
     padding: 10,
-    right: 0,
+    right: 8,
     position: 'absolute',
   },
   content: {
