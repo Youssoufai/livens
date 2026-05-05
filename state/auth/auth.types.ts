@@ -5,6 +5,7 @@ export interface AuthState {
   error?: string
   loading: boolean
   getUser: () => Promise<void>
+  logout: VoidFunction
 }
 
 export type BusinessFormDetailsState = {

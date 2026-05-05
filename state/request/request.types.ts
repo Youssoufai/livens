@@ -1,6 +1,6 @@
-import { RequestData } from '@/services/requests/request.types'
+import { RequestData, RequestPayload } from '@/services/requests/request.types'
 
-export interface CreateRequestFormData extends RequestData {}
+export interface CreateRequestFormData extends RequestPayload {}
 
 export interface RequestState {
   requestDetails?: Partial<CreateRequestFormData>

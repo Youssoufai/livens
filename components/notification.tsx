@@ -1,7 +1,13 @@
 import { BadgeAlert, BadgeCheck, BadgeInfo, XIcon } from 'lucide-react-native'
 import React, { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { toast, ToasterProps, ToastPosition } from 'sonner-native'
+import {
+  toast,
+  ToasterProps,
+  ToastPosition,
+  ToastAction,
+  ToastProps,
+} from 'sonner-native'
 
 import { FONTS } from '@/constants/fonts'
 import { COLORS } from '@/constants/theme'
@@ -91,10 +97,12 @@ export function showToastMessage(
   message: string,
   type: 'success' | 'error' = 'success'
 ) {
-  const options = {
-    position: 'top-center' as ToastPosition,
+  const options: Partial<ToastProps> = {
+    position: 'bottom-center' as ToastPosition,
     duration: 5000,
     icon: getToastIcon(type),
+    closeButton: true,
+    close: <XIcon size={28} color={COLORS.white} />,
   }
 
   if (type === 'success') {

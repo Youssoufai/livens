@@ -23,26 +23,6 @@ export default function RequestsLayout() {
         headerShown: false, // hide headers across all nested screens
         animation: 'slide_from_right', // smooth transitions between screens
       }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: true,
-          header(props) {
-            return (
-              <CustomHeader
-                title="Requests"
-                titleStyle={styles.requestTitle}
-                moreInfo={
-                  <Pressable>
-                    <Ellipsis size={24} color="#1C1B1F" />
-                  </Pressable>
-                }
-              />
-            )
-          },
-        }}
-      />
-    </Stack>
+    ></Stack>
   )
 }

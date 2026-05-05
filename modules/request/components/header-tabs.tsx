@@ -6,9 +6,14 @@ import { globalStyles } from '@/styles/globalStyles'
 
 import { HeaderTabProps } from '../requests.types'
 
-const HeaderTabs = ({ list, selected, onSelect }: HeaderTabProps) => {
+const HeaderTabs = ({
+  list,
+  selected,
+  onSelect,
+  containerStyle,
+}: HeaderTabProps) => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       {list.map((tab, index) => (
         <Pressable
           key={`${tab.value}_${index}`}
@@ -17,7 +22,7 @@ const HeaderTabs = ({ list, selected, onSelect }: HeaderTabProps) => {
             selected === tab.value && styles.selected,
             pressed && globalStyles.pressedOpacity,
           ]}
-          onPress={() => onSelect(tab.value)}
+          onPress={() => onSelect(String(tab.value))}
         >
           <Text
             size={14}

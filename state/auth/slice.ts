@@ -22,10 +22,14 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   async getUser() {
     try {
       const response = await AuthenticatedAPI.get(API_ENDPOINTS.auth.profile)
+
       set({ user: response.data.data, isAuthenticated: true })
     } catch (error) {
-      const err = catchErr(error)
+      throw error
     }
+  },
+  logout: () => {
+    set({ isAuthenticated: false, user: undefined })
   },
 })
 

@@ -1,8 +1,9 @@
 import { TestFunction } from 'yup'
-
-import { COLORS } from '@/constants/theme'
 import parsePhoneNumberFromString from 'libphonenumber-js'
 import { Platform } from 'react-native'
+
+import { COLORS } from '@/constants/theme'
+
 import { envConfig } from './config'
 
 export const getResolvedColor = (color: string) => {

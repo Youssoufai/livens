@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { Text as RNText, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
+import { Text as RNText } from 'react-native-paper'
 
 import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { getResolvedColor } from '@/utils/resolver'

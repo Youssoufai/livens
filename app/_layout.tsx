@@ -14,6 +14,7 @@ import { Toaster } from 'sonner-native'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { StyleSheet, View } from 'react-native'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { PaystackProvider } from 'react-native-paystack-webview'
 
 import { toastOptions } from '@/components/notification'
 import { queryClient } from '@/services'
@@ -125,8 +126,8 @@ const InitialLayout = () => {
         style={lightStatusRoutes.includes(pathname) ? 'light' : 'dark'}
       />
       <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+        <Stack.Screen name="index" />
         <Stack.Protected guard={!isAuthenticated}>
-          <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(onboarding)" />
         </Stack.Protected>
@@ -149,8 +150,10 @@ export default function RootLayout() {
           <PaperProvider>
             <KeyboardProvider>
               {/*<RequestProvider> */}
-              <InitialLayout />
-              <Toaster toastOptions={toastOptions} />
+              <PaystackProvider publicKey={envConfig.paystackPubKey || ''}>
+                <InitialLayout />
+                <Toaster toastOptions={toastOptions} />
+              </PaystackProvider>
               {/*  </RequestProvider> */}
             </KeyboardProvider>
           </PaperProvider>

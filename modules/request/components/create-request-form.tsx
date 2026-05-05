@@ -37,6 +37,8 @@ const CreateRequestForm = ({
   const isValid = location && description.length > 3
 
   const handleNext = () => {
+    console.log(location)
+
     updateRequest({ location, description })
     onNext()
   }

@@ -51,19 +51,16 @@ const RequestConfirmForm = ({
   } = useCreateRequestMutation()
 
   const walletAmount = 0
+  const reward = +(request?.reward ?? 0)
 
   const rewardLabel =
-    request?.reward === 0
-      ? 'No reward'
-      : formatCurrency(+(request?.reward ?? 0), 2, 'NGN')
+    reward === 0 ? 'No reward' : formatCurrency(+reward, 2, 'NGN')
 
   const formattedPrice =
-    request?.reward === 0
-      ? 'Free'
-      : formatCurrency(+(request?.reward ?? 0), 2, 'NGN')
+    reward === 0 ? 'Free' : formatCurrency(+reward, 2, 'NGN')
 
-  const userPayout = request?.reward
-    ? Math.round((+request.reward - +request.reward * 0.2) * 100) / 100
+  const userPayout = reward
+    ? Math.round((reward - reward * 0.2) * 100) / 100
     : 0
 
   const handleSubmit = async () => {
@@ -72,7 +69,7 @@ const RequestConfirmForm = ({
         location: request?.location ?? '',
         description: request?.description ?? '',
         duration: request?.duration ?? '',
-        allow_comment: request?.allow_comment ?? true,
+        allow_comment: true,
         reward: (request?.reward ?? 0).toString(),
       })
 
@@ -106,7 +103,7 @@ const RequestConfirmForm = ({
             value={request?.description || '—'}
           />
           <SummaryItem label="Duration" value={request?.duration || '—'} />
-          {request?.reward === 0 && <SummaryItem label="Reward" value="Free" />}
+          {reward === 0 && <SummaryItem label="Reward" value="Free" />}
 
           <Notice
             show={walletAmount < +request?.reward!}
@@ -122,7 +119,7 @@ const RequestConfirmForm = ({
           />
         </View>
 
-        {request?.reward !== 0 && (
+        {reward !== 0 && (
           <>
             <Divider style={styles.divider} />
             <View style={styles.paymentDetailsSection}>

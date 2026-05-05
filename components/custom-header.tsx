@@ -57,7 +57,7 @@ export const CustomHeader = ({
             size={16}
             lineHeight={24}
             weight={500}
-            style={[styles.title, titleStyle]}
+            style={[styles.title, styles.stringedTitle, titleStyle]}
           >
             {title}
           </Text>
@@ -92,6 +92,9 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     textTransform: 'capitalize',
+  },
+  stringedTitle: {
+    paddingLeft: 44,
   },
   link: {},
   alignVertically: {
