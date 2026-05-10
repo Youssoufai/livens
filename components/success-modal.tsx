@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native'
+import { PropsWithChildren } from 'react'
 
 import FullScreenModal from './ui/modal'
 import Text from './text'
@@ -11,8 +12,8 @@ const SuccessModal = ({
   onDismiss,
   icon,
   contentStyle,
-  bottomContent,
-}: SuccessModalProps) => {
+  children,
+}: PropsWithChildren<SuccessModalProps>) => {
   return (
     <FullScreenModal visible={isOpen} showCloseButton onDismiss={onDismiss}>
       <View style={styles.container}>
@@ -33,7 +34,7 @@ const SuccessModal = ({
             </Text>
           </View>
         </View>
-        {bottomContent}
+        {children}
       </View>
     </FullScreenModal>
   )
@@ -42,7 +43,7 @@ const SuccessModal = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 20,
+    paddingBottom: 10,
   },
   modalContent: {
     flex: 1,

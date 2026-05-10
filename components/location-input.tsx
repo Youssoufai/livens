@@ -4,7 +4,8 @@ import GooglePlacesTextInput, {
   GooglePlacesTextInputStyles,
   Place,
 } from 'react-native-google-places-textinput'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import * as Location from 'expo-location'
 
 import { getMapApiKey } from '@/utils/resolver'
 import { COLORS } from '@/constants/theme'
@@ -18,11 +19,14 @@ import SearchIcon from './icons/search'
 
 const LocationInput = ({
   defaultValue,
+  defaultCoords,
   placeholder,
   label,
   labelStyle,
   onLocation,
 }: LocationInputProps) => {
+  const [value, setValue] = useState('')
+
   const placesStyle: GooglePlacesTextInputStyles = useMemo(
     () => ({
       ...googleLocationStyles,
@@ -43,9 +47,32 @@ const LocationInput = ({
   )
 
   const handleLocationChange = (place: Place, sessionToken?: string | null) => {
-    place?.details?.formattedAddress &&
-      onLocation(place?.details?.formattedAddress)
+    place?.details?.location &&
+      onLocation({
+        latitude: place.details.location.latitude,
+        longitude: place.details.location.longitude,
+        formattedAddress: place.details.formattedAddress,
+      })
   }
+
+  useEffect(() => {
+    const getDefaultValue = async () => {
+      let defaultName = defaultValue ?? ''
+      if (!defaultValue && defaultCoords) {
+        const location = {
+          longitude: +defaultCoords.longitude,
+          latitude: +defaultCoords.latitude,
+        }
+        const address = await Location.reverseGeocodeAsync(location)
+
+        defaultName = defaultCoords.formattedAddress || (address[0].name ?? '')
+      }
+
+      setValue(defaultName)
+    }
+
+    getDefaultValue()
+  }, [defaultValue, defaultCoords])
 
   return (
     <View style={styles.container}>
@@ -59,7 +86,7 @@ const LocationInput = ({
         outlineStyle={styles.nativePaperInput}
         render={() => (
           <GooglePlacesTextInput
-            value={defaultValue}
+            value={value}
             placeHolderText={placeholder ?? 'Search address'}
             onPlaceSelect={handleLocationChange}
             apiKey={getMapApiKey() || ''}

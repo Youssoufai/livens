@@ -11,19 +11,32 @@ import ScrollView from '@/components/scrollview'
 import RequestOverview from '@/modules/request/components/request-overview'
 import RequestResponsesStatus from '@/modules/request/components/request-responder-status'
 import RequestResponses from '@/modules/request/components/request-responses'
+import { useGetRequestResponders } from '@/hooks/queries/use-requests'
 
 const RequestDetails = () => {
   const queryParams = useLocalSearchParams<{ id: string }>()
 
   const [currentTab, setCurrentTab] = useState('')
+  const [numResponders, setNumRespnonders] = useState(0)
 
-  const responders = 0
+  const { data: responsesData, isLoading } = useGetRequestResponders(
+    queryParams.id
+  )
 
-  const list = useMemo(() => getRespondersTabData(responders), [responders])
+  const list = useMemo(
+    () => getRespondersTabData(numResponders),
+    [numResponders]
+  )
 
   useEffect(() => {
     setCurrentTab(list[0].value)
   }, [list[0].value])
+
+  useEffect(() => {
+    if (responsesData?.length) {
+      setNumRespnonders(responsesData.length)
+    }
+  }, [responsesData?.length])
 
   const moveToStatus = useCallback(() => {
     setCurrentTab(list[2]?.value)
@@ -35,28 +48,32 @@ const RequestDetails = () => {
       responders: (
         <RequestResponses
           requestId={queryParams.id}
+          data={responsesData}
+          isLoading={isLoading}
           onGotoStatus={moveToStatus}
         />
       ),
       status: <RequestResponsesStatus id={queryParams.id} />,
     }),
-    []
+    [queryParams.id, isLoading, responsesData, moveToStatus]
   )
 
   return (
-    <ThemedView hasBottomPadding style={styles.container}>
-      <View style={styles.tabWrapper}>
-        <HeaderTabs
-          list={list}
-          selected={currentTab}
-          onSelect={setCurrentTab}
-          containerStyle={styles.tabContainer}
-        />
-      </View>
-      <ScrollView style={styles.scrollContent}>
-        {content[currentTab]}
-      </ScrollView>
-    </ThemedView>
+    <>
+      <ThemedView hasBottomPadding style={styles.container}>
+        <View style={styles.tabWrapper}>
+          <HeaderTabs
+            list={list}
+            selected={currentTab}
+            onSelect={setCurrentTab}
+            containerStyle={styles.tabContainer}
+          />
+        </View>
+        <ScrollView style={styles.scrollContent}>
+          {content[currentTab]}
+        </ScrollView>
+      </ThemedView>
+    </>
   )
 }
 

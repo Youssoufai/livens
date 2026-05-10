@@ -60,6 +60,12 @@ global {
     description?: ReactNode
   }
 
+  type LocationType = {
+    longitude: number
+    latitude: number
+    formattedAddress: string
+  }
+
   type ColorsType = typeof COLORS
 
   type FirstColorFieldType = keyof ColorsType

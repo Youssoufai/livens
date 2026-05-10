@@ -18,11 +18,13 @@ export type ColorType =
   | 'yellow-300'
   | 'yellow-400'
   | 'yellow-500'
+  | 'green-50'
   | 'green-100'
   | 'green-200'
   | 'green-300'
   | 'green-400'
   | 'green-500'
+  | 'green-600'
   | 'grey-100'
   | 'grey-200'
   | 'grey-300'
@@ -96,7 +98,7 @@ export interface ActionRowProps {
 
 export interface ScreenLoaderProps {
   isLoading: boolean
-  content: ReactNode
+  content?: ReactNode
 }
 
 export interface SearchInputProps {
@@ -111,10 +113,11 @@ export interface SearchInputProps {
 
 export interface LocationInputProps {
   defaultValue?: string
+  defaultCoords?: LocationType
   placeholder?: string
   label?: string
   labelStyle?: TextStyle
-  onLocation: (value: string) => void
+  onLocation: (values: LocationType) => void
 }
 
 export interface SearchModalProps {
@@ -122,6 +125,8 @@ export interface SearchModalProps {
   placeholder?: string
   needsAuthentication: boolean
   extraPayload?: Record<string, string | number | boolean>
+  filterOption: string
+  onChangeOption: (value?: string) => void
   onSelect: (value: string) => void
 }
 

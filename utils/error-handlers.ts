@@ -45,12 +45,14 @@ export const handleAxiosErrors = (
 ): NetworkResponse<undefined> => {
   const axiosErr = error instanceof AxiosError
   if (axiosErr && error.response) {
+    console.log(error.response)
+
     const statusCode = error.response.status
     const parsed = normalizeResponseData(error.response.data)
 
     const message =
-      parsed.message ||
       extractFirstError(parsed.errors) ||
+      parsed.message ||
       'Something went wrong'
 
     // optional: don’t mutate axios response (avoid side effects)
@@ -64,14 +66,18 @@ export const handleAxiosErrors = (
     if (statusCode >= 500) {
       return {
         ...normalizedError,
-        message: 'Our server is having troubles. Please try again later',
+        message:
+          normalizedError.message ??
+          'Our server is having troubles. Please try again later',
       }
     }
 
     if (statusCode === 404) {
       return {
         ...normalizedError,
-        message: 'Unable to complete your request. Try again later.',
+        message:
+          normalizedError.message ??
+          'Unable to complete your request. Try again later.',
       }
     }
 
@@ -153,4 +159,45 @@ export const getEnhancedError = (error: unknown, defaultMsg?: string) => {
   ;(enhancedError as any).status = status
 
   throw enhancedError
+}
+
+export const deviceFileErrorHandler = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return 'Something went wrong'
+  }
+
+  let errorMessage = ''
+  if (error?.message?.includes('No directory selected')) {
+    errorMessage = 'No directory selected'
+  } else if (
+    error?.message?.includes('Unable to resolve host') ||
+    error?.message?.includes('Network request failed')
+  ) {
+    errorMessage = 'Please check your internet connection'
+  } else if (
+    error.message
+      .toLowerCase()
+      .includes('Destination already exists'.toLowerCase())
+  ) {
+    errorMessage = 'File already exists'
+  } else if (error?.message?.includes('FileSystem.downloadFileAsync')) {
+    errorMessage = 'Failed to download file'
+  } else if (
+    error?.message?.includes('permission') ||
+    error?.message?.includes('denied')
+  ) {
+    errorMessage = 'Your denied permission to your storage access'
+  } else if (
+    error?.message?.includes('ENOSPC') ||
+    error?.message?.includes('No space left')
+  ) {
+    errorMessage = 'Not enough storage space'
+  } else if (
+    error?.message?.includes('Malformed URL') ||
+    error?.message?.includes('Invalid URL')
+  ) {
+    errorMessage = 'Invalid file URL'
+  }
+
+  return errorMessage
 }

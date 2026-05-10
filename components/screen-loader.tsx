@@ -12,10 +12,10 @@ const ScreenLoader = ({ isLoading, content }: ScreenLoaderProps) => {
     <Portal>
       <Modal visible={isLoading} contentContainerStyle={styles.modalContent}>
         <View style={styles.content}>
-          <ActivityIndicator size="large" color={COLORS.primary[500]} />
+          <ActivityIndicator size={45} color={COLORS.primary[500]} />
           {isValidElement(content) ? (
             content
-          ) : (
+          ) : !content ? null : (
             <Text
               size={16}
               lineHeight={20}

@@ -26,9 +26,9 @@ export const registerSchema = Yup.object({
     .min(8, 'Password must be at least 8 characters')
     .password()
     .required('Password is required'),
-  // confirmPassword: Yup.string()
-  //   .oneOf([Yup.ref('password')], 'Passwords do not match')
-  //   .required('Please confirm your password'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords do not match')
+    .required('Please confirm your password'),
   referral: Yup.string().trim(),
 })
 
@@ -51,5 +51,7 @@ export const resetPasswordSchema = Yup.object({
 
 export type LoginFormValues = Yup.InferType<typeof loginSchema>
 export type RegisterFormValues = Yup.InferType<typeof registerSchema>
-export type ForgotPasswordFormValues = Yup.InferType<typeof forgotPasswordSchema>
+export type ForgotPasswordFormValues = Yup.InferType<
+  typeof forgotPasswordSchema
+>
 export type ResetPasswordFormValues = Yup.InferType<typeof resetPasswordSchema>

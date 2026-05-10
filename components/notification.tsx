@@ -1,6 +1,7 @@
 import { BadgeAlert, BadgeCheck, BadgeInfo, XIcon } from 'lucide-react-native'
 import React, { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable as RNGPressable } from 'react-native-gesture-handler'
 import {
   toast,
   ToasterProps,
@@ -46,7 +47,7 @@ export const getToastIcon: (type: string) => ReactNode = (type) => {
   const typeIcons: Record<string, ReactNode> = {
     error: <BadgeAlert color={COLORS.white} fill={COLORS.danger} size={20} />,
     success: (
-      <BadgeCheck color={COLORS.white} fill={COLORS.primary[500]} size={20} />
+      <BadgeCheck color={COLORS.white} fill={COLORS.green[500]} size={20} />
     ),
   }
   return typeIcons[type] ?? <BadgeInfo size={20} color={COLORS.grey[300]} />
@@ -97,12 +98,19 @@ export function showToastMessage(
   message: string,
   type: 'success' | 'error' = 'success'
 ) {
+  let toastId = Math.random().toString(36)
+
   const options: Partial<ToastProps> = {
+    // id: toastId,
     position: 'bottom-center' as ToastPosition,
     duration: 5000,
     icon: getToastIcon(type),
     closeButton: true,
-    close: <XIcon size={28} color={COLORS.white} />,
+    close: (
+      <RNGPressable onPress={() => toast.dismiss(toastId)}>
+        <XIcon size={28} color={COLORS.white} />
+      </RNGPressable>
+    ),
   }
 
   if (type === 'success') {
@@ -114,7 +122,7 @@ export function showToastMessage(
 
 export const toastOptions: ToasterProps['toastOptions'] = {
   success: {
-    backgroundColor: COLORS.primary[500],
+    backgroundColor: COLORS.green[500],
   },
   error: {
     backgroundColor: COLORS.danger,

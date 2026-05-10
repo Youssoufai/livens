@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { StyleSheet, Text as RNText, View } from 'react-native'
 import { Link, useRouter } from 'expo-router'
 import { Divider } from 'react-native-paper'
+import * as Location from 'expo-location'
 
 import Button from '@/components/ui/button'
 import Text from '@/components/text'
@@ -9,16 +10,21 @@ import { COLORS } from '@/constants/theme'
 import { FONTS } from '@/constants/fonts'
 import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { useRequestStore } from '@/state/request'
-import { useCreateRequestMutation } from '@/hooks/mutations/use-request'
+import {
+  useCreateRequestMutation,
+  useEditRequestMutation,
+} from '@/hooks/mutations/use-request'
 import ScrollView from '@/components/scrollview'
 import { formatCurrency } from '@/utils/format'
 import Notice from '@/components/notice'
 import StepTransition from '@/components/step-animate-wrapper'
 import { showToastMessage } from '@/components/notification'
 import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
+import { grantLocationPermission } from '@/utils/resolver'
 
 import PaymentMethod from './payment-method'
 import PaymentSummary from './payment-summary'
+import { useBoundStore } from '@/state'
 
 const SummaryItem = ({ label, value }: { label: string; value: string }) => (
   <View style={styles.summaryItem}>
@@ -33,14 +39,20 @@ const SummaryItem = ({ label, value }: { label: string; value: string }) => (
 
 const RequestConfirmForm = ({
   direction,
+  requestId,
   onSuccessModal,
 }: {
   direction: Direction
+  requestId?: string
   onSuccessModal: VoidFunction
 }) => {
   const router = useRouter()
-  const [paymentMethod, setPaymentMethod] = useState('')
 
+  const [paymentMethod, setPaymentMethod] = useState('')
+  const [address, setAddress] = useState('')
+
+  const balance = useBoundStore((state) => state.user?.balance)
+  const updateBalance = useBoundStore((state) => state.updateBalance)
   const resetRequest = useRequestStore((state) => state.resetRequest)
   const request = useRequestStore((state) => state.requestDetails)
 
@@ -49,8 +61,10 @@ const RequestConfirmForm = ({
     isPending,
     error,
   } = useCreateRequestMutation()
+  const { mutateAsync: editRequest, isPending: isEditingRequest } =
+    useEditRequestMutation(requestId ?? '')
 
-  const walletAmount = 0
+  const walletAmount = +(balance ?? 0)
   const reward = +(request?.reward ?? 0)
 
   const rewardLabel =
@@ -63,15 +77,48 @@ const RequestConfirmForm = ({
     ? Math.round((reward - reward * 0.2) * 100) / 100
     : 0
 
+  useEffect(() => {
+    const getLocationDetails = async () => {
+      try {
+        const isGranted = await grantLocationPermission()
+        if (isGranted && request?.location) {
+          const location = {
+            longitude: +(request?.location.longitude ?? 0),
+            latitude: +(request?.location.latitude ?? 0),
+          }
+          const details = await Location.reverseGeocodeAsync(location)
+
+          setAddress(details[0].formattedAddress || '')
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    getLocationDetails()
+  }, [request?.location])
+
   const handleSubmit = async () => {
     try {
-      await createRequest({
-        location: request?.location ?? '',
+      if (!request?.location) return
+
+      const payload = {
+        longitude: request.location.longitude,
+        latitude: request.location.latitude,
+        location: request.location.formattedAddress,
         description: request?.description ?? '',
         duration: request?.duration ?? '',
         allow_comment: true,
         reward: (request?.reward ?? 0).toString(),
-      })
+      }
+
+      if (!requestId) {
+        await createRequest(payload)
+
+        updateBalance(reward, 'decrease')
+      } else {
+        await editRequest(payload)
+      }
 
       resetRequest()
       onSuccessModal()
@@ -97,7 +144,7 @@ const RequestConfirmForm = ({
           >
             Request summary
           </Text>
-          <SummaryItem label="Location" value={request?.location || '—'} />
+          <SummaryItem label="Location" value={address || '—'} />
           <SummaryItem
             label="Description"
             value={request?.description || '—'}
@@ -110,7 +157,13 @@ const RequestConfirmForm = ({
             content={
               <Text size={14} lineHeight={18} weight={600} color="white">
                 Payment method failed due to insufficient funds.{' '}
-                <Link href={'/'} disabled style={styles.fundLink}>
+                <Link
+                  href={{
+                    pathname: '/(profile)/fund-wallet',
+                    params: { prevScreen: 'create-request' },
+                  }}
+                  style={styles.fundLink}
+                >
                   Fund wallet now
                 </Link>
               </Text>
@@ -185,8 +238,8 @@ const RequestConfirmForm = ({
           <Button
             label="Post request"
             onPress={handleSubmit}
-            loading={isPending}
-            disabled={isPending || isButtonDisabled}
+            loading={isPending || isEditingRequest}
+            disabled={isButtonDisabled}
           />
         </View>
       </View>

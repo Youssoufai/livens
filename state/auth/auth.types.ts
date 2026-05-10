@@ -5,6 +5,7 @@ export interface AuthState {
   error?: string
   loading: boolean
   getUser: () => Promise<void>
+  updateBalance: (amount: number, type?: 'increase' | 'decrease') => void
   logout: VoidFunction
 }
 

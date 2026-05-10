@@ -7,21 +7,49 @@ import {
   View,
 } from 'react-native'
 import { useDebounce } from 'use-debounce'
+import { Search } from 'lucide-react-native'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { API, AuthenticatedAPI } from '@/services'
 import { COLORS } from '@/constants/theme'
+import SearchFilter from '@/modules/search/components/search-filter'
+import { generateArray } from '@/utils/generator'
 
 import SearchInput from './search-input'
 import FullScreenModal from './ui/modal'
 import ScrollView from './scrollview'
 import { SearchModalProps } from './components.types'
 import Text from './text'
+import { SkeletonLoader } from './skeleton-loader'
+
+const EmptSearchResult = ({ search }: { search: string }) => {
+  return (
+    <View style={styles.emptyContainer}>
+      <Search height={32} width={32} />
+      <View style={styles.emptyTextWrapper}>
+        <Text
+          size={20}
+          lineHeight={24}
+          weight={600}
+          color="black"
+          align="center"
+        >
+          No results for “{search}”
+        </Text>
+        <Text size={16} lineHeight={24} color="grey-400" align="center">
+          Try using different keywords or check your spelling.
+        </Text>
+      </View>
+    </View>
+  )
+}
 
 const SearchModal = ({
   endpoint,
   extraPayload,
   needsAuthentication,
+  filterOption,
+  onChangeOption,
   onSelect,
 }: SearchModalProps) => {
   const [search, setSearch] = useState('')
@@ -72,6 +100,8 @@ const SearchModal = ({
     fetchSearchResult()
   }, [debouncedValue, endpoint, needsAuthentication, extraPayload])
 
+  const searchData = loading ? generateArray<string>(6) : suggestions
+
   return (
     <>
       <View>
@@ -102,23 +132,43 @@ const SearchModal = ({
             onChangeText={setSearch}
             onClear={clearSearch}
           />
+          <SearchFilter
+            value={filterOption ?? ''}
+            onValueChange={onChangeOption}
+          />
         </View>
-        <ScrollView>
-          {suggestions.map((item, index) => (
-            <Pressable
-              key={`${item.value}_${index}`}
-              style={({ pressed }) => [
-                styles.option,
-                suggestions.length - 1 === index && styles.onBorder,
-                pressed && { opacity: 0.75 },
-              ]}
-              onPress={() => onSelect(item?.id ?? item?.value.toString() ?? '')}
-            >
-              <Text size={16} lineHeight={24} weight={600} color="grey-600">
-                {item.label}
-              </Text>
-            </Pressable>
-          ))}
+        <ScrollView style={styles.scrollContent}>
+          {loading ? (
+            generateArray<string>(6, '').map((_, index) => (
+              <SkeletonLoader
+                key={`search_placeholder_${index}`}
+                height={18}
+                style={styles.loader}
+              />
+            ))
+          ) : suggestions.length ? (
+            suggestions.map((item, index) => {
+              return (
+                <Pressable
+                  key={`${item.value}_${index}`}
+                  style={({ pressed }) => [
+                    styles.option,
+                    suggestions.length - 1 === index && styles.onBorder,
+                    pressed && { opacity: 0.75 },
+                  ]}
+                  onPress={() =>
+                    onSelect(item?.id ?? item?.value.toString() ?? '')
+                  }
+                >
+                  <Text size={16} lineHeight={24} weight={600} color="grey-600">
+                    {item.label}
+                  </Text>
+                </Pressable>
+              )
+            })
+          ) : search && !suggestions.length ? (
+            <EmptSearchResult search={search} />
+          ) : null}
         </ScrollView>
       </FullScreenModal>
     </>
@@ -135,6 +185,15 @@ const styles = StyleSheet.create({
   searchWrapper: {
     paddingHorizontal: 16,
     marginBottom: 16,
+    rowGap: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderColor: COLORS.grey[50],
+  },
+  scrollContent: {
+    rowGap: 16,
+    paddingHorizontal: 16,
+    marginTop: 16,
   },
   option: {
     paddingVertical: 16,
@@ -144,6 +203,18 @@ const styles = StyleSheet.create({
   },
   onBorder: {
     borderBottomWidth: 0,
+  },
+  loader: {
+    width: '100%',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    rowGap: 24,
+    flex: 1,
+  },
+  emptyTextWrapper: {
+    rowGap: 8,
   },
 })
 

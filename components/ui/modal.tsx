@@ -12,6 +12,8 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
+import { Toaster } from 'sonner-native'
 
 import { COLORS } from '@/constants/theme'
 
@@ -19,6 +21,7 @@ import ScrollView from '../scrollview'
 import Text from '../text'
 import Button from './button'
 import { Modalprops } from './ui.types'
+import { toastOptions } from '../notification'
 
 export const Modal = ({
   isVisible,
@@ -61,47 +64,53 @@ const FullScreenModal = ({
   contentStyle,
   fullHeight,
   showCloseButton,
+  statusBarStyle,
   onDismiss,
   children,
 }: PropsWithChildren<Modalprops>) => {
   const { top, bottom } = useSafeAreaInsets()
 
   return (
-    <RNModal
-      isVisible={visible}
-      style={styles.modal}
-      onDismiss={onDismiss}
-      backdropColor={'#00000099'}
-      animationIn="fadeIn"
-      animationInTiming={350}
-      animationOutTiming={250}
-      hideModalContentWhileAnimating
-      backdropTransitionOutTiming={0}
-      coverScreen={fullHeight}
-      onSwipeComplete={onDismiss}
-      useNativeDriver={true}
-      onBackButtonPress={onDismiss}
-    >
-      <View
-        style={[
-          styles.modalContainer,
-          { paddingTop: top, paddingBottom: bottom + 40 },
-          contentStyle,
-        ]}
+    <>
+      <StatusBar style={statusBarStyle} />
+      <RNModal
+        isVisible={visible}
+        style={styles.modal}
+        onDismiss={onDismiss}
+        backdropColor={'#00000099'}
+        animationIn="fadeIn"
+        animationInTiming={350}
+        animationOutTiming={250}
+        hideModalContentWhileAnimating
+        backdropTransitionOutTiming={0}
+        propagateSwipe
+        coverScreen={fullHeight}
+        onSwipeComplete={onDismiss}
+        onBackButtonPress={onDismiss}
       >
-        {showCloseButton && (
-          <TouchableOpacity
-            style={[styles.closeBtn, { top: top + 10 }]}
-            onPress={onDismiss}
-          >
-            <XIcon size={24} />
-          </TouchableOpacity>
-        )}
-        <ScrollView>
-          <View style={styles.content}>{children}</View>
-        </ScrollView>
-      </View>
-    </RNModal>
+        <View
+          style={[
+            styles.modalContainer,
+            { paddingTop: top, paddingBottom: bottom + 40 },
+            contentStyle,
+          ]}
+        >
+          {showCloseButton && (
+            <TouchableOpacity
+              style={[styles.closeBtn, { top: top + 10 }]}
+              hitSlop={6}
+              onPress={onDismiss}
+            >
+              <XIcon size={24} />
+            </TouchableOpacity>
+          )}
+          <ScrollView>
+            <View style={styles.content}>{children}</View>
+          </ScrollView>
+        </View>
+        <Toaster toastOptions={toastOptions} />
+      </RNModal>
+    </>
   )
 }
 
@@ -139,6 +148,7 @@ const styles = StyleSheet.create({
     padding: 10,
     right: 8,
     position: 'absolute',
+    zIndex: 1000,
   },
   content: {
     flex: 1,

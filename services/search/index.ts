@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '@/constants/endpoints'
+
 import { AuthenticatedAPI } from '..'
 
 export const getSearchResults = async (query: string) => {
@@ -10,6 +11,6 @@ export const getSearchResults = async (query: string) => {
 
     return data.data
   } catch (error) {
-    throw Error(error as any)
+    throw error
   }
 }

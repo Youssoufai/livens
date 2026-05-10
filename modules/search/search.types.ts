@@ -7,3 +7,8 @@ export type OptionType = {
   icon: () => ReactElement
   link?: Href
 }
+
+export type SearchFilterProps = {
+  value: string
+  onValueChange: (value?: string) => void
+}

@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import { ReactElement } from 'react'
-import { Pressable, StyleSheet } from 'react-native'
+import { BackHandler, Pressable, StyleSheet } from 'react-native'
 
 export const BackButton = ({
   routingFunc,
@@ -14,7 +14,16 @@ export const BackButton = ({
 
   return (
     <Pressable
-      onPress={routingFunc || (() => router.back())}
+      onPress={
+        routingFunc ||
+        (() => {
+          if (router.canGoBack()) {
+            router.back()
+          } else {
+            BackHandler.exitApp()
+          }
+        })
+      }
       style={({ pressed }) => [styles.btn, pressed && { opacity: 0.7 }]}
       hitSlop={10}
     >

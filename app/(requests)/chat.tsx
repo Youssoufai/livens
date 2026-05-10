@@ -16,10 +16,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import Text from '@/components/text'
 import api from '@/lib/api'
-import { Message, User } from '@/models/auth'
+import { Message } from '@/models/auth'
 
 export default function ChatScreen() {
-  const { conversation_id } = useLocalSearchParams<{ conversation_id: string }>()
+  const { conversation_id } = useLocalSearchParams<{
+    conversation_id: string
+  }>()
   const flatListRef = useRef<FlatList>(null)
 
   const [messages, setMessages] = useState<Message[]>([])
@@ -40,7 +42,9 @@ export default function ChatScreen() {
     if (!conversation_id) return
     try {
       setLoading(true)
-      const { data } = await api.get<{ data: Message[] }>(`/conversations/${conversation_id}/messages`)
+      const { data } = await api.get<{ data: Message[] }>(
+        `/conversations/${conversation_id}/messages`
+      )
       setMessages(Array.isArray(data.data) ? data.data : [])
     } finally {
       setLoading(false)
@@ -71,10 +75,8 @@ export default function ChatScreen() {
     const isMe = item.sender_id === currentUser?.id
     return (
       <View
-        style={[
-          styles.bubble,
-          isMe ? styles.bubbleMe : styles.bubbleOther,
-        ]}>
+        style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleOther]}
+      >
         <Text size={14} style={{ color: isMe ? '#fff' : '#111' }}>
           {item.message}
         </Text>
@@ -87,7 +89,8 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={10}>
+        keyboardVerticalOffset={10}
+      >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={22} color="#111" />
@@ -113,7 +116,9 @@ export default function ChatScreen() {
             renderItem={renderItem}
             contentContainerStyle={{ padding: 16 }}
             keyboardShouldPersistTaps="handled"
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onContentSizeChange={() =>
+              flatListRef.current?.scrollToEnd({ animated: true })
+            }
           />
         )}
 
@@ -128,7 +133,11 @@ export default function ChatScreen() {
           <TouchableOpacity
             disabled={sending || !input.trim()}
             onPress={handleSend}
-            style={[styles.sendBtn, (sending || !input.trim()) && { opacity: 0.5 }]}>
+            style={[
+              styles.sendBtn,
+              (sending || !input.trim()) && { opacity: 0.5 },
+            ]}
+          >
             <Ionicons name="send" color="#fff" size={18} />
           </TouchableOpacity>
         </View>

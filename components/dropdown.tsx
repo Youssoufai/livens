@@ -1,5 +1,11 @@
 import { ReactElement, useEffect, useRef, useState } from 'react'
-import { Dimensions, Pressable, StyleSheet, View } from 'react-native'
+import {
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native'
 import { Portal } from 'react-native-paper'
 import Animated, {
   Easing,
@@ -19,11 +25,13 @@ const Dropdown = ({
   anchor,
   options,
   onSelectOption,
+  style,
 }: {
   isVisible?: boolean
   anchor: ReactElement
   options: ListItem[]
   onSelectOption?: (value: string) => void
+  style?: ViewStyle
 }) => {
   const [showDropdown, setShowDropdown] = useState(false)
   const [inputMeasure, setInputMeasure] = useState<InputMeasure>({
@@ -75,7 +83,7 @@ const Dropdown = ({
   }))
 
   return (
-    <View>
+    <View style={style}>
       <Pressable ref={anchorRef} onPress={handleAnchorPress}>
         <View pointerEvents="none">{anchor}</View>
       </Pressable>

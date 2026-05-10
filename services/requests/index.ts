@@ -5,16 +5,27 @@ import { CreateRequestFormData } from '@/state/request/request.types'
 import { AuthenticatedAPI } from '..'
 import {
   RequestData,
+  RequestPayload,
   RequestResponderPayload,
   RequestResponseStatusType,
   RespondersType,
 } from './request.types'
 
-export const createRequest = async (payload: CreateRequestFormData) => {
+export const createRequest = async (payload: RequestPayload) => {
   try {
     await AuthenticatedAPI.post(API_ENDPOINTS.requests.create, payload)
   } catch (error) {
-    throw Error(error as any)
+    throw error
+  }
+}
+
+export const editRequest = async (
+  payload: RequestPayload & { request_id: string }
+) => {
+  try {
+    await AuthenticatedAPI.post(API_ENDPOINTS.requests.edit, payload)
+  } catch (error) {
+    throw error
   }
 }
 
@@ -54,6 +65,14 @@ export const getRequestResponders = async (requestId: string) => {
   }
 }
 
+export const makeRequestPublic = async (id: string) => {
+  try {
+    await AuthenticatedAPI.patch(API_ENDPOINTS.requests.setAsPublic(id))
+  } catch (error) {
+    throw error
+  }
+}
+
 export const approveRequestResponder = async (
   payload: RequestResponderPayload
 ) => {
@@ -67,13 +86,43 @@ export const approveRequestResponder = async (
 export const getResponseStatus = async (id: string) => {
   try {
     const response = await AuthenticatedAPI.get(
-      API_ENDPOINTS.requests.get_response_status,
-      {
-        params: { reqid: id },
-      }
+      API_ENDPOINTS.requests.get_response_status(id)
     )
 
-    return response.data.data as RequestResponseStatusType
+    return response.data as {
+      request: RequestData
+      response: RequestResponseStatusType
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+export const completeRequest = async (id: string) => {
+  try {
+    await AuthenticatedAPI.post(API_ENDPOINTS.requests.complete, {
+      request_id: id,
+    })
+  } catch (error) {
+    throw error
+  }
+}
+
+export const cancelRequest = async (requestId: string) => {
+  try {
+    await AuthenticatedAPI.post(API_ENDPOINTS.requests.cancel, {
+      request_id: requestId,
+    })
+  } catch (error) {
+    throw error
+  }
+}
+
+export const withdrawResponder = async (requestId: string) => {
+  try {
+    await AuthenticatedAPI.post(API_ENDPOINTS.requests.withdrawResponder, {
+      request_id: requestId,
+    })
   } catch (error) {
     throw error
   }

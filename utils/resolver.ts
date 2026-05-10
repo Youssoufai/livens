@@ -1,6 +1,7 @@
 import { TestFunction } from 'yup'
 import parsePhoneNumberFromString from 'libphonenumber-js'
 import { Platform } from 'react-native'
+import * as Location from 'expo-location'
 
 import { COLORS } from '@/constants/theme'
 
@@ -71,4 +72,23 @@ export const getMapApiKey = () => {
     // android: process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY_ANDROID,
     default: envConfig.googleMapApiKey,
   })
+}
+
+export const grantLocationPermission = async () => {
+  const { status: permissionStatus } =
+    await Location.getForegroundPermissionsAsync()
+
+  let isGranted = permissionStatus === 'granted'
+
+  if (!isGranted) {
+    let { status } = await Location.requestForegroundPermissionsAsync()
+
+    isGranted = status === 'granted'
+
+    if (!isGranted) {
+      return false
+    }
+  }
+
+  return isGranted
 }

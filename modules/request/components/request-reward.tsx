@@ -26,7 +26,8 @@ const RequestReward = ({
   const [noReward, setNoReward] = useState(false)
 
   const updateRequest = useRequestStore((state) => state.updateRequest)
-  const reward = useRequestStore((state) => state.requestDetails?.reward)
+  const requestReward = useRequestStore((state) => state.requestDetails?.reward)
+  const reward = +(requestReward ?? 0)
 
   useEffect(() => {
     if (typeof reward === 'undefined') return
@@ -52,11 +53,11 @@ const RequestReward = ({
 
   const handleNext = () => {
     if (noReward) {
-      updateRequest({ reward: 0 })
+      updateRequest({ reward: '0' })
     } else if (selected === 'custom') {
-      updateRequest({ reward: Number(customAmount) })
+      updateRequest({ reward: customAmount })
     } else {
-      updateRequest({ reward: Number(selected) })
+      updateRequest({ reward: selected })
     }
     onNext()
   }

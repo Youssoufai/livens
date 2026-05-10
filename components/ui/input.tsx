@@ -116,7 +116,12 @@ const Input = ({
         </View>
       </View>
       {hasErrors && (
-        <View style={styles.errorWrapper}>
+        <View
+          style={[
+            styles.errorWrapper,
+            !addBottomPadding && styles.errorBottomExtra,
+          ]}
+        >
           <Text size={10} weight={500} color="danger">
             {error}
           </Text>
@@ -154,15 +159,18 @@ const styles = StyleSheet.create({
   },
   errorWrapper: {
     position: 'absolute',
-    bottom: 0.5,
+    bottom: 0,
     left: 0,
-    paddingLeft: 10,
+    paddingLeft: 4,
   },
   errorInput: {
     borderColor: COLORS.danger,
   },
   errorLabel: {
     color: COLORS.danger,
+  },
+  errorBottomExtra: {
+    bottom: -10,
   },
 })
 

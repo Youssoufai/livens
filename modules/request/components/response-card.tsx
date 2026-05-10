@@ -15,6 +15,8 @@ const ResponseCard = ({
   starRating,
   requestCompleted,
   isLoading,
+  selected,
+  isApproved,
   onApprove,
 }: ResponseCardProps) => {
   const [firstName] = responder.split(' ')
@@ -55,8 +57,13 @@ const ResponseCard = ({
       </View>
       <View>
         <Button
-          label={`Approve ${firstName}`}
-          loading={isLoading}
+          label={!isApproved ? `Approve ${firstName}` : 'Approved!'}
+          buttonColor={isApproved ? 'green-50' : 'primary-500'}
+          labelColor={isApproved ? 'green-600' : 'white'}
+          loading={selected === id && isLoading}
+          disabled={isApproved}
+          disabledColor={isApproved ? COLORS.green[50] : COLORS.grey[50]}
+          disabledTextColor={isApproved ? 'green-600' : 'grey-500'}
           onPress={() => onApprove(id, responder)}
         />
       </View>
