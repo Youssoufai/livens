@@ -7,17 +7,19 @@ import {
   getResponseStatus,
 } from '@/services/requests'
 
-export const useGetRequestsQuery = () => {
+export const useGetRequestsQuery = (type: string) => {
   return useQuery({
     queryKey: ['requests'],
     queryFn: getRequests,
+    enabled: type === 'my-request',
   })
 }
 
 export const useGetRequestByIdQuery = (id: string) => {
   return useQuery({
-    queryKey: ['requests', id],
+    queryKey: ['request', id],
     queryFn: () => getRequestById(id),
+    enabled: !!id,
   })
 }
 

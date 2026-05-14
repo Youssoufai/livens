@@ -28,6 +28,26 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
       throw error
     }
   },
+  updateBalance(amount, type = 'increase') {
+    set((state) => {
+      if (!state.user) return state
+
+      const balance = +(state.user.balance ?? 0)
+      const newBalance =
+        type === 'increase'
+          ? String(balance + amount)
+          : balance < amount
+            ? 0
+            : balance - amount
+
+      return {
+        user: {
+          ...state.user,
+          balance: newBalance.toString(),
+        },
+      }
+    })
+  },
   logout: () => {
     set({ isAuthenticated: false, user: undefined })
   },

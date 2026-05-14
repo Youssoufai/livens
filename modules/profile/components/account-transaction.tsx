@@ -41,7 +41,12 @@ const AccountTransaction = () => {
           label="Fund wallet"
           labelColor="black"
           buttonColor="white"
-          onPress={() => router.push('/(profile)/fund-wallet')}
+          onPress={() =>
+            router.push({
+              pathname: '/(profile)/fund-wallet',
+              params: { prevScreen: 'profile' },
+            })
+          }
           btnStyle={{ ...styles.button, ...styles.fundButton }}
         />
       </View>

@@ -1,8 +1,12 @@
 import { Href } from 'expo-router'
-import { ReactElement } from 'react'
+import { ReactElement, ReactNode } from 'react'
 import { ViewStyle } from 'react-native'
 
-import { RequestData } from '@/services/requests/request.types'
+import {
+  RequestData,
+  RequestStatusType,
+  RespondersType,
+} from '@/services/requests/request.types'
 
 export type OptionType = {
   title: string
@@ -44,11 +48,12 @@ export interface PaymentDetailsProps {
 
 export interface RequestCardProps {
   id?: string
-  status?: string
-  title: string
+  status?: Partial<RequestStatusType>
+  title: string | Omit<LocationType, 'formattedAddress'>
   description: string
   buttonText?: string
   onPress?: (id: string) => void
+  onCancelRequest?: (id: string) => void
 }
 
 export interface ResponseCardProps {
@@ -58,6 +63,8 @@ export interface ResponseCardProps {
   starRating: number
   requestCompleted: number
   isLoading?: boolean
+  selected?: string
+  isApproved?: boolean
   onApprove: (id: string, name: string) => void
 }
 
@@ -68,7 +75,28 @@ export interface RequestListProps {
 
 export interface ResponderListProps {
   requestId: string
+  isLoading: boolean
+  data?: RespondersType[]
   onGotoStatus: VoidFunction
+}
+
+export interface RequestCompleteContentProps {
+  responder: string
+  onDismissModal: VoidFunction
+  onRateResponder: VoidFunction
+}
+
+export type RequestSuccessModalContentType = {
+  title: string
+  description: string
+  icon: ReactElement
+  content: ReactNode
+}
+
+export interface RatingContentProps {
+  userId: string
+  responderName: string
+  onDismissModal: VoidFunction
 }
 
 export type RequestSuccessModalType = 'request_completed' | 'rating' | 'boost'

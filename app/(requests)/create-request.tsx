@@ -1,10 +1,15 @@
-import { ReactElement, useCallback, useLayoutEffect, useState } from 'react'
+import {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react'
 import { StyleSheet, View } from 'react-native'
-import { useNavigation, useRouter } from 'expo-router'
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 
 import { ThemedView } from '@/components/themed-view'
 import Text from '@/components/text'
-import { RequestProvider } from '@/context/requestContext'
 import CreateRequestForm from '@/modules/request/components/create-request-form'
 import RequestConditionForm from '@/modules/request/components/request-condition-form'
 import RequestRewardForm from '@/modules/request/components/request-reward'
@@ -12,13 +17,14 @@ import RequestConfirmForm from '@/modules/request/components/confirm-request'
 import { REQUEST_STEP_META } from '@/modules/request/requests.data'
 import { CustomHeader } from '@/components/custom-header'
 import { COLORS } from '@/constants/theme'
-import FullScreenModal, { Modal } from '@/components/ui/modal'
 import RequestSuccessIcon from '@/assets/icons/request-sucess.svg'
 import SuccessModal from '@/components/success-modal'
+import { useRequestStore } from '@/state/request'
 
 const renderFormArea = (
   step: number,
   direction: Direction,
+  requestId: string,
   gotoNext: (step: number) => void,
   openModal: VoidFunction
 ) => {
@@ -28,7 +34,13 @@ const renderFormArea = (
       <RequestConditionForm direction={direction} onNext={() => gotoNext(3)} />
     ),
     3: <RequestRewardForm direction={direction} onNext={() => gotoNext(4)} />,
-    4: <RequestConfirmForm direction={direction} onSuccessModal={openModal} />,
+    4: (
+      <RequestConfirmForm
+        direction={direction}
+        requestId={requestId}
+        onSuccessModal={openModal}
+      />
+    ),
   }
 
   return fieldContent[step]
@@ -41,6 +53,9 @@ const CreateRequest = () => {
 
   const navigation = useNavigation()
   const router = useRouter()
+  const queryParams = useLocalSearchParams<{ id?: string; step?: string }>()
+
+  const clearFields = useRequestStore((state) => state.resetRequest)
 
   const { title, subtitle } = REQUEST_STEP_META[step - 1]
 
@@ -49,17 +64,29 @@ const CreateRequest = () => {
     setDirection('back')
   }, [])
 
+  const goBack = useCallback(() => {
+    clearFields()
+    router.back()
+  }, [router, clearFields])
+
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
         <CustomHeader
           showBack
-          backFunc={step > 1 ? handleBack : undefined}
+          backFunc={step > 1 ? handleBack : goBack}
           containerStyle={styles.navigationHeader}
         />
       ),
     })
-  }, [step, navigation, handleBack])
+  }, [step, navigation, handleBack, goBack])
+
+  useEffect(() => {
+    const paramsStep = +(queryParams?.step ?? 0)
+    if (!isNaN(paramsStep) && +paramsStep > 0) {
+      setStep(paramsStep)
+    }
+  }, [queryParams.step])
 
   const handleNext = (step: number) => {
     setDirection('forward')
@@ -79,7 +106,7 @@ const CreateRequest = () => {
             Step {step} of 4
           </Text>
           <Text size={24} weight={700} color="grey-800">
-            {title}
+            {queryParams && step === 1 ? 'Edit request' : title}
           </Text>
           {subtitle && (
             <Text size={14} lineHeight={22} color="grey-500">
@@ -89,14 +116,20 @@ const CreateRequest = () => {
         </View>
 
         <View style={styles.formArea}>
-          {renderFormArea(step, direction, handleNext, () => {
-            setIsModalOpen(true)
-          })}
+          {renderFormArea(
+            step,
+            direction,
+            queryParams.id ?? '',
+            handleNext,
+            () => {
+              setIsModalOpen(true)
+            }
+          )}
         </View>
       </ThemedView>
       <SuccessModal
         isOpen={isModalOpen}
-        title="Your request has been posted!"
+        title={`Your request has been ${queryParams.id ? 'edited' : 'posted'}!`}
         description="Your request is now visible to the public, expect some responses
               soon!"
         icon={<RequestSuccessIcon width={158} height={118} />}

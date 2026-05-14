@@ -37,3 +37,18 @@ export const HOME_OPTIONS: OptionType[] = [
     link: '/(tabs)/requests',
   },
 ]
+
+export const searchFilterOptions = [
+  {
+    label: 'Date posted',
+    value: 'date-posted',
+  },
+  {
+    label: 'Sort by',
+    value: 'sort',
+  },
+  {
+    label: 'Has responses?',
+    value: 'has-responses',
+  },
+]

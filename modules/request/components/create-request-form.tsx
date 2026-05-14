@@ -21,7 +21,7 @@ const CreateRequestForm = ({
   direction: Direction
   onNext: VoidFunction
 }) => {
-  const [location, setLocation] = useState('')
+  const [location, setLocation] = useState<LocationType>()
   const [description, setDescription] = useState('')
 
   const [initialDirection] = useState(direction)
@@ -30,15 +30,15 @@ const CreateRequestForm = ({
   const requestDetails = useRequestStore((state) => state.requestDetails)
 
   useEffect(() => {
-    setLocation(requestDetails?.location ?? '')
+    if (requestDetails?.location) {
+      setLocation({ ...requestDetails?.location })
+    }
     setDescription(requestDetails?.description ?? '')
   }, [requestDetails?.location, requestDetails?.description])
 
   const isValid = location && description.length > 3
 
   const handleNext = () => {
-    console.log(location)
-
     updateRequest({ location, description })
     onNext()
   }
@@ -47,7 +47,7 @@ const CreateRequestForm = ({
     <StepTransition direction={direction}>
       <View style={styles.formField}>
         <LocationInput
-          defaultValue={requestDetails?.location}
+          defaultCoords={requestDetails?.location}
           label="Specify the location where you need updates from."
           placeholder="Choose location"
           onLocation={setLocation}

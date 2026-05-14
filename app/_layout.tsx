@@ -152,9 +152,9 @@ export default function RootLayout() {
               {/*<RequestProvider> */}
               <PaystackProvider publicKey={envConfig.paystackPubKey || ''}>
                 <InitialLayout />
-                <Toaster toastOptions={toastOptions} />
               </PaystackProvider>
               {/*  </RequestProvider> */}
+              <Toaster toastOptions={toastOptions} />
             </KeyboardProvider>
           </PaperProvider>
         </QueryClientProvider>

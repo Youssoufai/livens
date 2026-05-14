@@ -12,17 +12,28 @@ export const API_ENDPOINTS = {
   },
   requests: {
     create: '/create-request',
+    edit: '/edit-request',
     fetch: '/get-requests',
     fetch_all: '/all-requests',
     details: (id: string) => `/get-request/${id}`,
     send_response: '/temp-response',
     get_responses: (id: string) => `/get-temp-responses/${id}`,
-    get_response_status: '/get-response/',
+    get_response_status: (id: string) => `/get-response/${id}`,
     approve_reponse: '/response-approval',
+    withdrawResponder: '/withdraw-responder',
+    setAsPublic: (id: string) => `/make-public/${id}`,
     complete: '/complete-request',
     cancel: '/cancel-request',
   },
   search: {
     occassion: '/search-requests',
+  },
+  payment: {
+    initiate: '/paystack-init',
+    verify: '/verify-payment/',
+    withdraw: '/initiate-withdrawal',
+  },
+  profile: {
+    rating: '/rate-user',
   },
 }

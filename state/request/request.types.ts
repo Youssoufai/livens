@@ -1,6 +1,14 @@
 import { RequestData, RequestPayload } from '@/services/requests/request.types'
 
-export interface CreateRequestFormData extends RequestPayload {}
+export type RequestDetailsType = {
+  location: LocationType
+  description: string
+  duration: string
+  allow_comment: boolean
+  reward: string
+}
+
+export interface CreateRequestFormData extends RequestDetailsType {}
 
 export interface RequestState {
   requestDetails?: Partial<CreateRequestFormData>

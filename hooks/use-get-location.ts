@@ -6,10 +6,12 @@ export default function useGetLocation() {
     useState<Location.LocationObject>()
   const [address, setAddress] = useState<Location.LocationGeocodedAddress>()
 
-  async function getCurrentLocation() {
+  async function getCurrentLocation(): Promise<{
+    location: Location.LocationObject | null
+    address: string | null
+  }> {
+    let location: Location.LocationObject | null = null
     try {
-      let location: Location.LocationObject | null = null
-
       const { status: permissionStatus } =
         await Location.getForegroundPermissionsAsync()
 
@@ -27,7 +29,7 @@ export default function useGetLocation() {
 
       location = await Location.getCurrentPositionAsync({})
 
-      if (!location) return
+      if (!location) throw Error('No location found')
 
       const address = await Location.reverseGeocodeAsync({
         longitude: location.coords.longitude,
@@ -36,10 +38,10 @@ export default function useGetLocation() {
 
       setAddress(address[0])
       setCurrentLocation(location)
-      return address[0].formattedAddress
+      return { address: address[0].formattedAddress, location }
     } catch (error) {
       console.error(error)
-      return ''
+      return { location, address: null }
     }
   }
 

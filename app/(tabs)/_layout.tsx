@@ -9,7 +9,6 @@ import HelpIcon from '@/components/icons/help'
 import ScheduleIcon from '@/components/icons/schedule'
 import SearchIcon from '@/components/icons/search'
 import AccountIcon from '@/components/icons/account'
-import { useAuthGuard } from '@/hooks/use-auth-guard'
 import { CustomHeader } from '@/components/custom-header'
 import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { FONTS } from '@/constants/fonts'
@@ -63,11 +62,11 @@ export default function TabsLayout() {
               <CustomHeader
                 title="Requests"
                 titleStyle={styles.tabHeaderTitle}
-                moreInfo={
-                  <Pressable>
-                    <Ellipsis size={24} color="#1C1B1F" />
-                  </Pressable>
-                }
+                // moreInfo={
+                //   <Pressable>
+                //     <Ellipsis size={24} color="#1C1B1F" />
+                //   </Pressable>
+                // }
               />
             )
           },

@@ -60,13 +60,6 @@ AuthenticatedAPI.interceptors.response.use(
   }
 )
 
-export const getChanges = (endpoint: string, lastPulledAt: number) =>
-  AuthenticatedAPI.get(`${endpoint}?lastPulledAt=${lastPulledAt}`)
-
-export function pushChanges<T>(endpoint: string, changes: T) {
-  return AuthenticatedAPI.post(`${endpoint}/push`, changes)
-}
-
 // async function refreshCurrentToken(refreshToken: string) {
 //   try {
 //     const response = await API.post(API_ENDPOINTS.auth.refresh_token, {

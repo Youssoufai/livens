@@ -1,0 +1,28 @@
+import { COLORS } from '@/constants/theme'
+import * as React from 'react'
+import Svg, { SvgProps, Mask, Path, G } from 'react-native-svg'
+
+const StarIcon = ({ fill, ...props }: SvgProps) => (
+  <Svg fill="red" {...props}>
+    <Mask
+      id="a"
+      width={40}
+      height={40}
+      x={0}
+      y={0}
+      maskUnits="userSpaceOnUse"
+      style={{
+        maskType: 'alpha',
+      }}
+    >
+      <Path fill={fill || '#d9d9d9'} d="M0 0h40v40H0z" />
+    </Mask>
+    <G mask="url(#a)">
+      <Path
+        fill={COLORS.yellow[500]}
+        d="M14.75 28.042 20 24.875l5.25 3.209-1.375-6 4.625-4-6.084-.542L20 11.875 17.583 17.5l-6.083.542 4.625 4.041zM9.708 35l2.708-11.708-9.083-7.875 12-1.042L20 3.334l4.666 11.041 12 1.042-9.083 7.875L30.291 35 20 28.792z"
+      />
+    </G>
+  </Svg>
+)
+export default StarIcon

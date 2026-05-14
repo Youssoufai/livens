@@ -2,6 +2,7 @@ import { ReactElement } from 'react'
 import { TextStyle, ViewStyle } from 'react-native'
 
 import { ColorType } from '../components.types'
+import { StatusBarStyle } from 'expo-status-bar'
 
 export interface BtnProps {
   icon?: ReactElement
@@ -16,6 +17,7 @@ export interface BtnProps {
   labelColor?: ColorType
   buttonColor?: ColorType
   disabledColor?: string
+  disabledTextColor?: ColorType
   loaderColor?: string
 }
 
@@ -46,6 +48,7 @@ export interface Modalprops {
   fullHeight?: boolean
   modalStyle?: ViewStyle
   contentStyle?: ViewStyle
+  statusBarStyle?: StatusBarStyle
   onDismiss?: VoidFunction
   showCloseButton?: boolean
 }

@@ -23,7 +23,8 @@ import { API, AuthenticatedAPI } from '@/services'
 import { API_ENDPOINTS } from '@/constants/endpoints'
 
 const LocationForm = () => {
-  const [location, setLocation] = useState('')
+  const [location, setLocation] = useState<LocationType>()
+  const [address, setAddress] = useState('')
   const [isLoadingAddr, setIsLoadingAddr] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -32,16 +33,26 @@ const LocationForm = () => {
   const { getCurrentLocation } = useGetLocation()
 
   const handleLocationChange = (place: Place, sessionToken?: string | null) => {
-    place?.details?.formattedAddress &&
-      setLocation(place?.details?.formattedAddress)
+    place?.details?.location &&
+      setLocation({
+        latitude: place.details.location.latitude,
+        longitude: place.details.location.longitude,
+        formattedAddress: place.details.formattedAddress,
+      })
   }
 
   const handleCurrentLocation = async () => {
     try {
       setIsLoadingAddr(true)
-      const address = await getCurrentLocation()
+      const { location, address } = await getCurrentLocation()
 
-      setLocation(address ?? '')
+      if (!location?.coords.latitude) return
+
+      setLocation({
+        latitude: location?.coords.latitude,
+        longitude: location?.coords.longitude,
+        formattedAddress: address ?? '',
+      })
     } catch (error) {
       showToastMessage(handleErrorInstances(error), 'error')
     } finally {
@@ -52,7 +63,12 @@ const LocationForm = () => {
   const confirmLocation = async () => {
     try {
       setLoading(true)
-      await AuthenticatedAPI.post(API_ENDPOINTS.auth.location, { location })
+      const payload = {
+        longitude: location?.longitude,
+        latitude: location?.latitude,
+        location: location?.formattedAddress,
+      }
+      await AuthenticatedAPI.post(API_ENDPOINTS.auth.location, payload)
 
       router.replace('/(auth)/success')
     } catch (error) {
@@ -91,6 +107,7 @@ const LocationForm = () => {
             outlineStyle={styles.nativePaperInput}
             render={() => (
               <GooglePlacesTextInput
+                value={location?.formattedAddress}
                 placeHolderText="Search address"
                 onPlaceSelect={handleLocationChange}
                 apiKey={getMapApiKey() || ''}
@@ -119,7 +136,7 @@ const LocationForm = () => {
                 Use current location
               </Text>
             </Pressable>
-            {loading && (
+            {isLoadingAddr && (
               <ActivityIndicator color={COLORS.primary[500]} size={24} />
             )}
           </View>

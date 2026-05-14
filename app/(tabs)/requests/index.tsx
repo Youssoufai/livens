@@ -13,7 +13,7 @@ import { COLORS } from '@/constants/theme'
 
 const styles = StyleSheet.create({
   content: {
-    paddingTop: 24,
+    paddingTop: 8,
   },
   floatingButton: {
     position: 'absolute',
@@ -34,7 +34,11 @@ export default function Requests() {
 
   const router = useRouter()
 
-  const { data: userRequestData } = useGetRequestsQuery()
+  const {
+    data: userRequestData,
+    isLoading,
+    isFetching,
+  } = useGetRequestsQuery(selectedTab)
 
   const data = selectedTab === REQUESTS_TABS[2].value ? userRequestData : []
 

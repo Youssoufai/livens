@@ -4,22 +4,30 @@ export type RequestResponderPayload = {
 }
 
 export type RequestPayload = {
-  location: string
   description: string
   duration: string
   allow_comment: boolean
   reward: string
+  longitude: number
+  latitude: number
+  location: string
 }
 
-export type RequestData = {
+export type RequestStatusType =
+  | 'pending'
+  | 'active'
+  | 'waiting for approval'
+  | 'completed'
+export interface RequestData extends LocationType {
   id: string
-  location: string
   description: string
   duration: string
   expiration: string // could be Date if you transform it
   allow_comment: boolean
   reward: string
-  status: 'pending' | 'approved' | 'completed' | 'cancelled' // extend if needed
+  location?: string
+  status: RequestStatusType
+  make_public?: string | null
   user_id: string
   responder: null | { name: string; location: string } // update when backend shape is known
   deleted_at: string | null
@@ -40,6 +48,7 @@ export type RequestResponseStatusType = {
   user_id: number
   comment: string
   media_paths: string[]
+  user: User
   created_at: string
   updated_at: string
 }

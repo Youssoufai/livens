@@ -71,6 +71,22 @@ export default (ctx: ConfigContext): ExpoConfig => {
             'com.googleusercontent.apps.850951594746-obmitsnsu02semv5itrg90la46peq9ee',
         },
       ],
+      [
+        'expo-file-system',
+        {
+          supportsOpeningDocumentsInPlace: true,
+          enableFileSharing: true,
+        },
+      ],
+      [
+        'expo-media-library',
+        {
+          photosPermission: 'Allow $(PRODUCT_NAME) to access your photos.',
+          savePhotosPermission: 'Allow $(PRODUCT_NAME) to save photos.',
+          isAccessMediaLocationEnabled: true,
+          granularPermissions: ['audio', 'photo'],
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,

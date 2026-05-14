@@ -59,7 +59,7 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
       name: values.fullName.trim(),
       email: values.email.trim(),
       password: values.password,
-      password_confirmation: values.password,
+      password_confirmation: values.confirmPassword,
       phone: cleanedPhone,
     }
 
@@ -127,6 +127,13 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
               and one number or symbol.
             </Text>
           </View>
+          <PasswordInput
+            control={control}
+            name="confirmPassword"
+            label="Confirm Password"
+            placeholder="Enter your password again"
+            error={errors.confirmPassword?.message}
+          />
 
           <PhoneInput
             ref={phoneInputRef}
@@ -143,7 +150,7 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
           label="Create Account"
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
-          disabled={!isValid || !isPhoneValid || isSubmitting}
+          disabled={!isPhoneValid || isSubmitting}
           btnStyle={{ marginTop: 8 }}
         />
       </View>

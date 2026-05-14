@@ -1,5 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { useRef } from 'react'
+import { Divider } from 'react-native-paper'
+import { useRouter } from 'expo-router'
+import { LogOut } from 'lucide-react-native'
 
 import { ThemedView } from '@/components/themed-view'
 import ProfileHeader from '@/modules/profile/components/user-profile-header'
@@ -11,10 +14,7 @@ import Button from '@/components/ui/button'
 import { useBoundStore } from '@/state'
 import AppStorage from '@/utils/storage'
 import { STORE_KEYS } from '@/constants'
-import { LogOut } from 'lucide-react-native'
 import { COLORS } from '@/constants/theme'
-import { Divider } from 'react-native-paper'
-import { useRouter } from 'expo-router'
 
 const UserProfile = () => {
   const logout = useBoundStore((state) => state.logout)

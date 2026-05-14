@@ -12,13 +12,18 @@ import { catchErr } from '@/utils/error-handlers'
 import SearchModal from '@/components/search-modal'
 import { API_ENDPOINTS } from '@/constants/endpoints'
 import { useBoundStore } from '@/state'
+import { grantLocationPermission } from '@/utils/resolver'
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [filterOption, setFilterOption] = useState<string>()
+
   const userLocation = useBoundStore((state) => state.user?.location)
   const getUser = useBoundStore((state) => state.getUser)
 
-  const location = userLocation?.replace(/(Nigeria|nigeria)/g, '')
+  const location = userLocation
+    ?.slice(userLocation.lastIndexOf(',') + 1)
+    .trimStart()
 
   useEffect(() => {
     ;(async () => {
@@ -27,6 +32,10 @@ export default function SearchScreen() {
       }
     })()
   }, [userLocation])
+
+  useEffect(() => {
+    grantLocationPermission()
+  }, [])
 
   const headerImage = (
     <View style={styles.headerText}>
@@ -66,6 +75,8 @@ export default function SearchScreen() {
             endpoint={API_ENDPOINTS.search.occassion}
             needsAuthentication
             onSelect={selectQueryItem}
+            filterOption={filterOption ?? ''}
+            onChangeOption={setFilterOption}
           />
 
           <View>

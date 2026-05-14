@@ -14,6 +14,7 @@ const Button = ({
   contentStyle,
   icon,
   disabledColor = COLORS.grey[50],
+  disabledTextColor = 'grey-300',
   buttonColor = 'primary-500',
   labelColor = 'white',
   loaderColor,
@@ -34,7 +35,7 @@ const Button = ({
             size={14}
             lineHeight={20}
             weight={600}
-            color={disabled ? 'grey-300' : labelColor}
+            color={disabled ? disabledTextColor : labelColor}
             style={labelStyle}
           >
             {label}
@@ -55,13 +56,14 @@ const Button = ({
 
         {
           opacity: pressed ? 0.75 : undefined,
-          backgroundColor: disabled
-            ? disabledColor || COLORS.grey[50]
-            : btnColor || COLORS.primary[500],
+          backgroundColor:
+            loading || disabled
+              ? disabledColor || COLORS.grey[50]
+              : btnColor || COLORS.primary[500],
         },
         btnStyle,
       ]}
-      disabled={disabled || loading}
+      disabled={loading || disabled}
     >
       {content}
     </Pressable>

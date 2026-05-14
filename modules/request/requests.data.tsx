@@ -5,6 +5,17 @@ import {
   SlideOutRight,
 } from 'react-native-reanimated'
 
+import RequestSuccessIcon from '@/assets/icons/request-sucess.svg'
+import BoostIcon from '@/assets/icons/boost.svg'
+import RequestCompletedContent from './components/reques-complete-content'
+
+import {
+  RequestSuccessModalContentType,
+  RequestSuccessModalType,
+} from './requests.types'
+import RatingContent from './components/response-rating-content'
+import BoostContent from './components/request-boost-content'
+
 export const REQUESTS_TABS: ListItem[] = [
   {
     label: 'Browse requests',
@@ -76,14 +87,14 @@ export const REQUEST_DURATION = [
 
 export const REWARD_OPTIONS = [
   {
-    id: '1000',
-    amount: '₦1,000',
+    id: '500',
+    amount: '₦500',
     description: 'Popular for simple tasks, gets casual responses fast.',
     popular: true,
   },
   {
-    id: '2500',
-    amount: '₦2,500',
+    id: '1000',
+    amount: '₦1,000',
     description: 'Attracts faster and more reliable responses.',
     popular: false,
   },
@@ -122,3 +133,55 @@ export const getRespondersTabData = (responders: number = 0) => {
     },
   ]
 }
+
+export const getRequestSuccessModalContent = (
+  responder: User,
+  dismissModal: VoidFunction,
+  updateModal?: (type: RequestSuccessModalType) => void,
+  type?: RequestSuccessModalType
+) => {
+  if (!type) return null
+
+  const successModalContents: Partial<
+    Record<RequestSuccessModalType, RequestSuccessModalContentType>
+  > = {
+    request_completed: {
+      title: 'Your request has been completed!',
+      description:
+        'Your request has been completed, you got real-time info from your desired place.',
+      icon: <RequestSuccessIcon width={158} height={118} />,
+      content: (
+        <RequestCompletedContent
+          responder={responder.name}
+          onRateResponder={() => updateModal?.('rating')}
+          onDismissModal={dismissModal}
+        />
+      ),
+    },
+    rating: {
+      title: `How was ${responder.name} response?`,
+      description: 'How would you rate your experience with this responder?',
+      icon: <></>,
+      content: (
+        <RatingContent
+          userId={responder.id.toString()}
+          responderName={responder.name}
+          onDismissModal={dismissModal}
+        />
+      ),
+    },
+    boost: {
+      title: 'We’re giving you a free boost for your next post!',
+      description:
+        'To congratulate you on completing your first successful request, we’re giving you a free boost to promote your next post. ',
+      icon: <BoostIcon width={212} height={168} />,
+      content: <BoostContent onDismissModal={dismissModal} />,
+    },
+  }
+
+  return successModalContents[type]
+}
+
+export const responderActionOptions = [
+  { label: 'Withdraw responder', value: 'withdraw-responder' },
+]
