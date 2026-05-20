@@ -1,200 +1,272 @@
-import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { Ionicons } from '@expo/vector-icons'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useMemo, useState } from 'react'
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-export default function AddCommentScreen() {
-    const params = useLocalSearchParams();
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
-    // ✅ FIX: read media, not images
-    const media = useMemo(() => {
-        try {
-            return params.media ? JSON.parse(params.media) : [];
-        } catch {
-            return [];
-        }
-    }, [params.media]);
+import Text from '@/components/text'
+import Button from '@/components/ui/button'
+import api from '@/lib/api'
+import { COLORS } from '@/constants/theme'
+import { getCurrentRequestId } from '@/utils/requestStorage'
 
-    const [comment, setComment] = useState("");
+const MAX_COMMENT = 500
+const MAX_PHOTOS = 6
 
-    const canProceed = comment.trim().length > 0 || media.length > 0;
+export default function ReviewAndComment() {
+  const params = useLocalSearchParams()
 
-    function goNext() {
-        router.push({
-            pathname: "/requests/submitScreen",
-            params: {
-                media: JSON.stringify(media),
-                comment,
-            },
-        });
+  const initialMedia = useMemo(() => {
+    try {
+      return params.media ? JSON.parse(params.media) : []
+    } catch {
+      return []
+    }
+  }, [params.media])
+
+  const request_id = params.request_id
+
+  const [media, setMedia] = useState(initialMedia)
+  const [comment, setComment] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const canSubmit = media.length > 0 || comment.trim().length > 0
+
+  const removePhoto = (index) => {
+    setMedia((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const addMorePhotos = () => {
+    // Re-open camera by going back to captureContent, preserving current photos
+    router.push({
+      pathname: '/requests/captureContent',
+      params: { request_id: String(request_id), existing_media: JSON.stringify(media) },
+    })
+  }
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return
+
+    let resolvedRequestId = request_id
+    if (!resolvedRequestId) {
+      resolvedRequestId = await getCurrentRequestId('CURRENT_REQUEST_ID')
     }
 
-    function goBack() {
-        router.back();
+    if (!resolvedRequestId) {
+      Alert.alert('Error', 'Missing request ID. Please restart the flow.')
+      return
     }
 
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-            <ScrollView contentContainerStyle={styles.container}>
-                <TouchableOpacity style={styles.backButton} onPress={goBack}>
-                    <Ionicons name="arrow-back" size={22} color="#000" />
-                </TouchableOpacity>
+    setSubmitting(true)
+    try {
+      const formData = new FormData()
+      media.forEach((uri, index) => {
+        const fileUri = uri.startsWith('file://') ? uri : `file://${uri}`
+        formData.append('media[]', {
+          uri: fileUri,
+          name: `photo_${index}.jpg`,
+          type: 'image/jpeg',
+        })
+      })
+      formData.append('comment', comment)
+      formData.append('request_id', String(resolvedRequestId))
 
-                <Text style={styles.stepText}>Step 2 of 3</Text>
-                <Text style={styles.title}>Add your comments</Text>
+      await api.post('/submit-response', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
 
-                {/* ✅ REAL IMAGE PREVIEW */}
-                <View style={styles.imageRow}>
-                    <View style={styles.imageList}>
-                        {media.length === 0 ? (
-                            <View style={styles.imageBox} />
-                        ) : (
-                            media.map((uri, index) => (
-                                <View key={index} style={styles.imageBox}>
-                                    <Image source={{ uri }} style={styles.image} />
-                                </View>
-                            ))
-                        )}
-                    </View>
+      router.replace({
+        pathname: '/requests/submission-success',
+        params: { request_id: String(resolvedRequestId) },
+      })
+    } catch {
+      Alert.alert('Error', 'Could not submit. Please check your connection and try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
-                    <TouchableOpacity
-                        style={styles.editButton}
-                        onPress={goBack}
-                    >
-                        <Text style={styles.editText}>Edit</Text>
-                    </TouchableOpacity>
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={COLORS.grey[800]} />
+          </TouchableOpacity>
+          <Text size={12} color="grey-300">
+            Step 3 of 4
+          </Text>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text size={24} lineHeight={30} weight={700} color="grey-800">
+            Review & Comment
+          </Text>
+
+          {/* Photo grid */}
+          <View style={styles.section}>
+            <Text size={14} lineHeight={18} weight={600} color="grey-600">
+              Your photos
+            </Text>
+            <View style={styles.photoGrid}>
+              {media.map((uri, i) => (
+                <View key={i} style={styles.photoCell}>
+                  <Image source={{ uri }} style={styles.photo} />
+                  <TouchableOpacity
+                    style={styles.removeBtn}
+                    onPress={() => removePhoto(i)}
+                    hitSlop={4}
+                  >
+                    <Ionicons name="close" size={12} color="#fff" />
+                  </TouchableOpacity>
                 </View>
+              ))}
 
-                <Text style={styles.helperText}>
-                    What are your thoughts on this place based on your experience?
-                </Text>
-
-                <TextInput
-                    placeholder="Write comment"
-                    value={comment}
-                    onChangeText={setComment}
-                    multiline
-                    style={styles.input}
-                />
-            </ScrollView>
-
-            <View style={styles.footer}>
-                <TouchableOpacity
-                    onPress={goNext}
-                    disabled={!canProceed}
-                    style={[
-                        styles.nextButton,
-                        !canProceed && styles.nextButtonDisabled,
-                    ]}
-                >
-                    <Text
-                        style={[
-                            styles.nextText,
-                            !canProceed && styles.nextTextDisabled,
-                        ]}
-                    >
-                        Next
-                    </Text>
+              {media.length < MAX_PHOTOS ? (
+                <TouchableOpacity style={styles.addMoreCell} onPress={addMorePhotos}>
+                  <Ionicons name="add" size={24} color={COLORS.grey[300]} />
+                  <Text size={11} lineHeight={14} color="grey-300" align="center">
+                    Add more
+                  </Text>
                 </TouchableOpacity>
+              ) : null}
             </View>
-        </SafeAreaView>
-    );
+          </View>
+
+          {/* Comment */}
+          <View style={styles.section}>
+            <Text size={14} lineHeight={18} weight={600} color="grey-600">
+              Comment{' '}
+              <Text size={14} color="grey-300">
+                (optional)
+              </Text>
+            </Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Share your thoughts on this place…"
+                placeholderTextColor={COLORS.grey[100]}
+                value={comment}
+                onChangeText={(t) => setComment(t.slice(0, MAX_COMMENT))}
+                multiline
+                textAlignVertical="top"
+              />
+              <Text size={11} color="grey-300" align="right" style={styles.charCount}>
+                {comment.length}/{MAX_COMMENT}
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Footer CTA */}
+        <View style={styles.footer}>
+          <Button
+            label="Continue"
+            onPress={handleSubmit}
+            loading={submitting}
+            disabled={!canSubmit || submitting}
+          />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  )
 }
 
-
-
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-    },
-    backButton: {
-        marginBottom: 10,
-    },
-    stepText: {
-        fontSize: 13,
-        color: "#777",
-        marginBottom: 6,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "700",
-        marginBottom: 20,
-    },
-    imageRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 20,
-    },
-    imageList: {
-        flexDirection: "row",
-    },
-    imageBox: {
-        width: 70,
-        height: 70,
-        borderRadius: 10,
-        backgroundColor: "#e5e5e5",
-        marginRight: 10,
-        overflow: "hidden",
-    },
-    image: {
-        width: "100%",
-        height: "100%",
-    },
-    editButton: {
-        borderWidth: 1,
-        borderColor: "#ddd",
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        borderRadius: 20,
-    },
-    editText: {
-        fontSize: 14,
-        fontWeight: "600",
-    },
-    helperText: {
-        fontSize: 15,
-        color: "#555",
-        marginBottom: 10,
-        lineHeight: 22,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 12,
-        padding: 14,
-        minHeight: 100,
-        textAlignVertical: "top",
-        fontSize: 15,
-    },
-    footer: {
-        padding: 20,
-        borderTopWidth: 1,
-        borderColor: "#f0f0f0",
-    },
-    nextButton: {
-        backgroundColor: "#000",
-        paddingVertical: 16,
-        borderRadius: 30,
-        alignItems: "center",
-    },
-    nextButtonDisabled: {
-        backgroundColor: "#eee",
-    },
-    nextText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "600",
-    },
-    nextTextDisabled: {
-        color: "#aaa",
-    },
-});
+  container: { flex: 1, backgroundColor: COLORS.white },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  backBtn: { padding: 4 },
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    rowGap: 24,
+  },
+  section: { rowGap: 12 },
+  photoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  photoCell: {
+    width: '30%',
+    aspectRatio: 1,
+    borderRadius: 10,
+    overflow: 'visible',
+  },
+  photo: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+    backgroundColor: COLORS.grey[50],
+  },
+  removeBtn: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  addMoreCell: {
+    width: '30%',
+    aspectRatio: 1,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.grey[50],
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    rowGap: 4,
+  },
+  inputWrapper: {
+    borderWidth: 1,
+    borderColor: COLORS.grey[50],
+    borderRadius: 12,
+    padding: 14,
+    rowGap: 8,
+    minHeight: 120,
+  },
+  textInput: {
+    fontSize: 14,
+    color: COLORS.grey[700],
+    flex: 1,
+    minHeight: 80,
+  },
+  charCount: { marginTop: 4 },
+  footer: {
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderColor: COLORS.grey[50],
+    backgroundColor: COLORS.white,
+  },
+})

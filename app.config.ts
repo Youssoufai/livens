@@ -21,7 +21,10 @@ export default (ctx: ConfigContext): ExpoConfig => {
       bundleIdentifier: 'com.livelens.app',
       supportsTablet: true,
       infoPlist: {
-        NSCameraUsageDescription: 'Allow $(PRODUCT_NAME) to access your camera',
+        NSCameraUsageDescription:
+          'Allow $(PRODUCT_NAME) to access your camera to capture photos and videos.',
+        NSMicrophoneUsageDescription:
+          '$(PRODUCT_NAME) needs access to your Microphone to record audio for video recordings.',
         NSPhotoLibraryAddUsageDescription:
           'Allow $(PRODUCT_NAME) to save photos to your library',
         UIBackgroundModes: ['remote-notification'],
@@ -32,7 +35,10 @@ export default (ctx: ConfigContext): ExpoConfig => {
     },
     android: {
       package: 'com.livelens.app',
-      permissions: ['CAMERA', 'RECORD_AUDIO'],
+      permissions: [
+        'android.permission.CAMERA',
+        'android.permission.RECORD_AUDIO',
+      ],
       adaptiveIcon: {
         foregroundImage: './assets/images/logo.png',
         backgroundColor: '#E6F4FE',
@@ -43,6 +49,13 @@ export default (ctx: ConfigContext): ExpoConfig => {
         'onesignal-expo-plugin',
         {
           mode: 'development',
+        },
+      ],
+      [
+        'expo-video',
+        {
+          supportsBackgroundPlayback: true,
+          supportsPictureInPicture: true,
         },
       ],
       [

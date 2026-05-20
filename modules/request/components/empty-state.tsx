@@ -1,14 +1,20 @@
-import { useRouter } from 'expo-router'
 import { StyleSheet, View } from 'react-native'
 
 import Button from '@/components/ui/button'
 import Text from '@/components/text'
 
-const EmptyState = () => {
-  const router = useRouter()
+import { RequestEmptyStateProps } from '../requests.types'
 
+const EmptyState = ({
+  title,
+  description,
+  icon,
+  buttonLabel,
+  onPress,
+}: RequestEmptyStateProps) => {
   return (
     <View style={styles.container}>
+      {icon}
       <View style={styles.textWrapper}>
         <Text
           size={20}
@@ -17,7 +23,7 @@ const EmptyState = () => {
           align="center"
           color="black"
         >
-          You don’t have any requests
+          {title}
         </Text>
         <Text
           size={16}
@@ -26,15 +32,16 @@ const EmptyState = () => {
           align="center"
           color="grey-400"
         >
-          Your posted requests will be visible to respondents. Create a request
-          now.
+          {description}
         </Text>
       </View>
-      <Button
-        label="Create a request"
-        btnStyle={styles.button}
-        onPress={() => router.push('/(requests)/create-request')}
-      />
+      {buttonLabel && (
+        <Button
+          label={buttonLabel}
+          btnStyle={styles.button}
+          onPress={() => onPress?.()}
+        />
+      )}
     </View>
   )
 }
@@ -43,7 +50,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    rowGap: 40,
+    rowGap: 24,
     alignItems: 'center',
   },
   textWrapper: {
@@ -51,6 +58,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: 195,
+    marginTop: 16,
   },
 })
 

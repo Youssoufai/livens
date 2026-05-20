@@ -1,16 +1,18 @@
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
 import { useCallback } from 'react'
+import { router, useRouter } from 'expo-router'
 
 import { useCancelRequestMutation } from '@/hooks/mutations/use-request'
 import ScreenLoader from '@/components/screen-loader'
 import { catchErr } from '@/utils/error-handlers'
 import { showToastMessage } from '@/components/notification'
 import useRefresh from '@/hooks/use-pull-refresh'
+import { RequestStatusType } from '@/services/requests/request.types'
 
 import EmptyState from './empty-state'
 import RequestCard from './request-card'
 import { RequestListProps } from '../requests.types'
-import { RequestStatusType } from '@/services/requests/request.types'
+import { REQUESTS_TABS } from '../requests.data'
 
 const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
   const { mutateAsync: cancelRequest, isPending } = useCancelRequestMutation()
@@ -37,12 +39,23 @@ const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
     [cancelRequest]
   )
 
+  const startNewRequest = () => {
+    router.push('/(requests)/create-request')
+  }
+
   return (
     <>
       <FlatList
         data={list}
         keyExtractor={(item, index) => item.id ?? `${item.longitude}_${index}`}
-        ListEmptyComponent={<EmptyState />}
+        ListEmptyComponent={
+          <EmptyState
+            title="You don’t have any requests"
+            description="Your posted requests will be visible to respondents. Create a request now."
+            buttonLabel="Create a request"
+            onPress={startNewRequest}
+          />
+        }
         renderItem={({ item }) => {
           const location = item.location
             ? item.location
@@ -66,7 +79,9 @@ const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => onRefresh([['requests']])}
+            onRefresh={() =>
+              onRefresh([['all-requests', REQUESTS_TABS[2].value]])
+            }
           />
         }
         contentContainerStyle={styles.contentContainer}
@@ -79,12 +94,14 @@ const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
   contentContainer: {
     rowGap: 16,
     flexGrow: 1,
     paddingTop: 16,
     paddingBottom: 16,
+    paddingHorizontal: 16,
   },
 })
 

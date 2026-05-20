@@ -27,6 +27,7 @@ export const COLORS = {
     400: '#45B56E',
     500: '#16A34A',
     600: '#149443',
+    800: '#0C5A29',
   },
   yellow: {
     100: '#FFEDB4',
@@ -34,9 +35,15 @@ export const COLORS = {
     300: '#FFD75C',
     400: '#FFD03D',
     500: '#FFC40C',
+    600: '#E8B20B',
+    900: '#6B5205',
   },
   red: {
     500: '#E60026',
+  },
+  blue: {
+    50: '#EFF6FF',
+    500: '#3B82F6',
   },
   white: '#FFFFFF',
   black: '#000000',

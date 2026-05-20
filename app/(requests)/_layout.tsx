@@ -1,15 +1,8 @@
 import { Stack } from 'expo-router'
-import { StyleSheet } from 'react-native'
 
 import { CustomHeader } from '@/components/custom-header'
 import { COLORS } from '@/constants/theme'
-
-const styles = StyleSheet.create({
-  screenHeaderContainer: {
-    borderBottomWidth: 1,
-    borderColor: COLORS.grey[50],
-  },
-})
+import { globalStyles } from '@/styles/globalStyles'
 
 const RequestLayout = () => {
   return (
@@ -21,7 +14,7 @@ const RequestLayout = () => {
           header: () => (
             <CustomHeader
               showBack
-              containerStyle={styles.screenHeaderContainer}
+              containerStyle={globalStyles.screenHeaderContainer}
             />
           ),
         }}
@@ -34,7 +27,44 @@ const RequestLayout = () => {
             <CustomHeader
               showBack
               title="Request details"
-              containerStyle={styles.screenHeaderContainer}
+              containerStyle={globalStyles.screenHeaderContainer}
+            />
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="browse-request-details"
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader
+              showBack
+              containerStyle={globalStyles.screenHeaderContainer}
+            />
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="outgoing-details"
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader
+              title="Request details"
+              showBack
+              containerStyle={globalStyles.screenHeaderContainer}
+            />
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="capture-process"
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader
+              // showBack
+              containerStyle={globalStyles.screenHeaderContainer}
             />
           ),
         }}
@@ -46,7 +76,7 @@ const RequestLayout = () => {
           header: () => (
             <CustomHeader
               showBack
-              containerStyle={styles.screenHeaderContainer}
+              containerStyle={globalStyles.screenHeaderContainer}
             />
           ),
         }}

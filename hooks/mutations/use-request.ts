@@ -14,12 +14,15 @@ import {
   RequestPayload,
   RequestResponderPayload,
 } from '@/services/requests/request.types'
+import { REQUESTS_TABS } from '@/modules/request/requests.data'
 
 export const useCreateRequestMutation = () => {
   return useMutation({
     mutationFn: createRequest,
     onSuccess(data) {
-      queryClient.invalidateQueries({ queryKey: ['requests'] })
+      queryClient.invalidateQueries({
+        queryKey: ['all-requests', REQUESTS_TABS[2].value],
+      })
     },
   })
 }
@@ -30,7 +33,9 @@ export const useEditRequestMutation = (id: string) => {
       editRequest({ request_id: id, ...payload }),
     onSuccess() {
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['requests'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['all-requests', REQUESTS_TABS[2].value],
+        }),
         queryClient.invalidateQueries({ queryKey: ['request', id] }),
       ])
     },
@@ -66,7 +71,9 @@ export const useCompleteRequest = (id: string) => {
     mutationFn: () => completeRequest(id),
     onSuccess: () => {
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['requests'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['all-requests', REQUESTS_TABS[2].value],
+        }),
         queryClient.invalidateQueries({
           queryKey: ['request-responders', id],
         }),
@@ -82,7 +89,9 @@ export const useWithdrawResponderMutation = (id: string) => {
     mutationFn: withdrawResponder,
     onSuccess: () => {
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['requests'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['all-requests', REQUESTS_TABS[2].value],
+        }),
         queryClient.invalidateQueries({ queryKey: ['request', id] }),
         queryClient.invalidateQueries({
           queryKey: ['request-responders', id],
@@ -97,7 +106,9 @@ export const useCancelRequestMutation = () => {
   return useMutation({
     mutationFn: cancelRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requests'] })
+      queryClient.invalidateQueries({
+        queryKey: ['all-requests', REQUESTS_TABS[2].value],
+      })
     },
   })
 }

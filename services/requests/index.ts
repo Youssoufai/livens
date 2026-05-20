@@ -29,9 +29,24 @@ export const editRequest = async (
   }
 }
 
-export const getRequests = async () => {
+export const getAllRequests = async (type: string) => {
   try {
-    const { data } = await AuthenticatedAPI.get(API_ENDPOINTS.requests.fetch)
+    const { data } = await AuthenticatedAPI.get(
+      API_ENDPOINTS.requests.fetch_all,
+      { params: { filter: type } }
+    )
+    return data.data as RequestData[]
+  } catch (error) {
+    throw Error(error as any)
+  }
+}
+
+export const getRequests = async (type: string) => {
+  try {
+    const { data } = await AuthenticatedAPI.get(
+      API_ENDPOINTS.requests.fetch_all,
+      { params: { filter: type } }
+    )
 
     return data.data as RequestData[]
   } catch (error) {

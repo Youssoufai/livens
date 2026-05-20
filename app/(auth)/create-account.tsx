@@ -2,11 +2,12 @@ import { Dimensions, StyleSheet, View } from 'react-native'
 import {
   ReactElement,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react'
-import { useNavigation, useRouter } from 'expo-router'
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import Animated, {
   SlideInLeft,
   SlideInRight,
@@ -51,6 +52,7 @@ export default function CreateAccount() {
   const [direction, setDirection] = useState<'forward' | 'back'>()
   const [email, setEmail] = useState('')
 
+  const queryParams = useLocalSearchParams<{ step: string }>()
   const navigation = useNavigation()
   const router = useRouter()
 
@@ -100,6 +102,10 @@ export default function CreateAccount() {
       ),
     })
   }, [step, navigation, handleBack])
+
+  useEffect(() => {
+    if (queryParams.step) setStep(+queryParams.step)
+  }, [queryParams.step])
 
   const handleNext = () => {
     setStep((prevStep) =>

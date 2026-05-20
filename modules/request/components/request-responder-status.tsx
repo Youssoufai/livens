@@ -44,12 +44,14 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
 
   useLayoutEffect(() => {
     if (responseStatusData?.response?.media_paths.length) {
-      setIsPublic(!!responseStatusData?.request?.make_public)
+      setIsPublic(!!Number(responseStatusData?.request?.make_public))
     }
   }, [
-    responseStatusData?.request.make_public,
-    responseStatusData?.response.media_paths,
+    responseStatusData?.request?.make_public,
+    responseStatusData?.response?.media_paths,
   ])
+
+  console.log(responseStatusData?.request?.make_public)
 
   if (isLoading) return <RequestResponderStatusSkeleton />
 
@@ -61,8 +63,8 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
     setVisibleModal(undefined)
   }
 
-  const responder = responseStatusData.response?.user
-  const media = responseStatusData.response?.media_paths?.slice(0, 4)
+  const responder = responseStatusData?.response?.user
+  const media = responseStatusData?.response?.media_paths?.slice(0, 4)
 
   const modalDetails = getRequestSuccessModalContent(
     responder,

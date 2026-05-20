@@ -1,3 +1,50 @@
+export function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  if (seconds < 60) return 'just now'
+
+  const totalMinutes = Math.floor(seconds / 60)
+  if (totalMinutes < 60) return `${totalMinutes} min${totalMinutes !== 1 ? 's' : ''} ago`
+
+  const hours = Math.floor(totalMinutes / 60)
+  const remainingMins = totalMinutes % 60
+
+  if (hours < 24) {
+    const hourStr = `${hours} hour${hours !== 1 ? 's' : ''}`
+    if (remainingMins === 0) return `${hourStr} ago`
+    return `${hourStr} ${remainingMins} min${remainingMins !== 1 ? 's' : ''} ago`
+  }
+
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days} day${days !== 1 ? 's' : ''} ago`
+  return date.toLocaleDateString()
+}
+
+export function getDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+export function formatDistance(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)}m away`
+  return `${km.toFixed(1)}km away`
+}
+
 export function formatTimer(seconds: number): string {
   const hrs = Math.floor(seconds / 3600)
   const mins = Math.floor((seconds % 3600) / 60)

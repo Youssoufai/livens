@@ -1,8 +1,7 @@
-import { router, Tabs } from 'expo-router'
-import { Platform, Pressable, StyleSheet } from 'react-native'
+import { Tabs } from 'expo-router'
+import { Platform, StyleSheet } from 'react-native'
 import { Ellipsis } from 'lucide-react-native'
 
-import { getToken } from '@/utils/secureStore'
 import { COLORS } from '@/constants/theme'
 import TabBar from '@/components/tab-bar'
 import HelpIcon from '@/components/icons/help'
@@ -72,7 +71,15 @@ export default function TabsLayout() {
           },
         }}
       />
-      <Tabs.Screen name="schedule" />
+      <Tabs.Screen
+        name="schedule"
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader title="Offers" titleStyle={styles.tabHeaderTitle} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{
