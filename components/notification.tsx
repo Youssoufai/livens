@@ -101,7 +101,7 @@ export function showToastMessage(
   let toastId = Math.random().toString(36)
 
   const options: Partial<ToastProps> = {
-    // id: toastId,
+    id: toastId,
     position: 'bottom-center' as ToastPosition,
     duration: 5000,
     icon: getToastIcon(type),

@@ -18,6 +18,7 @@ import AppStorage from '@/utils/storage'
 import { STORE_KEYS } from '@/constants'
 import { OnboardingStatus } from '@/modules/auth/auth.types'
 import { showToastMessage } from '@/components/notification'
+import { handleErrorInstances } from '@/utils/error-handlers'
 
 const snipImage = require('@/assets/images/snip.png')
 
@@ -31,23 +32,35 @@ const Welcome = () => {
 
   const storage = useRef(new AppStorage()).current
 
-  const completeSignin = async (token: string) => {
-    storage.setItem(STORE_KEYS.token, token)
-    storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
+  const completeSignin = async (token: string, hasLocation: boolean) => {
+    try {
+      storage.setItem(STORE_KEYS.token, token)
+      storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
 
-    await getUser()
+      if (!hasLocation) {
+        router.replace({
+          pathname: '/(auth)/create-account',
+          params: { step: '3' },
+        })
+        return
+      }
 
-    router.push('/(tabs)/home')
+      await getUser()
+
+      router.replace('/(tabs)/home')
+    } catch (error) {
+      console.error(handleErrorInstances(error))
+    }
   }
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoadingGoogle(true)
-      const token = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
+      const data = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
 
-      if (!token) return
+      if (!data?.token) return
 
-      completeSignin(token)
+      completeSignin(data.token, !!data?.user?.location)
     } catch (error) {
     } finally {
       setIsLoadingGoogle(false)

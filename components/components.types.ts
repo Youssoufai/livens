@@ -177,3 +177,8 @@ export interface SkeletonLoaderProps {
   height?: DimensionValue
   style?: ViewStyle
 }
+
+export interface VideoProps {
+  source: string | FileType
+  style?: ViewStyle
+}

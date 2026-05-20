@@ -1,16 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
 
 import {
+  getAllRequests,
   getRequestById,
   getRequestResponders,
   getRequests,
   getResponseStatus,
 } from '@/services/requests'
 
+export const useGetAllRequestsQuery = (type: string) =>
+  useQuery({
+    queryKey: ['all-requests', type],
+    queryFn: () => getAllRequests(type),
+  })
+
 export const useGetRequestsQuery = (type: string) => {
   return useQuery({
-    queryKey: ['requests'],
-    queryFn: getRequests,
+    queryKey: ['requests', type],
+    queryFn: () => getRequests(type),
     enabled: type === 'my-request',
   })
 }

@@ -1,6 +1,7 @@
 import { Href } from 'expo-router'
 import { ReactElement, ReactNode } from 'react'
 import { ViewStyle } from 'react-native'
+import { QueryKey } from '@tanstack/react-query'
 
 import {
   RequestData,
@@ -13,6 +14,13 @@ export type OptionType = {
   description: string
   icon: () => ReactElement
   link?: Href
+}
+
+export type OutgoingStatusColorType = {
+  label: string
+  color: string
+  bgColor: string
+  btnColor: string
 }
 
 export interface HeaderTabProps {
@@ -46,6 +54,34 @@ export interface PaymentDetailsProps {
   onValueChange: (value: string) => void
 }
 
+export interface BrowseRequestCardProps {
+  id: string
+  name: string
+  description: string
+  profilePhoto?: string
+  reward: number | string
+  duration: string
+  userLat?: number
+  userLon?: number
+  location?: string
+  longitude: number
+  latitude: number
+  requesterLocation: string
+  createdAt: string
+  onPress: (id: string) => void
+}
+
+export interface OutgoingRequestCardProps {
+  id?: string
+  status?: Partial<RequestStatusType>
+  title: string | Omit<LocationType, 'formattedAddress'>
+  description: string
+  onAddResponse?: (id: string) => void
+  onEditResponse?: (id: string) => void
+  onWithdrawResponse: (id: string) => void
+  onMessage: (userId: string) => void
+}
+
 export interface RequestCardProps {
   id?: string
   status?: Partial<RequestStatusType>
@@ -68,9 +104,28 @@ export interface ResponseCardProps {
   onApprove: (id: string, name: string) => void
 }
 
+export interface BrowseRequestListProps {
+  data: RequestData[]
+  isLoading: boolean
+  refreshing: boolean
+  onRefresh: (keys: QueryKey[]) => void
+  userLat?: number
+  userLon?: number
+}
+
+export interface OutgoingRequestListProps {
+  data: RequestData[]
+  isLoading: boolean
+  refreshing: boolean
+  onRefresh: (keys: QueryKey[]) => void
+}
+
 export interface RequestListProps {
   list?: RequestData[]
   onViewResponders: (id: string) => void
+  isLoading: boolean
+  refreshing: boolean
+  onRefresh: (keys: QueryKey[]) => void
 }
 
 export interface ResponderListProps {
@@ -97,6 +152,20 @@ export interface RatingContentProps {
   userId: string
   responderName: string
   onDismissModal: VoidFunction
+}
+
+export interface RequestEmptyStateProps {
+  title: string
+  description: string
+  icon?: ReactNode
+  buttonLabel?: string
+  onPress?: VoidFunction
+}
+
+export interface OfferPreviewProps {
+  count: number
+  hasUser?: boolean
+  avatarUris?: string[]
 }
 
 export type RequestSuccessModalType = 'request_completed' | 'rating' | 'boost'

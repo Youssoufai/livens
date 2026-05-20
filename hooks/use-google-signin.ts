@@ -10,6 +10,8 @@ import { showToastMessage } from '@/components/notification'
 import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
 import { API } from '@/services'
 
+import { GoogleAPIResponseType } from './hooks.types'
+
 export function useGoogleSignIn() {
   const loginWithGoogle = async (apiEndpoint: string) => {
     if (!apiEndpoint) return
@@ -27,11 +29,11 @@ export function useGoogleSignIn() {
         throw Error('Unable to signin with Google. Try again later')
       }
 
-      const apiResponse = await API.post(apiEndpoint, {
+      const apiResponse = await API.post<GoogleAPIResponseType>(apiEndpoint, {
         id_token: response.data.idToken,
       })
 
-      return apiResponse.data.token as string
+      return apiResponse.data
     } catch (error) {
       let errorMsg = ''
       if (error instanceof AxiosError) {

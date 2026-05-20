@@ -25,6 +25,12 @@ export const API_ENDPOINTS = {
     complete: '/complete-request',
     cancel: '/cancel-request',
   },
+  response: {
+    offer_list: (id: string) => `/offers-sent/${id}`,
+    sent_offers: '/sent-offers',
+    response_to_request: '/temp-response',
+    submit_response: '/submit-response',
+  },
   search: {
     occassion: '/search-requests',
   },

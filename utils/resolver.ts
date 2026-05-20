@@ -7,6 +7,19 @@ import { COLORS } from '@/constants/theme'
 
 import { envConfig } from './config'
 
+export const getResolvedAvataUri = (
+  value: string,
+  colorsConfig: { text: string; background: string } = {
+    background: COLORS.primary[50],
+    text: COLORS.primary[500],
+  }
+) => {
+  const backgroundColor = colorsConfig.background.replace('#', '')
+  const textColor = colorsConfig.text.replace('#', '')
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(value ?? 'U')}&background=${backgroundColor}&color=${textColor}`
+}
+
 export const getResolvedColor = (color: string) => {
   const colors = color.split('-')
 

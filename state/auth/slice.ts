@@ -1,7 +1,7 @@
 import { create, StateCreator } from 'zustand'
 
 import { API_ENDPOINTS } from '@/constants/endpoints'
-import { API, AuthenticatedAPI } from '@/services'
+import { API, AuthenticatedAPI, queryClient } from '@/services'
 import { catchErr } from '@/utils/error-handlers'
 
 import {
@@ -50,6 +50,7 @@ export const createAuthSlice: StateCreator<AuthState, [], [], AuthState> = (
   },
   logout: () => {
     set({ isAuthenticated: false, user: undefined })
+    queryClient.clear()
   },
 })
 

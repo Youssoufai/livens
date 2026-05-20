@@ -4,3 +4,8 @@ export type PaystackPayload = {
   reference: string
   currency?: string
 }
+
+export type GoogleAPIResponseType = {
+  token: string
+  user: User
+}

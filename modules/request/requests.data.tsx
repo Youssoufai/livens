@@ -19,15 +19,15 @@ import BoostContent from './components/request-boost-content'
 export const REQUESTS_TABS: ListItem[] = [
   {
     label: 'Browse requests',
-    value: 'browse-request',
+    value: 'browse',
   },
   {
     label: 'Ongoing requests',
-    value: 'ongoing-request',
+    value: 'ongoing',
   },
   {
     label: 'My requests',
-    value: 'my-request',
+    value: 'myrequests',
   },
 ]
 

@@ -51,10 +51,18 @@ export default function LoginScreen() {
 
   const storage = useRef(new AppStorage()).current
 
-  const completeSignin = async (token: string) => {
+  const completeSignin = async (token: string, hasLocation: boolean) => {
     try {
       storage.setItem(STORE_KEYS.token, token)
       storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
+
+      if (!hasLocation) {
+        router.replace({
+          pathname: '/(auth)/create-account',
+          params: { step: '3' },
+        })
+        return
+      }
 
       await getUser()
 
@@ -67,11 +75,11 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     try {
       setIsLoadingGoogle(true)
-      const token = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
+      const response = await loginWithGoogle(API_ENDPOINTS.auth.google_signin)
 
-      if (!token) return
+      if (!response?.token) return
 
-      completeSignin(token)
+      completeSignin(response.token, !!response?.user?.location)
     } catch (error) {
     } finally {
       setIsLoadingGoogle(false)
@@ -88,7 +96,7 @@ export default function LoginScreen() {
       const authToken = data?.access_token
       if (!authToken) throw new Error('Authentication token missing')
 
-      completeSignin(authToken)
+      completeSignin(authToken, !!data?.user?.location)
     } catch (error) {
       showToastMessage(catchErr(error).message ?? '', 'error')
     }

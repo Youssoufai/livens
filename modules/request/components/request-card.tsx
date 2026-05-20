@@ -16,7 +16,7 @@ const STATUS_COLORS: Partial<
 > = {
   pending: {
     label: 'Pending',
-    color: COLORS.yellow[500],
+    color: COLORS.yellow[600],
   },
   active: {
     label: 'Active',

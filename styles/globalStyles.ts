@@ -8,6 +8,10 @@ export const globalStyles = StyleSheet.create({
   pressedOpacity: {
     opacity: 0.75,
   },
+  screenHeaderContainer: {
+    borderBottomWidth: 1,
+    borderColor: COLORS.grey[50],
+  },
 })
 
 export const phoneStyles = StyleSheet.create({
