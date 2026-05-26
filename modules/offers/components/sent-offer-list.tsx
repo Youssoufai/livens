@@ -9,27 +9,17 @@ import { Approved } from '@/services/response/response.types'
 import ScheduleSendIcon from '@/assets/icons/schedule_send_lg.svg'
 
 import SentOfferCard from './sent-offer-card'
-
-type OfferCardStatus = 'pending_approval' | 'not_selected'
-
-interface SentOfferListProps {
-  data?: Approved[]
-  isLoading: boolean
-  refreshing?: boolean
-  onRefresh?: () => void
-  cardStatus?: OfferCardStatus
-  emptyTitle?: string
-  emptyDescription?: string
-}
+import { SentOfferListProps } from '../offers.types'
+import { GLOBAL_HORIZONTAL_PADDING } from '@/constants'
 
 const SKELETON_COUNT = 3
 
 const SentOfferList = ({
+  type,
   data,
   isLoading,
   refreshing = false,
   onRefresh,
-  cardStatus = 'pending_approval',
   emptyTitle = 'No sent offers yet',
   emptyDescription = 'When you respond to requests, your offers will appear here.',
 }: SentOfferListProps) => {
@@ -49,6 +39,9 @@ const SentOfferList = ({
         keyExtractor={(_, i) => `skeleton-${i}`}
         renderItem={() => <SentOfferCardSkeleton />}
         scrollEnabled={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={styles.list}
       />
     )
@@ -57,7 +50,7 @@ const SentOfferList = ({
   return (
     <FlatList
       data={data ?? []}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => item.id}
       ListEmptyComponent={
         <EmptyState
           icon={<ScheduleSendIcon />}
@@ -66,7 +59,13 @@ const SentOfferList = ({
         />
       }
       renderItem={({ item }) => (
-        <SentOfferCard item={item} status={cardStatus} onPress={handlePress} />
+        <SentOfferCard
+          id={item.id}
+          description={item.description}
+          status={item.status}
+          timestamp={item.created_at}
+          onPress={handlePress}
+        />
       )}
       showsVerticalScrollIndicator={false}
       refreshControl={
@@ -84,7 +83,8 @@ const styles = StyleSheet.create({
     rowGap: 12,
     flexGrow: 1,
     paddingTop: 16,
-    paddingBottom: 80,
+    paddingBottom: 30,
+    paddingHorizontal: GLOBAL_HORIZONTAL_PADDING,
   },
 })
 

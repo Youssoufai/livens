@@ -13,7 +13,11 @@ import { useReverseGeoCoding } from '@/hooks/use-reverse-geocode'
 import { useRequestStore } from '@/state/request'
 import { showToastMessage } from '@/components/notification'
 
-import { formatToHHMMSS, getDuration } from '../requests.handler'
+import {
+  formatToHHMMSS,
+  generateRequestTitle,
+  getDuration,
+} from '../requests.handler'
 
 const CountdownTimer = memo(({ expiration }: { expiration: string }) => {
   const [timer, setTimer] = useState(() => getDuration(expiration))
@@ -97,7 +101,7 @@ const RequestOverview = ({ id }: { id: string }) => {
       <View style={styles.detailsContent}>
         <View style={styles.detailsHeader}>
           <Text size={24} lineHeight={28} weight={700} color="black">
-            {locationName}
+            {generateRequestTitle(data?.location ?? data?.description ?? '')}
           </Text>
           <Text size={14} lineHeight={18} weight={600} color="black">
             By {data?.user.name}

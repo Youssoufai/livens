@@ -6,4 +6,5 @@ export const envConfig = {
   googleMapApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY,
   paystackPubKey: process.env.EXPO_PUBLIC_PAYSTACK_PUBLIC_KEY,
   imageBaseUrl: process.env.EXPO_PUBLIC_IMAGE_BASE_URL,
+  pusherKey: process.env.EXPO_PUBLIC_PUSHER_KEY,
 }

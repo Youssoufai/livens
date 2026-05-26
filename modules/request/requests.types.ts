@@ -28,6 +28,7 @@ export interface HeaderTabProps {
   selected: string
   onSelect: (value: string) => void
   containerStyle?: ViewStyle
+  contentStyle?: ViewStyle
 }
 
 export interface CreateRequestData {
@@ -73,13 +74,20 @@ export interface BrowseRequestCardProps {
 
 export interface OutgoingRequestCardProps {
   id?: string
+  requesterId: string
+  conversationId?: string
   status?: Partial<RequestStatusType>
   title: string | Omit<LocationType, 'formattedAddress'>
   description: string
+  isChatLoading?: boolean
   onAddResponse?: (id: string) => void
   onEditResponse?: (id: string) => void
   onWithdrawResponse: (id: string) => void
-  onMessage: (userId: string) => void
+  onMessage: (
+    requestId: string,
+    senderId: string,
+    conversationId?: string
+  ) => void
 }
 
 export interface RequestCardProps {

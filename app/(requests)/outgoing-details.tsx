@@ -13,12 +13,17 @@ import { ThemedView } from '@/components/themed-view'
 import CurrencyAltIcon from '@/assets/icons/currency-alt.svg'
 import ScrollView from '@/components/scrollview'
 import { getResolvedAvataUri } from '@/utils/resolver'
-import { getTimeLeftFromDuration } from '@/modules/request/requests.handler'
+import {
+  generateRequestTitle,
+  getTimeLeftFromDuration,
+} from '@/modules/request/requests.handler'
 import DetailsItem from '@/modules/request/components/details-item'
 import NeedItem from '@/modules/request/components/need-item'
 
 import AvgIcon from '@/assets/icons/avg_pace.svg'
 import LocationIcon from '@/assets/icons/location_on.svg'
+import OngoingRequestCardSkeleton from '@/components/placeholder/ongoing-request-card-skeleton'
+import BrowseRequestDetailsSkeleton from '@/components/placeholder/browse-request-details-skeleton'
 
 export default function OutgoingRequestScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -33,11 +38,7 @@ export default function OutgoingRequestScreen() {
   }
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color={COLORS.primary[500]} />
-      </SafeAreaView>
-    )
+    return <BrowseRequestDetailsSkeleton />
   }
 
   const avatarUri = getResolvedAvataUri(data?.user?.name ?? 'U')
@@ -60,10 +61,9 @@ export default function OutgoingRequestScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.content}>
-        {/* Title */}
-        {/* <Text size={26} lineHeight={32} weight={700} color="grey-800">
-          {data?.description?.split('\n')[0] ?? 'Request'}
-        </Text> */}
+        <Text size={26} lineHeight={32} weight={700} color="grey-800">
+          {generateRequestTitle(data?.description ?? '')}
+        </Text>
 
         {/* Reward badge */}
         <View style={styles.rewardRow}>

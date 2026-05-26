@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { Image, StyleSheet, View } from 'react-native'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
 import {
   CheckCircle,
   ClockFading,
@@ -24,29 +24,23 @@ import { useGetOfferListQuery } from '@/hooks/queries/use-response'
 import { useRespondToRequest } from '@/hooks/mutations/use-response'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
-import ScreenLoader from '@/components/screen-loader'
 import NeedItem from '@/modules/request/components/need-item'
+import BrowseRequestDetailsSkeleton from '@/components/placeholder/browse-request-details-skeleton'
+import {
+  generateRequestTitle,
+  getResponderName,
+} from '@/modules/request/requests.handler'
+import { useBoundStore } from '@/state'
 
 export default function AcceptRequestScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-
-  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const { data, isLoading } = useGetRequestByIdQuery(id)
   const { data: offerListData } = useGetOfferListQuery(id)
 
   const { mutateAsync: respondToRequest, isPending } = useRespondToRequest(id)
 
-  useEffect(() => {
-    if (isRedirecting) {
-      const timeout = setTimeout(() => {
-        setIsRedirecting(false)
-        router.replace({ pathname: '/(offers)/sent', params: { id } })
-      }, 2000)
-
-      return () => clearTimeout(timeout)
-    }
-  }, [isRedirecting, id])
+  const userId = useBoundStore((state) => state.user?.id)
 
   const offerCount = isNaN(+(offerListData?.offer_sent ?? 0))
     ? 0
@@ -55,8 +49,6 @@ export default function AcceptRequestScreen() {
   const offerHelp = async () => {
     try {
       await respondToRequest()
-
-      setIsRedirecting(true)
     } catch (error) {
       showToastMessage(
         catchErr(error).message ?? 'Something went wrong',
@@ -65,17 +57,23 @@ export default function AcceptRequestScreen() {
     }
   }
 
+  if (isLoading) return <BrowseRequestDetailsSkeleton />
+
   const avatarUri = getResolvedAvataUri(data?.user?.name ?? 'U')
 
   const postedAt = data?.created_at ? formatTimeAgo(data?.created_at) : null
 
-  // Parse description lines as "what's needed" items if multi-line, else show as paragraph
+  const respondersName = getResponderName(offerListData?.responders ?? [])
+
   const descriptionLines = (data?.description ?? '')
     .split(/\n|•|-/)
     .map((s) => s.trim())
     .filter(Boolean)
 
   const hasMultipleItems = descriptionLines.length > 1
+  const hasSentOffer = offerListData?.responders.some(
+    (responder) => responder.user_id.toString() === userId?.toString()
+  )
 
   const reward = +(data?.reward ?? 0)
 
@@ -83,12 +81,10 @@ export default function AcceptRequestScreen() {
     <>
       <ThemedView style={styles.container}>
         <ScrollView style={styles.content}>
-          {/* Title */}
-          {/* <Text size={26} lineHeight={32} weight={700} color="grey-800">
-          {data?.description?.split('\n')[0] ?? 'Request'}
-        </Text> */}
+          <Text size={26} lineHeight={32} weight={700} color="grey-800">
+            {generateRequestTitle(data?.description ?? '')}
+          </Text>
 
-          {/* Reward badge */}
           <View style={styles.rewardRow}>
             <CurrencyAltIcon />
             <Text size={14} lineHeight={18} weight={700} color="grey-500">
@@ -96,7 +92,6 @@ export default function AcceptRequestScreen() {
             </Text>
           </View>
 
-          {/* User info */}
           <View style={styles.userRow}>
             <Image source={{ uri: avatarUri }} style={styles.avatar} />
             <View style={styles.userMeta}>
@@ -130,7 +125,6 @@ export default function AcceptRequestScreen() {
 
           <View style={styles.divider} />
 
-          {/* What's needed */}
           <View style={styles.section}>
             <Text size={15} lineHeight={20} weight={600} color="grey-800">
               Description of what's needed
@@ -150,7 +144,6 @@ export default function AcceptRequestScreen() {
 
           <View style={styles.divider} />
 
-          {/* Meta info */}
           <View style={styles.metaSection}>
             {data?.location ? (
               <InfoRow
@@ -172,26 +165,36 @@ export default function AcceptRequestScreen() {
                 text={data?.duration}
               />
             ) : null}
-            {postedAt ? (
-              <InfoRow
-                icon={<Calendar size={24} color={COLORS.grey[400]} />}
-                title={`Posted ${postedAt}`}
-              />
-            ) : null}
           </View>
-          {/* ADD THE OFFERS COUNT */}
-          <OffersPreview count={offerCount} />
+          <OffersPreview
+            count={offerCount}
+            avatarUris={respondersName}
+            hasUser={hasSentOffer}
+          />
         </ScrollView>
 
         <View style={styles.footer}>
           <Button
-            label="Offer to help"
+            label={hasSentOffer ? 'Offer sent' : 'Offer to help'}
             onPress={offerHelp}
+            disabled={hasSentOffer}
             loading={isPending}
           />
+          {hasSentOffer && (
+            <Pressable style={styles.withdrawButton}>
+              <Text
+                size={14}
+                lineHeight={16}
+                color="grey-500"
+                weight={600}
+                style={styles.withdrawBtnText}
+              >
+                Withdraw offer
+              </Text>
+            </Pressable>
+          )}
         </View>
       </ThemedView>
-      <ScreenLoader isLoading={isRedirecting} content="Redirecting..." />
     </>
   )
 }
@@ -251,5 +254,13 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: COLORS.grey[50],
     backgroundColor: COLORS.white,
+    rowGap: 4,
+  },
+  withdrawButton: {
+    paddingVertical: 6,
+  },
+  withdrawBtnText: {
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 })

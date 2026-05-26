@@ -8,19 +8,20 @@ import Button from '@/components/ui/button'
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import ScrollView from '@/components/scrollview'
-import { useSubmitResponseMutation } from '@/hooks/mutations/use-response'
+import { useEditResponseMutation } from '@/hooks/mutations/use-response'
 import { catchErr } from '@/utils/error-handlers'
 import { showToastMessage } from '@/components/notification'
 import { REQUESTS_TABS } from '@/modules/request/requests.data'
+import ScreenLoader from '@/components/screen-loader'
 
 import { StepReviewProps } from '../offers.types'
 import ResponseHeader from './response-header'
-import ScreenLoader from '@/components/screen-loader'
 
-export default function StepReview({
+export default function StepReviewEdit({
   requestId,
   media,
   comment,
+  disableEdit,
   onEditMedia,
   onEditComment,
 }: StepReviewProps) {
@@ -28,14 +29,13 @@ export default function StepReview({
 
   const [isRedirecting, setIsRedirecting] = useState(false)
 
-  const { mutateAsync: submitResponse, isPending } =
-    useSubmitResponseMutation()
+  const { mutateAsync: editResponse, isPending } =
+    useEditResponseMutation(requestId)
 
   useEffect(() => {
     if (isRedirecting) {
       const timeout = setTimeout(() => {
         setIsRedirecting(false)
-
         router.replace({
           pathname: '/(tabs)/requests',
           params: { tab: REQUESTS_TABS[1].value },
@@ -46,18 +46,17 @@ export default function StepReview({
     }
   }, [isRedirecting])
 
-  const handleSubmit = async () => {
+  const handleUpdate = async () => {
     let errorMsg = ''
 
     try {
-      await submitResponse({ media, comment, request_id: requestId })
+      await editResponse({ media, comment, request_id: requestId })
       setIsRedirecting(true)
     } catch (error) {
       errorMsg = catchErr(error).message ?? 'Something went wrong'
     } finally {
       showToastMessage(
-        errorMsg ||
-          'Your content has been submitted and the reward will be on it’s way to you once the requestor approves of it.',
+        errorMsg || 'Your response has been updated successfully.',
         errorMsg ? 'error' : 'success'
       )
     }
@@ -69,7 +68,7 @@ export default function StepReview({
         <ScrollView style={styles.content}>
           <ResponseHeader
             title="Review your content"
-            description="Please review your photos and comment before submitting."
+            description="Please review your photos and comment before updating."
           />
 
           <View style={styles.section}>
@@ -100,7 +99,7 @@ export default function StepReview({
                 if (isVideo) {
                   return (
                     <View
-                      key={`captured_video_uri_${i}`}
+                      key={`edit_video_${i}`}
                       style={[styles.mediaThumb, styles.videoThumb]}
                     >
                       <Video size={24} color={COLORS.white} />
@@ -110,7 +109,7 @@ export default function StepReview({
 
                 return (
                   <Image
-                    key={`captured_photo_uri_${i}`}
+                    key={`edit_photo_${i}`}
                     source={{ uri: asset.uri }}
                     style={styles.mediaThumb}
                   />
@@ -150,7 +149,12 @@ export default function StepReview({
         </ScrollView>
 
         <View style={styles.footer}>
-          <Button label="Submit" onPress={handleSubmit} loading={isPending} />
+          <Button
+            label="Update response"
+            onPress={handleUpdate}
+            loading={isPending}
+            disabled={disableEdit}
+          />
           <View style={styles.securityRow}>
             <Lock size={13} color={COLORS.grey[300]} />
             <Text size={12} lineHeight={16} color="grey-300">

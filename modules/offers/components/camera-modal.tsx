@@ -8,14 +8,13 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Camera } from 'react-native-vision-camera'
-import { Ionicons } from '@expo/vector-icons'
+import { Flashlight, FlashlightOff, XIcon } from 'lucide-react-native'
 
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import useCamera from '@/hooks/use-camera'
 
 import { CameraModalProps } from '../offers.types'
-import { Flashlight, FlashlightOff, XIcon } from 'lucide-react-native'
 
 function CameraModal({
   visible,
@@ -42,7 +41,7 @@ function CameraModal({
   } = useCamera()
 
   const [mode, setMode] = useState<'photo' | 'video'>('photo')
-  const [torch, setTorch] = useState<'on' | 'off'>('off')
+  const [torch, setTorch] = useState<'on' | 'off'>()
   const [cameraReady, setCameraReady] = useState(false)
   const recordingStarted = useRef(false)
 
@@ -112,8 +111,11 @@ function CameraModal({
               style={cam.camera}
               device={device}
               isActive={cameraReady}
-              outputs={mode === 'photo' ? [photoOutput] : [videoOutput]}
-              torchMode={visible && cameraReady ? torch : 'off'}
+              outputs={[photoOutput, videoOutput]}
+              torchMode={cameraReady && visible ? torch : undefined}
+              orientationSource="interface"
+              enableNativeZoomGesture
+              enableNativeTapToFocusGesture
               onConfigured={() => setCameraReady(true)}
             />
 

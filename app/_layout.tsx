@@ -22,6 +22,7 @@ import AppStorage from '@/utils/storage'
 import { useBoundStore } from '@/state'
 import { STORE_KEYS } from '@/constants'
 import { envConfig } from '@/utils/config'
+import { pusherService } from '@/lib/pusher'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -74,7 +75,6 @@ const InitialLayout = () => {
 
   const segments = useSegments() as string[]
   const pathname = segments.join('/')
-
   const storage = useRef(new AppStorage()).current
 
   const token = storage.getItem(STORE_KEYS.token)
@@ -94,6 +94,10 @@ const InitialLayout = () => {
     }
 
     init()
+  }, [])
+
+  useEffect(() => {
+    pusherService.init()
   }, [])
 
   useEffect(() => {

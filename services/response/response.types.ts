@@ -3,7 +3,10 @@ import { RequestData } from '../requests/request.types'
 export type OfferSentResponseType = {
   offer_sent: string
   responders: {
-    name: string
+    id: string
+    request_id: string
+    user: User
+    user_id: string
   }[]
 }
 
@@ -17,6 +20,12 @@ export type SentOfferResponseType = {
 }
 
 export type SubmitResponsePayload = {
+  request_id: string
+  comment: string
+  media: FileType[]
+}
+
+export type EditResponsePayload = {
   request_id: string
   comment: string
   media: FileType[]

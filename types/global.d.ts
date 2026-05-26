@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 global {
   type Direction = 'back' | 'forward'
   export interface User {
-    id: number
+    id: string
     name: string
     email: string
     profile_photo?: string | null

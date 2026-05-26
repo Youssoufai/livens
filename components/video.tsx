@@ -1,19 +1,15 @@
-import { useVideoPlayer, VideoView } from 'expo-video'
+import RNVideo, { VideoRef, ReactVideoProps } from 'react-native-video'
 import { StyleSheet } from 'react-native'
 
-import { VideoProps } from './components.types'
-
-const Video = ({ source, style }: VideoProps) => {
-  const player = useVideoPlayer(source, (player) => {
-    player.loop = true
-    player.play()
-  })
-
-  if (typeof source === 'string' && !source.toLowerCase().includes('mp4')) {
-    return null
-  }
-
-  return <VideoView player={player} style={[styles.video, style]} />
+const Video = ({ source, style, ...props }: Partial<ReactVideoProps>) => {
+  return (
+    <RNVideo
+      source={source}
+      style={[styles.video, style]}
+      pointerEvents="none"
+      {...props}
+    />
+  )
 }
 
 const styles = StyleSheet.create({

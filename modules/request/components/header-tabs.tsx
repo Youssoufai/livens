@@ -12,10 +12,11 @@ const HeaderTabs = ({
   selected,
   onSelect,
   containerStyle,
+  contentStyle,
 }: HeaderTabProps) => {
   return (
     <View style={[styles.container, containerStyle]}>
-      <ScrollView style={styles.scrollWrapper}>
+      <ScrollView style={[styles.scrollWrapper, contentStyle]}>
         {list.map((tab, index) => (
           <Pressable
             key={`${tab.value}_${index}`}

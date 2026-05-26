@@ -9,7 +9,10 @@ import {
 } from '@/utils/error-handlers'
 import { showToastMessage } from '@/components/notification'
 
-const getFilenameFromUrl = (url: string, type: 'jpg' | 'pdf' = 'jpg') => {
+export const getFilenameFromUrl = (
+  url: string,
+  type: 'jpg' | 'pdf' = 'jpg'
+) => {
   try {
     const pathname = new URL(url).pathname
     return (

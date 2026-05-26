@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native'
 import { Divider, Menu } from 'react-native-paper'
-import { ChevronRight, Ellipsis } from 'lucide-react-native'
+import { ChevronRight, Ellipsis, Video } from 'lucide-react-native'
 import { Image } from 'expo-image'
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 
@@ -12,7 +12,6 @@ import { COLORS } from '@/constants/theme'
 import ReplyIcon from '@/assets/icons/reply.svg'
 import { useGetResponseStatus } from '@/hooks/queries/use-requests'
 import RequestResponderStatusSkeleton from '@/components/placeholder/response-status-placeholder'
-import { envConfig } from '@/utils/config'
 import Switch from '@/components/ui/switch'
 import SuccessModal from '@/components/success-modal'
 import {
@@ -23,14 +22,21 @@ import {
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
 import ScreenLoader from '@/components/screen-loader'
+import { startConversation } from '@/services/chat'
 
 import { RequestSuccessModalType } from '../requests.types'
 import { getRequestSuccessModalContent } from '../requests.data'
+import ScrollView from '@/components/scrollview'
+import useRefresh from '@/hooks/use-pull-refresh'
+import { queryClient } from '@/services'
 
 const RequestResponderStatus = ({ id }: { id: string }) => {
   const [isPublic, setIsPublic] = useState(false)
   const [visibleModal, setVisibleModal] = useState<RequestSuccessModalType>()
   const [showMenuItems, setShowMenuItems] = useState(false)
+  const [chatLoading, setChatLoading] = useState(false)
+
+  const { refreshing, onRefresh } = useRefresh()
 
   const router = useRouter()
 
@@ -42,7 +48,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
   const { mutateAsync: makeRequestPublic, isPending: isMakingPublic } =
     useMakeRequestPublicMutation(id)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (responseStatusData?.response?.media_paths.length) {
       setIsPublic(!!Number(responseStatusData?.request?.make_public))
     }
@@ -51,20 +57,14 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
     responseStatusData?.response?.media_paths,
   ])
 
-  console.log(responseStatusData?.request?.make_public)
-
   if (isLoading) return <RequestResponderStatusSkeleton />
-
   if (!responseStatusData) return null
-
   if (responseStatusData.request.status === 'pending') return null
 
-  const dismissModal = () => {
-    setVisibleModal(undefined)
-  }
+  const dismissModal = () => setVisibleModal(undefined)
 
-  const responder = responseStatusData?.response?.user
-  const media = responseStatusData?.response?.media_paths?.slice(0, 4)
+  const responder = responseStatusData.response?.user
+  const media = responseStatusData.response?.media_paths?.slice(0, 4)
 
   const modalDetails = getRequestSuccessModalContent(
     responder,
@@ -73,9 +73,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
     visibleModal
   )
 
-  const isButtonDisabled = !(
-    (responseStatusData?.response?.media_paths?.length ?? 0) > 0
-  )
+  const isButtonDisabled = !responseStatusData.response?.media_paths?.length
 
   const handleVisibilitySwitch = async (value: boolean) => {
     let errorMsg = ''
@@ -128,6 +126,37 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
     }
   }
 
+  const handleMessaging = async () => {
+    setChatLoading(true)
+    try {
+      let conversation_id = responseStatusData.request.conversation_id
+
+      if (!conversation_id) {
+        const response = await startConversation(
+          [responseStatusData.request.responder ?? ''],
+          id
+        )
+
+        queryClient.invalidateQueries({ queryKey: ['request-status', id] })
+
+        conversation_id = response.id
+      }
+
+      router.push({
+        pathname: '/(requests)/chat',
+        params: {
+          conversationId: conversation_id,
+          requestId: responseStatusData.request.id,
+          receiverId: responseStatusData.response.user_id,
+        },
+      })
+    } catch (error) {
+      showToastMessage(catchErr(error).message ?? '', 'error')
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
   const responderRightContent =
     responseStatusData?.request?.status !== 'completed' ? (
       <View style={styles.responderRight}>
@@ -135,13 +164,9 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
           label="Message"
           buttonColor="white"
           labelColor="black"
+          loading={chatLoading}
           btnStyle={styles.messageButton}
-          onPress={() => {
-            router.push({
-              pathname: `/(requests)/chat`,
-              params: { conversation_id: id },
-            })
-          }}
+          onPress={handleMessaging}
         />
         <Menu
           visible={showMenuItems}
@@ -175,131 +200,154 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
         entering={FadeIn}
         exiting={FadeOut}
       >
-        <View style={styles.responderCard}>
-          <View style={styles.responderCardContent}>
-            <View style={styles.responderLeft}>
-              <View style={styles.avatar} />
-              <View style={styles.responderInfo}>
-                <Text size={16} lineHeight={20} weight={700} color="grey-500">
-                  {responder?.name}
-                </Text>
-                <Text size={14} lineHeight={28} weight={600} color="grey-300">
-                  {responder?.location}
-                </Text>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => onRefresh([['request-status', id]])}
+            />
+          }
+        >
+          <View style={styles.responderCard}>
+            <View style={styles.responderCardContent}>
+              <View style={styles.responderLeft}>
+                <View style={styles.avatar} />
+                <View style={styles.responderInfo}>
+                  <Text size={16} lineHeight={20} weight={700} color="grey-500">
+                    {responder?.name}
+                  </Text>
+                  <Text size={14} lineHeight={20} weight={600} color="grey-300">
+                    {responder?.location}
+                  </Text>
+                </View>
               </View>
+
+              {responderRightContent}
             </View>
+            {responseStatusData.request.status !== 'completed' && (
+              <>
+                <Divider style={styles.divider} />
 
-            {responderRightContent}
-          </View>
-          {responseStatusData.request.status !== 'completed' && (
-            <>
-              <Divider style={styles.divider} />
+                <View style={styles.section}>
+                  <Text size={16} lineHeight={20} weight={600} color="black">
+                    Uploaded content
+                  </Text>
+                  {media?.length ? (
+                    <>
+                      <View style={styles.uploadWrapper}>
+                        <View style={styles.uploadeContent}>
+                          {media.map((photo, index) => {
+                            if (photo.type.startsWith('video/')) {
+                              return (
+                                <View style={styles.videoThumb}>
+                                  <Video
+                                    size={24}
+                                    color={COLORS.white}
+                                    style={styles.videoIcon}
+                                  />
+                                </View>
+                              )
+                            }
 
-              <View style={styles.section}>
-                <Text size={16} lineHeight={20} weight={600} color="black">
-                  Uploaded content
-                </Text>
-                {media?.length ? (
-                  <>
-                    <View style={styles.uploadWrapper}>
-                      <View style={styles.uploadeContent}>
-                        {media.map((photo, index) => {
-                          return (
-                            <Image
-                              key={`uploaded_response_media_${index}`}
-                              source={{ uri: envConfig.imageBaseUrl + photo }}
-                              priority="high"
-                              style={styles.uploadedImage}
-                            />
-                          )
-                        })}
-                      </View>
-                      <Pressable
-                        style={styles.moreImagesButton}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/(requests)/uploaded-images',
-                            params: { id },
-                          })
-                        }
-                      >
-                        <ChevronRight />
-                      </Pressable>
-                    </View>
-                    <View style={styles.publicSearchWrapper}>
-                      <View style={styles.publicSearchHeader}>
-                        <Text
-                          size={14}
-                          lineHeight={20}
-                          weight={600}
-                          color="black"
+                            return (
+                              <Image
+                                key={`uploaded_response_media_${index}`}
+                                source={{
+                                  uri: photo.url,
+                                }}
+                                priority="high"
+                                style={styles.uploadedImage}
+                              />
+                            )
+                          })}
+                        </View>
+                        <Pressable
+                          style={styles.moreImagesButton}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/(requests)/uploaded-images',
+                              params: { id },
+                            })
+                          }
                         >
-                          Make available to public
-                        </Text>
+                          <ChevronRight />
+                        </Pressable>
                       </View>
-                      <View style={styles.publicSearchContent}>
-                        <View style={styles.publicSearchText}>
-                          <Text size={14} lineHeight={20} color="black">
-                            Allow this content to be displayed in public
-                            searches and related locations.
+                      <View style={styles.publicSearchWrapper}>
+                        <View style={styles.publicSearchHeader}>
+                          <Text
+                            size={14}
+                            lineHeight={20}
+                            weight={600}
+                            color="black"
+                          >
+                            Make available to public
                           </Text>
                         </View>
-                        <Switch
-                          value={isPublic}
-                          trackColor={COLORS.primary[400]}
-                          thumbColor={COLORS.white}
-                          onValueChange={handleVisibilitySwitch}
-                        />
+                        <View style={styles.publicSearchContent}>
+                          <View style={styles.publicSearchText}>
+                            <Text size={14} lineHeight={20} color="black">
+                              Allow this content to be displayed in public
+                              searches and related locations.
+                            </Text>
+                          </View>
+                          <Switch
+                            value={isPublic}
+                            trackColor={COLORS.primary[400]}
+                            thumbColor={COLORS.white}
+                            onValueChange={handleVisibilitySwitch}
+                          />
+                        </View>
                       </View>
-                    </View>
-                  </>
-                ) : (
-                  <Text size={14} lineHeight={20} color="black">
-                    No content has been uploaded yet.
-                  </Text>
-                )}
-              </View>
-            </>
-          )}
+                    </>
+                  ) : (
+                    <Text size={14} lineHeight={20} color="black">
+                      No content has been uploaded yet.
+                    </Text>
+                  )}
+                </View>
+              </>
+            )}
 
-          <Divider style={styles.divider} />
+            <Divider style={styles.divider} />
 
-          <View style={styles.section}>
-            <Text size={16} lineHeight={20} weight={600} color="black">
-              Responder comments
-            </Text>
-            <Text size={16} lineHeight={24} color="grey-500">
-              {responseStatusData?.response?.comment ??
-                'No comment has been added yet.'}
-            </Text>
-          </View>
-        </View>
-
-        {responseStatusData.request.status !== 'completed' && (
-          <View style={styles.bottomContainer}>
-            <View style={styles.warningBox}>
-              <ReplyIcon width={21} height={21} />
-              <View style={styles.warningContent}>
-                <Text size={14} weight={700} color="primary-500">
-                  Automatic payment
-                </Text>
-                <Text size={12} lineHeight={16} color="grey-500">
-                  You have 48 hours to withdraw this responder from the request
-                  otherwise payment will be made immediately content has been
-                  uploaded.
-                </Text>
-              </View>
+            <View style={styles.section}>
+              <Text size={16} lineHeight={20} weight={600} color="black">
+                Responder comments
+              </Text>
+              <Text size={16} lineHeight={24} color="grey-500">
+                {responseStatusData?.response?.comment ??
+                  'No comment has been added yet.'}
+              </Text>
             </View>
-
-            {/* CTA */}
-            <Button
-              label="Approve & Pay"
-              loading={isCompletingRequest}
-              disabled={isButtonDisabled}
-              onPress={approveAndPay}
-            />
           </View>
-        )}
+
+          {responseStatusData.request.status !== 'completed' && (
+            <View style={styles.bottomContainer}>
+              <View style={styles.warningBox}>
+                <ReplyIcon width={21} height={21} />
+                <View style={styles.warningContent}>
+                  <Text size={14} weight={700} color="primary-500">
+                    Automatic payment
+                  </Text>
+                  <Text size={12} lineHeight={16} color="grey-500">
+                    You have 48 hours to withdraw this responder from the
+                    request otherwise payment will be made immediately content
+                    has been uploaded.
+                  </Text>
+                </View>
+              </View>
+
+              {/* CTA */}
+              <Button
+                label="Approve & Pay"
+                loading={isCompletingRequest}
+                disabled={isButtonDisabled}
+                onPress={approveAndPay}
+              />
+            </View>
+          )}
+        </ScrollView>
       </Animated.View>
       <SuccessModal
         isOpen={!!visibleModal}
@@ -401,6 +449,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     flex: 1,
+    columnGap: 10,
   },
   moreImagesButton: {
     paddingRight: 12,
@@ -442,7 +491,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     columnGap: 6,
   },
-
+  videoThumb: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    borderRadius: 10,
+    backgroundColor: COLORS.grey[800],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoIcon: {
+    position: 'absolute',
+  },
   warningContent: {
     rowGap: 4,
     flex: 1,
