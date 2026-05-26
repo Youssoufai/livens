@@ -8,7 +8,7 @@ import {
   useVideoOutput,
 } from 'react-native-vision-camera'
 import type { CameraRef, Recorder } from 'react-native-vision-camera'
-import { cacheDirectory, copyAsync } from 'expo-file-system/legacy'
+// import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 
 import { AuthenticatedAPI } from '@/services'
 import { MAX_RECORDING_SESSION } from '@/constants'
@@ -22,7 +22,7 @@ export default function useCamera() {
   const device = useCameraDevice('back')
 
   const photoOutput = usePhotoOutput({
-    targetResolution: CommonResolutions.FHD_16_9,
+    targetResolution: CommonResolutions.FHD_4_3,
     qualityPrioritization: 'balanced',
     quality: 0.8,
     containerFormat: 'jpeg',
@@ -30,7 +30,6 @@ export default function useCamera() {
   const videoOutput = useVideoOutput({
     enableAudio: true,
     fileType: 'mp4',
-    enablePersistentRecorder: true,
   })
 
   const [recording, setRecording] = useState(false)
@@ -43,11 +42,20 @@ export default function useCamera() {
 
   //  HANDLE PICTURES CAPTURE
   const takePicture = async (): Promise<FileType | null> => {
+    photoOutput.outputOrientation = 'right'
     const photo = await photoOutput.capturePhoto({}, {})
     const path = await photo.saveToTemporaryFileAsync()
     photo.dispose()
 
+    // const context = ImageManipulator.manipulate(path).rotate(90)
+
+    // const renderedImage = await context.renderAsync()
+    // const result = await renderedImage.saveAsync({
+    //   format: SaveFormat.PNG,
+    // })
+
     const uri = path.startsWith('file://') ? path : `file://${path}`
+
     const name = uri.split('/').pop() ?? 'photo.jpeg'
     const file: FileType = {
       uri,
@@ -75,15 +83,11 @@ export default function useCamera() {
     await recorder.startRecording(
       async (filePath) => {
         setRecording(false)
-        const uri = filePath.startsWith('file://')
-          ? filePath
-          : `file://${filePath}`
+        const uri = filePath
 
         const name = uri.split('/').pop() ?? 'video.mp4'
 
-        const destUri = `${cacheDirectory}${name}`
         try {
-          await copyAsync({ from: uri, to: destUri })
           setMedia({ uri: uri, name, type: 'video/mp4' })
         } catch {
           setMedia({ uri: uri, name, type: 'video/mp4' })

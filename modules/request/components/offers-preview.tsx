@@ -3,9 +3,9 @@ import { Image, StyleSheet, Text as RNText, View } from 'react-native'
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import { getResolvedAvataUri } from '@/utils/resolver'
+import { FONTS } from '@/constants/fonts'
 
 import { OfferPreviewProps } from '../requests.types'
-import { FONTS } from '@/constants/fonts'
 
 const AVATAR_SIZE = 32
 const OVERLAP = 14

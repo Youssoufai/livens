@@ -16,7 +16,15 @@ const useRefresh = () => {
     [queryClient]
   )
 
-  return { onRefresh, refreshing }
+  const onRefreshQuery = useCallback(async function <T>(
+    callback: () => Promise<T>
+  ) {
+    setRefreshing(true)
+    await callback()
+    setRefreshing(false)
+  }, [])
+
+  return { onRefresh, onRefreshQuery, refreshing }
 }
 
 export default useRefresh

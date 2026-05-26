@@ -1,3 +1,40 @@
+export const createDateFormatOptions = (
+  day?: 'numeric' | '2-digit',
+  month?: 'numeric' | '2-digit' | 'long' | 'short',
+  year?: 'numeric' | '2-digit',
+  weekday?: 'long' | 'short' | 'narrow',
+  minute?: 'numeric' | '2-digit',
+  hour?: 'numeric' | '2-digit'
+): Intl.DateTimeFormatOptions => {
+  const format = { year, month, day } as Intl.DateTimeFormatOptions
+
+  if (hour) format.hour = hour
+
+  if (minute) format.minute = minute
+
+  if (weekday) format.weekday = weekday
+
+  return format
+}
+
+export const formatDate = (
+  date: Date | string | number | undefined,
+  countCode: 'en-NG' | 'en-GB' | 'en-US' | 'zh-CH' = 'en-NG',
+  day: '2-digit' | 'numeric' = '2-digit',
+  month: '2-digit' | 'numeric' | 'long' | 'short' = '2-digit',
+  weekday?: 'long' | 'short' | 'narrow'
+) => {
+  if (typeof date === 'string' || typeof date === 'number')
+    date = new Date(date)
+
+  if (typeof date === 'undefined') date = new Date()
+
+  return new Intl.DateTimeFormat(
+    countCode,
+    createDateFormatOptions(day, month, 'numeric', weekday)
+  ).format(date)
+}
+
 export function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()
@@ -6,7 +43,8 @@ export function formatTimeAgo(dateString: string): string {
   if (seconds < 60) return 'just now'
 
   const totalMinutes = Math.floor(seconds / 60)
-  if (totalMinutes < 60) return `${totalMinutes} min${totalMinutes !== 1 ? 's' : ''} ago`
+  if (totalMinutes < 60)
+    return `${totalMinutes} min${totalMinutes !== 1 ? 's' : ''} ago`
 
   const hours = Math.floor(totalMinutes / 60)
   const remainingMins = totalMinutes % 60

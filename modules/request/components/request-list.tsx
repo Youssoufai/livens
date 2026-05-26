@@ -7,17 +7,26 @@ import ScreenLoader from '@/components/screen-loader'
 import { catchErr } from '@/utils/error-handlers'
 import { showToastMessage } from '@/components/notification'
 import useRefresh from '@/hooks/use-pull-refresh'
-import { RequestStatusType } from '@/services/requests/request.types'
+import {
+  RequestData,
+  RequestStatusType,
+} from '@/services/requests/request.types'
 
 import EmptyState from './empty-state'
 import RequestCard from './request-card'
 import { RequestListProps } from '../requests.types'
 import { REQUESTS_TABS } from '../requests.data'
+import { generateArray } from '@/utils/generator'
+import RequestCardSkeleton from '@/components/placeholder/request-card-skeleton'
 
-const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
+const RequestList = ({
+  list = [],
+  onViewResponders,
+  isLoading,
+  refreshing,
+  onRefresh,
+}: RequestListProps) => {
   const { mutateAsync: cancelRequest, isPending } = useCancelRequestMutation()
-
-  const { onRefresh, refreshing } = useRefresh()
 
   const handleCancelRequest = useCallback(
     async (id: string) => {
@@ -43,11 +52,19 @@ const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
     router.push('/(requests)/create-request')
   }
 
+  const requestList: (RequestData | string)[] = isLoading
+    ? generateArray<string>(4)
+    : list
+
   return (
     <>
       <FlatList
-        data={list}
-        keyExtractor={(item, index) => item.id ?? `${item.longitude}_${index}`}
+        data={requestList}
+        keyExtractor={(item, index) => {
+          if (typeof item === 'string') return `ongoing-placeholder_${index}`
+
+          return item.id
+        }}
         ListEmptyComponent={
           <EmptyState
             title="You don’t have any requests"
@@ -57,6 +74,8 @@ const RequestList = ({ list = [], onViewResponders }: RequestListProps) => {
           />
         }
         renderItem={({ item }) => {
+          if (typeof item !== 'object') return <RequestCardSkeleton />
+
           const location = item.location
             ? item.location
             : {

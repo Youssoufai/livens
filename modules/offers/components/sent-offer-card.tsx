@@ -3,46 +3,36 @@ import { Pressable, StyleSheet, View } from 'react-native'
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import { globalStyles } from '@/styles/globalStyles'
-import { Approved } from '@/services/response/response.types'
+import { formatDate } from '@/utils/format'
+import { generateRequestTitle } from '@/modules/request/requests.handler'
 
-type OfferCardStatus = 'pending_approval' | 'not_selected'
+import LineIcon from '@/assets/icons/line.svg'
 
-interface SentOfferCardProps {
-  item: Approved
-  status?: OfferCardStatus
-  onPress: (id: string) => void
+import { SentOfferCardProps } from '../offers.types'
+import { BADGE_CONFIG } from '../offer.data'
+
+const LineBlock = () => {
+  return (
+    <View style={styles.lineBlockContainer}>
+      <LineIcon />
+    </View>
+  )
 }
 
-const BADGE_CONFIG: Record<OfferCardStatus, { bg: string; color: string; label: string }> = {
-  pending_approval: {
-    bg: COLORS.yellow[100],
-    color: COLORS.yellow[900],
-    label: 'Pending approval',
-  },
-  not_selected: {
-    bg: COLORS.grey[50],
-    color: COLORS.grey[400],
-    label: 'Not selected',
-  },
-}
-
-function formatPostedDate(dateString: string): string {
-  const date = new Date(dateString)
-  const day = date.getDate()
-  const month = date.toLocaleString('en-GB', { month: 'short' })
-  const year = date.getFullYear()
-  return `${day} ${month}, ${year}`
-}
+const LINE_WIDTH = 24
 
 const SentOfferCard = ({
-  item,
-  status = 'pending_approval',
+  id,
+  description,
+  status = 'pending',
+  timestamp,
   onPress,
 }: SentOfferCardProps) => {
   const badge = BADGE_CONFIG[status]
-  const location = item.location ?? 'Unknown location'
-  const description = item.description ?? ''
-  const postedDate = item.created_at ? formatPostedDate(item.created_at) : null
+
+  const postedDate = timestamp
+    ? formatDate(timestamp, 'en-US', '2-digit', 'short')
+    : null
 
   return (
     <Pressable
@@ -50,30 +40,34 @@ const SentOfferCard = ({
         styles.card,
         pressed && globalStyles.pressedOpacity,
       ]}
-      onPress={() => onPress(item.id)}
+      // onPress={() => onPress(id)}
     >
-      <View style={styles.headerRow}>
-        <Text size={12} lineHeight={16} color="grey-300">
+      <View style={[styles.headerRow, { backgroundColor: badge?.headerBg }]}>
+        <Text size={14} lineHeight={20} color="grey-400">
           You sent an offer
         </Text>
-        <View style={[styles.badge, { backgroundColor: badge.bg }]}>
-          <Text size={11} lineHeight={14} weight={600} style={{ color: badge.color }}>
-            {badge.label}
+        <View style={[styles.badge, { backgroundColor: badge?.bg }]}>
+          <Text
+            size={11}
+            lineHeight={14}
+            weight={600}
+            style={{ color: badge?.color }}
+          >
+            {badge?.label}
           </Text>
         </View>
       </View>
 
-      <View style={styles.divider} />
-
       <View style={styles.content}>
-        <Text size={14} lineHeight={18} weight={600} color="grey-700">
-          {location}
+        <LineBlock />
+        <Text size={14} lineHeight={18} weight={600} color="grey-500">
+          {generateRequestTitle(description)}
         </Text>
-        <Text size={13} lineHeight={20} color="grey-300" numberOfLines={2}>
+        <Text size={14} lineHeight={20} color="grey-300">
           {description}
         </Text>
         {postedDate ? (
-          <Text size={12} lineHeight={16} color="grey-300">
+          <Text size={11} lineHeight={14} color="grey-300">
             Posted: {postedDate}
           </Text>
         ) : null}
@@ -86,19 +80,17 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    overflow: 'hidden',
   },
   headerRow: {
+    borderWidth: 1,
+    borderColor: COLORS.grey[100],
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: COLORS.grey[50],
+    borderRadius: 8,
   },
   badge: {
     borderRadius: 20,
@@ -112,7 +104,27 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
     paddingVertical: 14,
+    paddingLeft: 12 + LINE_WIDTH + 4,
     rowGap: 6,
+    position: 'relative',
+  },
+  lineBlockContainer: {
+    width: LINE_WIDTH,
+    height: 21,
+    position: 'absolute',
+    left: 12,
+  },
+  horizontalLine: {
+    width: '100%',
+    height: 2,
+    backgroundColor: COLORS.grey[100],
+    borderBottomLeftRadius: 50,
+  },
+  verticalLine: {
+    width: 2,
+    height: '100%',
+    backgroundColor: COLORS.grey[100],
+    borderBottomLeftRadius: 50,
   },
 })
 

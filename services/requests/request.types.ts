@@ -29,10 +29,11 @@ export interface RequestData extends LocationType {
   status: RequestStatusType
   make_public?: string | null
   user_id: string
-  responder: null | { name: string; location: string } // update when backend shape is known
+  responder: null | string
   deleted_at: string | null
   created_at: string
   updated_at: string
+  conversation_id: string | null
   user: User
 }
 
@@ -47,8 +48,14 @@ export type RequestResponseStatusType = {
   request_id: string
   user_id: number
   comment: string
-  media_paths: string[]
+  media_paths: MediaType[]
   user: User
   created_at: string
   updated_at: string
+}
+
+export type MediaType = {
+  public_id: string
+  url: string
+  type: string
 }

@@ -8,22 +8,23 @@ import {
 import { useLocalSearchParams } from 'expo-router'
 import { Image } from 'expo-image'
 import { useCallback, useState } from 'react'
-import { EllipsisVertical } from 'lucide-react-native'
+import { EllipsisVertical, Video as VideoIcon } from 'lucide-react-native'
+import { ActivityIndicator } from 'react-native-paper'
 
 import { ThemedView } from '@/components/themed-view'
 import Text from '@/components/text'
 import { useGetResponseStatus } from '@/hooks/queries/use-requests'
-import { envConfig } from '@/utils/config'
 import FullScreenModal from '@/components/ui/modal'
 import { COLORS } from '@/constants/theme'
 import { useDeviceFiles } from '@/hooks/use-device-files'
 import { showToastMessage } from '@/components/notification'
-import { ActivityIndicator } from 'react-native-paper'
+import Video from '@/components/video'
+import { MediaType } from '@/services/requests/request.types'
 
 const UploadedImage = () => {
   const queryParams = useLocalSearchParams<{ id: string }>()
 
-  const [selectedImage, setSelectedImage] = useState('')
+  const [selectedImage, setSelectedImage] = useState<MediaType | null>(null)
   const [isOptionsOpen, setIsOptionsOpen] = useState(false)
   const [option, setOption] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -32,12 +33,12 @@ const UploadedImage = () => {
 
   const { data: responseStatusData } = useGetResponseStatus(queryParams.id)
 
-  const viewImage = useCallback((url: string) => {
-    setSelectedImage(url)
+  const viewImage = useCallback((file: MediaType) => {
+    setSelectedImage(file)
   }, [])
 
   const dismissModal = () => {
-    setSelectedImage('')
+    setSelectedImage(null)
   }
 
   const selectOption = (value: string) => {
@@ -48,17 +49,22 @@ const UploadedImage = () => {
   const handleImageSave = async () => {
     setIsLoading(true)
     setIsOptionsOpen(false)
-    const value = await saveFile(selectedImage)
+
+    if (!selectedImage?.url) return
+
+    const value = await saveFile(selectedImage?.url)
 
     if (value?.length) {
       showToastMessage('Saved successfully', 'success')
 
       setTimeout(() => {
-        setSelectedImage('')
+        setSelectedImage(null)
       }, 2000)
     }
     setIsLoading(false)
   }
+
+  console.log(selectedImage)
 
   return (
     <>
@@ -71,17 +77,37 @@ const UploadedImage = () => {
           numColumns={2}
           keyExtractor={(_, index) => `uploaded_images_${index}`}
           renderItem={({ item, index }) => {
-            const imageUrl = envConfig.imageBaseUrl + item
+            if (item.type.startsWith('video')) {
+              return (
+                <TouchableOpacity
+                  key={`request_media_${index}`}
+                  activeOpacity={0.75}
+                  onPress={() => viewImage(item)}
+                  style={styles.imageWrapper}
+                >
+                  <Image
+                    key={item.public_id}
+                    source={{ uri: item.url }}
+                    style={styles.image}
+                  />
+                  <VideoIcon
+                    size={24}
+                    color={COLORS.white}
+                    style={styles.videoIcon}
+                  />
+                </TouchableOpacity>
+              )
+            }
 
             return (
               <TouchableOpacity
                 key={`request_media_${index}`}
                 activeOpacity={0.75}
-                onPress={() => viewImage(imageUrl)}
+                onPress={() => viewImage(item)}
                 style={styles.imageWrapper}
               >
                 <Image
-                  source={{ uri: imageUrl }}
+                  source={{ uri: item.url }}
                   style={styles.image}
                   priority="high"
                 />
@@ -123,12 +149,19 @@ const UploadedImage = () => {
           </View>
 
           <View style={styles.modalImgWrapper}>
-            <Image
-              source={{ uri: selectedImage }}
-              priority="high"
-              contentFit="fill"
-              style={styles.modalImage}
-            />
+            {selectedImage?.type.startsWith('video') ? (
+              <Video
+                source={{ uri: selectedImage?.url }}
+                style={styles.modalImage}
+              />
+            ) : (
+              <Image
+                source={{ uri: selectedImage?.url }}
+                priority="high"
+                contentFit="fill"
+                style={styles.modalImage}
+              />
+            )}
           </View>
         </View>
         {isLoading && (
@@ -156,9 +189,13 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 4,
     overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
     height: 200,
+    width: '100%',
   },
   modalContainer: {
     backgroundColor: COLORS.black,
@@ -176,6 +213,9 @@ const styles = StyleSheet.create({
   },
   modalImage: {
     height: '100%',
+  },
+  videoIcon: {
+    position: 'absolute',
   },
   moreAction: {
     alignSelf: 'flex-end',

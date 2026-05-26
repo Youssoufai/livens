@@ -10,3 +10,13 @@ export const rateUser = async (payload: RatingType) => {
     throw error
   }
 }
+
+export const getUserById = async (id: string) => {
+  try {
+    const response = await AuthenticatedAPI(API_ENDPOINTS.profile.get_user(id))
+
+    return response.data.data as User
+  } catch (error) {
+    throw error
+  }
+}

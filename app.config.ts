@@ -45,6 +45,7 @@ export default (ctx: ConfigContext): ExpoConfig => {
       },
     },
     plugins: [
+      './plugins/withAndroidMedia3Fix',
       [
         'onesignal-expo-plugin',
         {
@@ -52,19 +53,17 @@ export default (ctx: ConfigContext): ExpoConfig => {
         },
       ],
       [
-        'expo-video',
+        'react-native-video',
         {
-          supportsBackgroundPlayback: true,
-          supportsPictureInPicture: true,
+          enableNotificationControls: true,
+          androidExtensions: {
+            useExoplayerRtsp: false,
+            useExoplayerSmoothStreaming: false,
+            useExoplayerHls: false,
+            useExoplayerDash: false,
+          },
         },
       ],
-      [
-        'expo-camera',
-        {
-          cameraPermission: 'Allow $(PRODUCT_NAME) to access your camera',
-        },
-      ],
-
       'expo-web-browser',
       'expo-secure-store',
       'expo-font',
@@ -74,6 +73,9 @@ export default (ctx: ConfigContext): ExpoConfig => {
         {
           ios: {
             useFrameworks: 'static',
+          },
+          android: {
+            enableProguardInReleaseBuilds: true,
           },
         },
       ],

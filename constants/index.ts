@@ -9,6 +9,8 @@ export const DROPDOWN_BOTTOM_MARGIN = 16
 export const MAX_RECORDING_SESSION = 90_000
 export const MIN_RECORDING_SESSION = 3000
 
+export const PUSHER_CHANNEL_NAME = 'livelens_channel'
+
 export const STORE_KEYS = {
   token: 'livens_token',
   user: 'livens_user',

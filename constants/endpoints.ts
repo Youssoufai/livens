@@ -30,9 +30,17 @@ export const API_ENDPOINTS = {
     sent_offers: '/sent-offers',
     response_to_request: '/temp-response',
     submit_response: '/submit-response',
+    edit_response: (requestId: string) => `/edit-response/${requestId}`,
   },
   search: {
     occassion: '/search-requests',
+  },
+  chat: {
+    start: '/conversations',
+    get_conversions: '/conversations',
+    get_messages: (conversationId: string) =>
+      `/conversations/${conversationId}/messages`,
+    send_message: '/messages',
   },
   payment: {
     initiate: '/paystack-init',
@@ -41,5 +49,6 @@ export const API_ENDPOINTS = {
   },
   profile: {
     rating: '/rate-user',
+    get_user: (id: string) => `get-user/${id}`,
   },
 }

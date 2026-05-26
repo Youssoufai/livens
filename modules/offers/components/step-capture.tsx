@@ -165,7 +165,7 @@ export default function StepCapture({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.white },
   content: {
-    paddingBottom: 24,
+    paddingBottom: 16,
     paddingHorizontal: 16,
     rowGap: 40,
   },

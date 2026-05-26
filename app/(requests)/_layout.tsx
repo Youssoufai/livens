@@ -81,6 +81,17 @@ const RequestLayout = () => {
           ),
         }}
       />
+      <Stack.Screen
+        name="edit-response"
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader
+              containerStyle={globalStyles.screenHeaderContainer}
+            />
+          ),
+        }}
+      />
     </Stack>
   )
 }

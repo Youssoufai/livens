@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import {
   ScrollView as RNScrollView,
   ScrollViewProps,
+  StyleProp,
   ViewStyle,
 } from 'react-native'
 
@@ -13,7 +14,7 @@ const ScrollView = ({
 }: {
   children: ReactNode
   horizontal?: boolean
-  style?: ViewStyle
+  style?: StyleProp<ViewStyle>
 } & Pick<ScrollViewProps, 'refreshControl'>) => {
   return (
     <RNScrollView

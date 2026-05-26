@@ -30,7 +30,7 @@ const STATUS_COLORS: Partial<
     btnColor: COLORS.primary[400],
   },
   'waiting for approval': {
-    label: 'Pending Approval and Payment',
+    label: 'Pending Approval & Payment',
     color: COLORS.yellow[900],
     bgColor: COLORS.yellow[100],
     btnColor: COLORS.yellow[400],
@@ -45,9 +45,12 @@ const STATUS_COLORS: Partial<
 
 const OngoingRequestCard = ({
   id,
+  requesterId,
+  conversationId,
   status = 'active',
   title,
   description,
+  isChatLoading,
   onAddResponse = () => {},
   onEditResponse = () => {},
   onWithdrawResponse,
@@ -158,9 +161,10 @@ const OngoingRequestCard = ({
           {status !== 'completed' && (
             <Button
               label="Send message"
-              onPress={() => onMessage(id ?? '')}
+              onPress={() => onMessage(id ?? '', requesterId, conversationId)}
               buttonColor="white"
               labelColor="grey-800"
+              loading={isChatLoading}
               btnStyle={styles.button}
             />
           )}
