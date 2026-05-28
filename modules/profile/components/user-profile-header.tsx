@@ -1,19 +1,29 @@
-import { Image, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { ChevronRight } from 'lucide-react-native'
 import { Link } from 'expo-router'
 
 import { COLORS } from '@/constants/theme'
 import { useBoundStore } from '@/state'
 import Text from '@/components/text'
+import { Image } from 'expo-image'
+import { envConfig } from '@/utils/config'
 
 const profileAvatar = require('@/assets/images/profile-avatar.png')
 
 const UserProfileHeader = () => {
   const user = useBoundStore((state) => state.user)
 
+  const photo = user?.profile_photo
+    ? envConfig.imageBaseUrl + user.profile_photo
+    : null
+
   return (
     <View style={styles.container}>
-      <Image source={profileAvatar} style={styles.image} />
+      <Image
+        source={photo ? { uri: photo } : undefined}
+        placeholder={profileAvatar}
+        style={styles.image}
+      />
       <View style={styles.nameWrapper}>
         <Text size={16} lineHeight={20} weight={600} color="grey-700">
           {user?.name}

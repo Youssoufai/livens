@@ -1,103 +1,112 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet, View } from 'react-native'
+import { Clock } from 'lucide-react-native'
 
-const transactions = [
-    { id: 1, title: "WALLET WITHDRAWAL", amount: "₦3,700 withdrawn from wallet", status: "Processing", date: "21/07/25 14:23" },
-    { id: 2, title: "WALLET WITHDRAWAL", amount: "₦3,700 withdrawn from wallet", status: "Failed", date: "21/07/25 14:23" },
-    { id: 3, title: "REQUEST REWARD", amount: "₦1,200 added to wallet", status: "Successful", date: "21/07/25 14:23" },
-    { id: 4, title: "WALLET DEPOSIT", amount: "₦2,500 added to wallet", status: "Successful", date: "21/07/25 16:14" },
-];
+import Text from '@/components/text'
+import { ThemedView } from '@/components/themed-view'
+import ScrollView from '@/components/scrollview'
+import { COLORS } from '@/constants/theme'
+
+type TransactionStatus = 'Processing' | 'Failed' | 'Successful'
+
+type Transaction = {
+  id: string
+  title: string
+  amount: string
+  date: string
+  status: TransactionStatus
+}
+
+const STATUS_COLORS: Record<TransactionStatus, string> = {
+  Processing: COLORS.yellow[500],
+  Failed: COLORS.red[500],
+  Successful: COLORS.green[500],
+}
+
+const transactions: Transaction[] = []
+
+const StatusBadge = ({ status }: { status: TransactionStatus }) => (
+  <View style={[styles.badge, { backgroundColor: STATUS_COLORS[status] }]}>
+    <Text size={11} weight={600} color="white">
+      {status}
+    </Text>
+  </View>
+)
+
+const TransactionCard = ({ item }: { item: Transaction }) => (
+  <View style={styles.card}>
+    <View style={styles.cardRow}>
+      <Text size={12} lineHeight={16} weight={600} color="grey-500" style={styles.cardTitle}>
+        {item.title}
+      </Text>
+      <StatusBadge status={item.status} />
+    </View>
+    <Text size={14} lineHeight={20} color="grey-700">
+      {item.amount}
+    </Text>
+    <Text size={12} lineHeight={16} color="grey-300">
+      {item.date}
+    </Text>
+  </View>
+)
 
 export default function TransactionHistory() {
-    const hasTransactions = transactions.length > 0;
+  const hasTransactions = transactions.length > 0
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Ionicons name="chevron-back" size={24} color="#000" />
-                <Text style={styles.headerTitle}>Transaction history</Text>
-            </View>
-
-            {hasTransactions ? (
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                    {transactions.map((item) => (
-                        <View key={item.id} style={styles.card}>
-                            <View style={styles.row}>
-                                <Text style={styles.title}>{item.title}</Text>
-                                <View style={[styles.status, styles[`status_${item.status}`]]}>
-                                    <Text style={styles.statusText}>{item.status}</Text>
-                                </View>
-                            </View>
-                            <Text style={styles.amount}>{item.amount}</Text>
-                            <Text style={styles.date}>{item.date}</Text>
-                        </View>
-                    ))}
-                </ScrollView>
-            ) : (
-                <View style={styles.emptyState}>
-                    <ActivityIndicator size="large" color="#aaa" />
-                    <Text style={styles.emptyText}>
-                        Once you start making transactions, your history will show up here.
-                    </Text>
-                </View>
-            )}
-        </SafeAreaView>
-    );
+  return (
+    <ThemedView style={styles.container}>
+      {hasTransactions ? (
+        <ScrollView style={styles.list}>
+          {transactions.map((item) => (
+            <TransactionCard key={item.id} item={item} />
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyState}>
+          <Clock size={48} color={COLORS.grey[200]} strokeWidth={1.5} />
+          <Text size={14} lineHeight={22} color="grey-400" align="center" style={styles.emptyText}>
+            Once you start making transactions, your history will show up here.
+          </Text>
+        </View>
+      )}
+    </ThemedView>
+  )
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff" },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: "700",
-        marginLeft: 10,
-    },
-    scrollContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 40,
-    },
-    card: {
-        backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#f2f2f2",
-        paddingVertical: 14,
-    },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    title: { fontWeight: "600", color: "#000" },
-    amount: { color: "#444", fontSize: 14, marginTop: 4 },
-    date: { color: "#999", fontSize: 12, marginTop: 2 },
-    status: {
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 6,
-    },
-    statusText: { color: "#fff", fontSize: 11, fontWeight: "600" },
-    status_Successful: { backgroundColor: "#28a745" },
-    status_Failed: { backgroundColor: "#dc3545" },
-    status_Processing: { backgroundColor: "#ffc107" },
-    emptyState: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 40,
-    },
-    emptyText: {
-        marginTop: 12,
-        fontSize: 14,
-        color: "#666",
-        textAlign: "center",
-    },
-});
+  container: {
+    paddingTop: 0,
+  },
+  list: {
+    paddingTop: 8,
+  },
+  card: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.grey[50],
+    rowGap: 4,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: 16,
+    paddingHorizontal: 40,
+  },
+  emptyText: {
+    maxWidth: 260,
+  },
+})

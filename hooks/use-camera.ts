@@ -8,7 +8,7 @@ import {
   useVideoOutput,
 } from 'react-native-vision-camera'
 import type { CameraRef, Recorder } from 'react-native-vision-camera'
-// import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 
 import { AuthenticatedAPI } from '@/services'
 import { MAX_RECORDING_SESSION } from '@/constants'
@@ -47,14 +47,14 @@ export default function useCamera() {
     const path = await photo.saveToTemporaryFileAsync()
     photo.dispose()
 
-    // const context = ImageManipulator.manipulate(path).rotate(90)
+    const context = ImageManipulator.manipulate(path).rotate(90)
 
-    // const renderedImage = await context.renderAsync()
-    // const result = await renderedImage.saveAsync({
-    //   format: SaveFormat.PNG,
-    // })
+    const renderedImage = await context.renderAsync()
+    const result = await renderedImage.saveAsync({
+      format: SaveFormat.PNG,
+    })
 
-    const uri = path.startsWith('file://') ? path : `file://${path}`
+    const uri = result.uri
 
     const name = uri.split('/').pop() ?? 'photo.jpeg'
     const file: FileType = {

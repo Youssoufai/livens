@@ -20,3 +20,35 @@ export const getUserById = async (id: string) => {
     throw error
   }
 }
+
+export const getAccountList = async () => {
+  try {
+    const response = await AuthenticatedAPI(API_ENDPOINTS.profile.accounts_list)
+
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getBankList = async () => {
+  try {
+    const response = await AuthenticatedAPI(API_ENDPOINTS.profile.bank_list)
+
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const addAccount = async () => {
+  try {
+    const response = await AuthenticatedAPI.post(
+      API_ENDPOINTS.profile.bank_account
+    )
+
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}

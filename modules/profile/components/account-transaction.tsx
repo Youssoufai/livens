@@ -28,7 +28,10 @@ const AccountTransaction = () => {
             )}
           </Text>
         </View>
-        <Pressable style={styles.transaction}>
+        <Pressable
+          style={styles.transaction}
+          onPress={() => router.push('/(profile)/transactionHistory' as any)}
+        >
           <Text size={14} lineHeight={18} color="grey-800" weight={600}>
             Transaction history
           </Text>
@@ -36,14 +39,18 @@ const AccountTransaction = () => {
         </Pressable>
       </View>
       <View style={styles.bottomContent}>
-        <Button label="Withdraw" onPress={() => {}} btnStyle={styles.button} />
+        <Button
+          label="Withdraw"
+          onPress={() => router.push('/(profile)/withdraw' as any)}
+          btnStyle={styles.button}
+        />
         <Button
           label="Fund wallet"
           labelColor="black"
           buttonColor="white"
           onPress={() =>
             router.push({
-              pathname: '/(profile)/fund-wallet',
+              pathname: '/(profile)/fund-wallet' as any,
               params: { prevScreen: 'profile' },
             })
           }

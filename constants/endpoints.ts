@@ -50,5 +50,9 @@ export const API_ENDPOINTS = {
   profile: {
     rating: '/rate-user',
     get_user: (id: string) => `get-user/${id}`,
+    edit: '/',
+    accounts_list: '/get-bank-account',
+    bank_list: '/list-bank',
+    bank_account: '/bank-account',
   },
 }

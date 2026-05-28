@@ -66,6 +66,13 @@ global {
     formattedAddress: string
   }
 
+  type SheetContentType = {
+    title: string
+    description?: string
+    index: number
+    content: ReactNode
+  }
+
   type ColorsType = typeof COLORS
 
   type FirstColorFieldType = keyof ColorsType

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { useRef } from 'react'
 import { Divider } from 'react-native-paper'
 import { useRouter } from 'expo-router'
@@ -26,7 +26,7 @@ const UserProfile = () => {
     logout()
     storage.removeItem(STORE_KEYS.token)
 
-    router.replace('/(auth)/login')
+    router.replace('/(auth)/login' as any)
   }
 
   return (
@@ -42,7 +42,7 @@ const UserProfile = () => {
               title={item.title}
               description={item.description}
               icon={item.icon}
-              // link={item.link}
+              link={item.link}
             />
           ))}
         </View>
