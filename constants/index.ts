@@ -17,4 +17,5 @@ export const STORE_KEYS = {
   userId: 'livens_user_id',
   onboarding: 'livens_onboarding',
   preference: 'livens_preference',
+  pushToken: 'livens_push_token',
 }

@@ -41,7 +41,7 @@ const ProfileLayout = () => {
       />
       <Stack.Screen name="withdraw" options={{ title: 'Withdraw' }} />
       <Stack.Screen
-        name="transactionHistory"
+        name="transaction-history"
         options={{ title: 'Transaction history' }}
       />
       <Stack.Screen name="support" options={{ title: 'Help & support' }} />

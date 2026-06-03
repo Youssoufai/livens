@@ -27,6 +27,7 @@ export const changePasswordSchema = Yup.object({
 export const addBankSchema = Yup.object({
   bank: Yup.string().required('A bank is required'),
   accountNumber: Yup.string().required('Account number is required'),
+  accountName: Yup.string().required('An account name is required'),
 })
 
 export const deleteAccountSchema = Yup.object({

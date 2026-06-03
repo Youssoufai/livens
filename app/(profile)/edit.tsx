@@ -36,10 +36,24 @@ export default function EditProfileScreen() {
 
   const onSubmit: SubmitHandler<EditProfileFormValues> = async (values) => {
     try {
-      await AuthenticatedAPI.put(API_ENDPOINTS.profile.edit, {
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
+      const formdata = new FormData()
+
+      if (values.name !== user?.name) {
+        formdata.append('name', values.name)
+      }
+
+      if (values.phone !== user?.phone) {
+        formdata.append('phone', values.phone)
+      }
+
+      if (photo) {
+        formdata.append('photo', photo as any)
+      }
+
+      await AuthenticatedAPI.put(API_ENDPOINTS.profile.edit, formdata, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       })
       await getUser()
       showToastMessage('Profile updated successfully', 'success')
@@ -94,7 +108,7 @@ export default function EditProfileScreen() {
         label="Save"
         onPress={handleSubmit(onSubmit)}
         loading={isSubmitting}
-        disabled={!isDirty || !isValid || !photo}
+        disabled={(!isDirty && !photo) || !isValid}
         btnStyle={styles.button}
       />
     </ThemedView>

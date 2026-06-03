@@ -13,6 +13,9 @@ import SearchModal from '@/components/search-modal'
 import { API_ENDPOINTS } from '@/constants/endpoints'
 import { useBoundStore } from '@/state'
 import { grantLocationPermission } from '@/utils/resolver'
+import { registerForPushNoft } from '@/services/profile'
+import AppStorage from '@/utils/storage'
+import LocationInput from '@/components/location-input'
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -21,9 +24,15 @@ export default function SearchScreen() {
   const userLocation = useBoundStore((state) => state.user?.location)
   const getUser = useBoundStore((state) => state.getUser)
 
+  const storage = new AppStorage()
+
   const location = userLocation
     ?.slice(userLocation.lastIndexOf(',') + 1)
     .trimStart()
+
+  const handlePushSubscription = async () => {
+    await registerForPushNoft(storage, API_ENDPOINTS.profile.notification)
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -35,6 +44,10 @@ export default function SearchScreen() {
 
   useEffect(() => {
     grantLocationPermission()
+  }, [])
+
+  useEffect(() => {
+    handlePushSubscription()
   }, [])
 
   const headerImage = (
@@ -56,6 +69,8 @@ export default function SearchScreen() {
     }
   }, [])
 
+  const handleLocation = (values: LocationType) => {}
+
   return (
     <ImageBackground
       source={require('@/assets/images/search.png')}
@@ -70,14 +85,7 @@ export default function SearchScreen() {
         contentBackgroundColor="white"
       >
         <View style={styles.main}>
-          <SearchModal
-            placeholder="Search places, areas, events"
-            endpoint={API_ENDPOINTS.search.occassion}
-            needsAuthentication
-            onSelect={selectQueryItem}
-            filterOption={filterOption ?? ''}
-            onChangeOption={setFilterOption}
-          />
+          <LocationInput placeholder="" onLocation={handleLocation} />
 
           <View>
             <Text

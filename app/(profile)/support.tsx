@@ -31,12 +31,12 @@ export default function HelpAndSupport() {
             description="Find quick answers to common questions about using the app."
             href="/(profile)/faqs"
           />
-          <SupportItem
+          {/* <SupportItem
             icon={<MessageSquare size={22} color={COLORS.grey[500]} />}
             title="Send us a message"
             description="Drop us a message and we'll get back to you as soon as possible."
             href="/(profile)/contact"
-          />
+          /> */}
         </View>
       </ScrollView>
     </ThemedView>

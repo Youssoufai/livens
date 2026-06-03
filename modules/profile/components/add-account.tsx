@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
+import { ActivityIndicator, TextInput } from 'react-native-paper'
 
 import SelectInput from '@/components/select-input'
 import Button from '@/components/ui/button'
@@ -11,65 +12,123 @@ import { addBankSchema, AddBankSchemaType } from '@/schemas/profile'
 import { useAddAccountMutation } from '@/hooks/mutations/use-profile'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
+import { getAccountName, getBankList } from '@/services/profile'
+import SheetInput from '@/components/ui/sheet-input'
 
 const AddAccount = ({ onCloseSheet }: { onCloseSheet: VoidFunction }) => {
-  const [bankList, setBankList] = useState([])
+  const [bankList, setBankList] = useState<ListItem[]>([])
+  const [isLoadingName, setIsLoadingName] = useState(false)
 
   const {
     handleSubmit,
     control,
-    formState: { isValid },
+    watch,
+    setValue,
+    setError,
+    formState: { isValid, isSubmitting },
   } = useForm({ resolver: yupResolver(addBankSchema) })
 
   const { mutateAsync: addAccount } = useAddAccountMutation()
 
+  const bank = watch('bank')
+  const accountNumber = watch('accountNumber')
+
+  const fetchBanks = useCallback(async () => {
+    try {
+      const banks = await getBankList()
+
+      setBankList(banks)
+    } catch (error) {}
+  }, [])
+
+  const handleAccountName = useCallback(async () => {
+    if (!bank || !accountNumber) return
+
+    if (accountNumber.length < 10) return
+
+    setIsLoadingName(true)
+    try {
+      const name = await getAccountName(bank, accountNumber)
+
+      name && setValue('accountName', name, { shouldValidate: true })
+    } catch (error) {
+      console.error(error)
+      setError('accountName', catchErr(error), { shouldFocus: true })
+    } finally {
+      setIsLoadingName(false)
+    }
+  }, [bank, accountNumber])
+
+  useEffect(() => {
+    fetchBanks()
+  }, [fetchBanks])
+
+  useEffect(() => {
+    handleAccountName()
+  }, [handleAccountName])
+
   const handleAddBank: SubmitHandler<AddBankSchemaType> = async (values) => {
     try {
-      await addAccount()
+      const bankObj = bankList.find((item) => item.value === bank)
+
+      await addAccount({
+        bank_code: values.bank,
+        account_number: values.accountNumber,
+        bank_name: bankObj?.label ?? '',
+      })
+      onCloseSheet()
     } catch (error) {
       showToastMessage(
         catchErr(error).message ?? 'Failed to add the account',
-        'error'
+        'error',
+        'top-center'
       )
     }
   }
 
   return (
     <View style={styles.sheetBody}>
-      <View style={styles.field}>
-        <SelectInput
-          control={control}
-          options={bankList}
-          name="bank"
-          label="Choose bank"
-          placeholder=""
-        />
-      </View>
+      <SelectInput
+        control={control}
+        options={bankList}
+        name="bank"
+        label="Choose bank"
+        placeholder="Choose Bank"
+      />
 
-      <View style={styles.field}>
-        <Input
-          control={control}
-          label="Account number"
-          placeholder="0000000000"
-          keyboardType="number-pad"
-          maxLength={10}
-          addBottomPadding={false}
-        />
-      </View>
-
-      <View style={styles.field}>
-        <Input
-          control={control}
-          label="Account name"
-          placeholder="Ex. John Doe"
-          addBottomPadding={false}
-        />
-      </View>
+      <SheetInput
+        control={control}
+        name="accountNumber"
+        label="Account number"
+        placeholder=""
+        keyboardType="number-pad"
+        maxLength={10}
+        addBottomPadding={false}
+      />
+      <Input
+        control={control}
+        name="accountName"
+        label="Account name"
+        placeholder=""
+        addBottomPadding={false}
+        disabled
+        editable
+        right={
+          isLoadingName ? (
+            <TextInput.Icon
+              icon={() => (
+                <ActivityIndicator size={18} color={COLORS.green[200]} />
+              )}
+            />
+          ) : undefined
+        }
+      />
 
       <Button
         label="Add bank account"
         onPress={handleSubmit(handleAddBank)}
         disabled={!isValid}
+        loading={isSubmitting}
         btnStyle={styles.addBankSubmit}
       />
     </View>

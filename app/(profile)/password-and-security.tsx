@@ -1,12 +1,10 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { StyleSheet, View } from 'react-native'
-import { useState } from 'react'
+import { useFocusEffect, useRouter } from 'expo-router'
+import { useCallback, useRef, useState } from 'react'
 
 import Button from '@/components/ui/button'
-import Input from '@/components/ui/input'
-import Switch from '@/components/ui/switch'
-import Text from '@/components/text'
 import { ThemedView } from '@/components/themed-view'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
@@ -17,6 +15,12 @@ import {
   changePasswordSchema,
   ChangePasswordFormValues,
 } from '@/schemas/profile'
+import { API_ENDPOINTS } from '@/constants/endpoints'
+import PasswordInput from '@/components/password-input'
+import { useBoundStore } from '@/state'
+import AppStorage from '@/utils/storage'
+import { STORE_KEYS } from '@/constants'
+import ScreenLoader from '@/components/screen-loader'
 
 export default function PasswordAndSecurity() {
   const {
@@ -33,14 +37,40 @@ export default function PasswordAndSecurity() {
     },
   })
 
-  const onSubmit: SubmitHandler<ChangePasswordFormValues> = async (values) => {
+  const [isRedirecting, setIsRedirecting] = useState(false)
+
+  const storage = useRef(new AppStorage()).current
+
+  const router = useRouter()
+
+  const logout = useBoundStore((state) => state.logout)
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isRedirecting) {
+        const timeoutId = setTimeout(() => {
+          setIsRedirecting(false)
+          logout()
+          storage.removeItem(STORE_KEYS.token)
+          router.replace('/(auth)/login')
+        }, 2500)
+
+        return () => clearTimeout(timeoutId)
+      }
+    }, [isRedirecting, router, logout])
+  )
+
+  const submitForm: SubmitHandler<ChangePasswordFormValues> = async (
+    values
+  ) => {
     try {
-      await AuthenticatedAPI.post('/change-password', {
+      await AuthenticatedAPI.patch(API_ENDPOINTS.profile.change_password, {
         current_password: values.currentPassword,
-        new_password: values.newPassword,
-        new_password_confirmation: values.confirmPassword,
+        password: values.newPassword,
+        password_confirmation: values.confirmPassword,
       })
       reset()
+      setIsRedirecting(true)
       showToastMessage('Password updated successfully', 'success')
     } catch (error) {
       showToastMessage(
@@ -51,43 +81,49 @@ export default function PasswordAndSecurity() {
   }
 
   return (
-    <ThemedView hasBottomPadding style={styles.container}>
-      <ScrollView style={styles.scroll}>
-        <View style={styles.section}>
-          <View style={styles.form}>
-            <Input
-              control={control}
-              name="currentPassword"
-              label="Current password"
-              secureTextEntry
-              error={errors.currentPassword?.message}
-            />
-            <Input
-              control={control}
-              name="newPassword"
-              label="New password"
-              secureTextEntry
-              error={errors.newPassword?.message}
-            />
-            <Input
-              control={control}
-              name="confirmPassword"
-              label="Confirm new password"
-              secureTextEntry
-              error={errors.confirmPassword?.message}
-            />
+    <>
+      <ThemedView hasBottomPadding style={styles.container}>
+        <ScrollView style={styles.scroll}>
+          <View style={styles.section}>
+            <View style={styles.form}>
+              <PasswordInput
+                control={control}
+                name="currentPassword"
+                label="Current password"
+                placeholder=""
+                error={errors.currentPassword?.message}
+              />
+              <PasswordInput
+                control={control}
+                name="newPassword"
+                label="New password"
+                placeholder=""
+                error={errors.newPassword?.message}
+              />
+              <PasswordInput
+                control={control}
+                name="confirmPassword"
+                label="Confirm new password"
+                placeholder=""
+                error={errors.confirmPassword?.message}
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      <Button
-        label="Update password"
-        onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-        disabled={!isValid}
-        btnStyle={styles.button}
+        <Button
+          label="Update password"
+          onPress={handleSubmit(submitForm)}
+          loading={isSubmitting}
+          disabled={!isValid}
+          btnStyle={styles.button}
+        />
+      </ThemedView>
+      <ScreenLoader
+        isLoading={isRedirecting}
+        content="Redirecting to login..."
       />
-    </ThemedView>
+    </>
   )
 }
 

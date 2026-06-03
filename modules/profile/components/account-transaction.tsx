@@ -30,7 +30,7 @@ const AccountTransaction = () => {
         </View>
         <Pressable
           style={styles.transaction}
-          onPress={() => router.push('/(profile)/transactionHistory' as any)}
+          onPress={() => router.push('/(profile)/transaction-history')}
         >
           <Text size={14} lineHeight={18} color="grey-800" weight={600}>
             Transaction history

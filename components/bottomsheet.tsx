@@ -124,6 +124,8 @@ const BottomSheet = memo(
       [backgroundColor]
     )
 
+    console.log(title)
+
     return (
       <Portal>
         <GBottomSheet

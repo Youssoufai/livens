@@ -1,11 +1,11 @@
 import { StyleSheet, View } from 'react-native'
 import { ChevronRight } from 'lucide-react-native'
 import { Link } from 'expo-router'
+import { Image } from 'expo-image'
 
 import { COLORS } from '@/constants/theme'
 import { useBoundStore } from '@/state'
 import Text from '@/components/text'
-import { Image } from 'expo-image'
 import { envConfig } from '@/utils/config'
 
 const profileAvatar = require('@/assets/images/profile-avatar.png')
@@ -49,6 +49,8 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: COLORS.grey[50],
   },
   nameWrapper: {
     flex: 1,

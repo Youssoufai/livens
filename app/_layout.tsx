@@ -23,6 +23,7 @@ import { useBoundStore } from '@/state'
 import { STORE_KEYS } from '@/constants'
 import { envConfig } from '@/utils/config'
 import { pusherService } from '@/lib/pusher'
+import useOneSignalPushNotification from '@/hooks/use-one-signal-push'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -77,24 +78,14 @@ const InitialLayout = () => {
   const pathname = segments.join('/')
   const storage = useRef(new AppStorage()).current
 
+  useOneSignalPushNotification()
+
   const token = storage.getItem(STORE_KEYS.token)
   const isAuthenticated = useBoundStore((state) => state.isAuthenticated)
 
   const isInSession = isAuthenticated || !!token
 
   const isReady = appIsReady && fontLoaded
-
-  useEffect(() => {
-    const init = async () => {
-      OneSignal.Debug.setLogLevel(LogLevel.Verbose)
-
-      await OneSignal.initialize('ab35b02e-e56d-4e83-86ca-ca3ad162e87a')
-
-      await OneSignal.Notifications.requestPermission(false)
-    }
-
-    init()
-  }, [])
 
   useEffect(() => {
     pusherService.init()

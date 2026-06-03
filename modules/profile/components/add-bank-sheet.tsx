@@ -1,8 +1,9 @@
 import { StyleSheet, View } from 'react-native'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 import BottomSheet from '@/components/bottomsheet'
 import { COLORS } from '@/constants/theme'
+import { getBankList } from '@/services/profile'
 
 import { WithdrawSheetProps } from '../profile.types'
 import AddAccount from './add-account'
@@ -11,18 +12,10 @@ import WithdrawAmount from './withdraw-amount'
 const WithdrawalSheet = ({
   isVisible,
   type,
+  recipientCode,
   onCloseSheet,
 }: WithdrawSheetProps) => {
-  const snapPoint = useRef([500, 250]).current
-
-  const getBanks = useCallback(async () => {
-    try {
-    } catch (error) {}
-  }, [])
-
-  useEffect(() => {
-    getBanks()
-  }, [getBanks])
+  const snapPoint = useRef([500, 290]).current
 
   const sheetContent: Record<string, SheetContentType> = {
     add_account: {
@@ -33,7 +26,12 @@ const WithdrawalSheet = ({
     withdraw: {
       title: 'Withdrawal amount',
       index: 1,
-      content: <WithdrawAmount onCloseSheet={onCloseSheet} />,
+      content: (
+        <WithdrawAmount
+          recipientCode={recipientCode}
+          onCloseSheet={onCloseSheet}
+        />
+      ),
     },
   }
 
@@ -41,7 +39,7 @@ const WithdrawalSheet = ({
     <BottomSheet
       title={sheetContent[type]?.title}
       isVisible={isVisible}
-      index={isVisible ? 0 : sheetContent[type]?.index}
+      index={!isVisible ? -1 : sheetContent[type]?.index}
       snapPoints={snapPoint}
       onClose={onCloseSheet}
     >

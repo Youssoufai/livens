@@ -96,13 +96,14 @@ const CustomToast = ({
 
 export function showToastMessage(
   message: string,
-  type: 'success' | 'error' = 'success'
+  type: 'success' | 'error' = 'success',
+  position?: ToastPosition
 ) {
   let toastId = Math.random().toString(36)
 
   const options: Partial<ToastProps> = {
     id: toastId,
-    position: 'bottom-center' as ToastPosition,
+    position: position ?? ('bottom-center' as ToastPosition),
     duration: 5000,
     icon: getToastIcon(type),
     closeButton: true,

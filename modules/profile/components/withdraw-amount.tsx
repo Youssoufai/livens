@@ -2,12 +2,17 @@ import { StyleSheet, View } from 'react-native'
 import { useState } from 'react'
 
 import Button from '@/components/ui/button'
-import Input from '@/components/ui/input'
 import { intiateWithdrawal } from '@/services/payment'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
+import SheetInput from '@/components/ui/sheet-input'
 
-const WithdrawAmount = ({ onCloseSheet }: { onCloseSheet: VoidFunction }) => {
+import { WithdrawalContentProps } from '../profile.types'
+
+const WithdrawAmount = ({
+  recipientCode,
+  onCloseSheet,
+}: WithdrawalContentProps) => {
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -17,7 +22,10 @@ const WithdrawAmount = ({ onCloseSheet }: { onCloseSheet: VoidFunction }) => {
     let errMsg = ''
     setLoading(true)
     try {
-      await intiateWithdrawal(+amount)
+      await intiateWithdrawal({
+        amount: +amount,
+        recipient_code: recipientCode,
+      })
       onCloseSheet()
     } catch (error) {
       errMsg = catchErr(error)?.message ?? 'Failed to initiate withdrawal'
@@ -32,7 +40,7 @@ const WithdrawAmount = ({ onCloseSheet }: { onCloseSheet: VoidFunction }) => {
 
   return (
     <View style={styles.container}>
-      <Input
+      <SheetInput
         keyboardType="number-pad"
         label="Amount"
         value={amount}
@@ -45,7 +53,8 @@ const WithdrawAmount = ({ onCloseSheet }: { onCloseSheet: VoidFunction }) => {
 
 const styles = StyleSheet.create({
   container: {
-    rowGap: 24,
+    rowGap: 12,
+    paddingTop: 12,
   },
 })
 

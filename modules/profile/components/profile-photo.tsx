@@ -6,36 +6,23 @@ import ReactNativeModal from 'react-native-modal'
 
 import AddPhotoIcon from '@/assets/icons/add-photo.svg'
 import { COLORS } from '@/constants/theme'
-import useCamera from '@/hooks/use-camera'
+import useDeviceImages from '@/hooks/use-device-image'
+import { showToastMessage } from '@/components/notification'
+import { handleErrorInstances } from '@/utils/error-handlers'
 
 import { ProfilePhotoProps } from '../profile.types'
 
 const ProfilePhoto = ({ setImage, image }: ProfilePhotoProps) => {
-  const {
-    cameraRef,
-    device,
-    photoOutput,
-    takePicture,
-    hasPermission,
-    requestPermission,
-  } = useCamera()
-  const [isModalVisible, setIsModalVisible] = useState(false)
+  const { uploadImg } = useDeviceImages('single')
 
   const openCamera = async () => {
-    if (!hasPermission) {
-      const granted = await requestPermission()
-      if (!granted) return
+    try {
+      const image = await uploadImg()
+
+      image && setImage(image)
+    } catch (error) {
+      showToastMessage(handleErrorInstances(error), 'error')
     }
-    setIsModalVisible(true)
-  }
-
-  const handlePhotoUpdate = async () => {
-    const photo = await takePicture()
-
-    if (!photo) return
-
-    setImage(photo)
-    setIsModalVisible(false)
   }
 
   return (
@@ -50,7 +37,7 @@ const ProfilePhoto = ({ setImage, image }: ProfilePhotoProps) => {
           <AddPhotoIcon />
         </Pressable>
       </View>
-      <ReactNativeModal isVisible={isModalVisible} style={styles.cameraModal}>
+      {/* <ReactNativeModal isVisible={isModalVisible} style={styles.cameraModal}>
         {device && (
           <Camera
             ref={cameraRef}
@@ -61,7 +48,7 @@ const ProfilePhoto = ({ setImage, image }: ProfilePhotoProps) => {
           />
         )}
         <Pressable style={styles.captureButton} onPress={handlePhotoUpdate} />
-      </ReactNativeModal>
+      </ReactNativeModal> */}
     </View>
   )
 }

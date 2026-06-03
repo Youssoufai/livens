@@ -4,7 +4,8 @@ import Lock from '@/assets/icons/lock.svg'
 import Notification from '@/assets/icons/notification-unread.svg'
 import Support from '@/assets/icons/chat.svg'
 
-import { FaqSection, ProfileDataType } from './profile.types'
+import { FaqSection, ProfileDataType, TransactionStatus } from './profile.types'
+import { COLORS } from '@/constants/theme'
 
 export const PROFILE_DATA: ProfileDataType[] = [
   {
@@ -18,11 +19,10 @@ export const PROFILE_DATA: ProfileDataType[] = [
     description:
       'Control the alerts you receive for live updates and requests.',
     icon: Notification,
-    link: '/(profile)/notifications' as Href,
   },
   {
     title: 'Help and support',
-    description: '',
+    description: 'Get answers to questions or contact us for help.',
     icon: Support,
     link: '/(profile)/support' as Href,
   },
@@ -85,3 +85,14 @@ export const FAQ_DATA: FaqSection[] = [
     ],
   },
 ]
+
+export const STATUS_COLORS = {
+  credit: {
+    text: COLORS.green[500],
+    background: COLORS.green[50],
+  },
+  debit: {
+    text: COLORS.primary[500],
+    background: COLORS.primary[50],
+  },
+}

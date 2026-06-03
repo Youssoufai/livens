@@ -3,3 +3,8 @@ export type InitiatePaymentResponse = {
   reference: string
   message?: string
 }
+
+export type WithdrawalRequestType = {
+  amount: number
+  recipient_code: string
+}

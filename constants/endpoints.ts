@@ -48,11 +48,16 @@ export const API_ENDPOINTS = {
     withdraw: '/initiate-withdrawal',
   },
   profile: {
+    change_password: '/change-password',
     rating: '/rate-user',
     get_user: (id: string) => `get-user/${id}`,
-    edit: '/',
+    edit: '/update-profile',
     accounts_list: '/get-bank-account',
     bank_list: '/list-bank',
     bank_account: '/bank-account',
+    account_name: '/account-name',
+    transactions: '/user-transactions',
+    notification: '/device-token',
+    toggle_notification: '/toggle-notifications',
   },
 }

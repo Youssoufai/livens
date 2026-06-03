@@ -163,7 +163,7 @@ export interface RatingContentProps {
 }
 
 export interface RequestEmptyStateProps {
-  title: string
+  title?: string
   description: string
   icon?: ReactNode
   buttonLabel?: string

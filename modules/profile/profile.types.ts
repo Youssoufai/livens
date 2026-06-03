@@ -2,6 +2,8 @@ import { Href } from 'expo-router'
 import { FC, FunctionComponent } from 'react'
 import { SvgProps } from 'react-native-svg'
 
+export type TransactionStatus = 'credit' | 'debit'
+
 export interface TileProps {
   type?: string
   isEnabled?: boolean
@@ -13,6 +15,7 @@ export interface TileProps {
   link?: Href
   hasBorder?: boolean
   onPress?: VoidFunction
+  onToggle?: (value: boolean) => void
 }
 
 export type ProfileDataType = {
@@ -63,6 +66,7 @@ export interface ProfilePhotoProps {
 export interface WithdrawSheetProps {
   isVisible: boolean
   type: string
+  recipientCode: string
   onCloseSheet: VoidFunction
 }
 
@@ -73,4 +77,18 @@ export interface AccountOptionProps {
   isSelected: boolean
   isDefault: boolean
   onSelect: (id: string) => void
+}
+
+export interface TransactionProps {
+  id: string
+  type: string
+  amount: string
+  date: string
+  status: TransactionStatus
+  hasBorder?: boolean
+}
+
+export interface WithdrawalContentProps {
+  recipientCode: string
+  onCloseSheet: VoidFunction
 }

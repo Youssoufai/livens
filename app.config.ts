@@ -48,7 +48,9 @@ export default (ctx: ConfigContext): ExpoConfig => {
       [
         'onesignal-expo-plugin',
         {
-          mode: 'development',
+          mode: String(process.env.EXPO_PUBLIC_ENVIRONMENT),
+          smallIcons: ['./assets/images/notification-icon.png'],
+          largeIcons: ['./assets/images/notification-icon.png'],
         },
       ],
       './plugins/withAndroidMedia3Fix',

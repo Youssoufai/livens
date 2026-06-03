@@ -16,12 +16,10 @@ const AccountOption = ({
   onSelect,
 }: AccountOptionProps) => {
   return (
-    <Pressable style={styles.container} onPress={() => onSelect(id)}>
-      {isDefault && (
-        <View style={styles.defaultWrapper}>
-          <Text color="white">Default</Text>
-        </View>
-      )}
+    <Pressable
+      style={[styles.container, isSelected && styles.selectedOption]}
+      onPress={() => onSelect(id)}
+    >
       <View style={styles.content}>
         <BankIcon />
         <View style={styles.textWrapper}>
@@ -32,7 +30,12 @@ const AccountOption = ({
             {accountNumber}
           </Text>
         </View>
-        <View style={styles.indicatorWrapper}>
+        <View
+          style={[
+            styles.indicatorWrapper,
+            isSelected && styles.loseIndicatorBorder,
+          ]}
+        >
           {isSelected && <View style={styles.indicator} />}
         </View>
       </View>
@@ -46,6 +49,18 @@ const styles = StyleSheet.create({
     borderColor: COLORS.grey[100],
     borderRadius: 8,
     padding: 16,
+    position: 'relative',
+    overflow: 'visible',
+  },
+  selectedOption: {
+    borderColor: COLORS.primary[500],
+  },
+  defaultBadgeContainer: {
+    position: 'absolute',
+    top: -14,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
   },
   content: {
     flexDirection: 'row',
@@ -56,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: COLORS.primary[500],
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 4,
   },
   textWrapper: {
     rowGap: 2,
@@ -71,11 +86,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  loseIndicatorBorder: {
+    borderWidth: 0,
+  },
   indicator: {
-    width: '90%',
-    height: '90%',
+    width: '100%',
+    height: '100%',
     borderRadius: 9999,
-    backgroundColor: COLORS.primary[500],
+    backgroundColor: COLORS.white,
+    borderWidth: 5,
+    borderColor: COLORS.primary[500],
   },
 })
 
