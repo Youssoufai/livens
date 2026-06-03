@@ -53,12 +53,13 @@ const SelectInput = ({
     } else {
       onChangeText?.(value)
     }
-    setInputValue(value)
+    const option = options.find((item) => item.value.toString() === value)
+    setInputValue(option?.label ?? value)
   }
 
   return (
     <View style={styles.container}>
-      <Text size={16} lineHeight={24} color="grey-500">
+      <Text size={14} lineHeight={18} weight={600} color="grey-500">
         {label}
       </Text>
       <Dropdown
@@ -83,7 +84,7 @@ const SelectInput = ({
 
 const styles = StyleSheet.create({
   container: {
-    rowGap: 12,
+    rowGap: 8,
   },
 })
 

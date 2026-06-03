@@ -8,7 +8,8 @@ import {
   useVideoOutput,
 } from 'react-native-vision-camera'
 import type { CameraRef, Recorder } from 'react-native-vision-camera'
-// import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
+import { Paths, File } from 'expo-file-system'
 
 import { AuthenticatedAPI } from '@/services'
 import { MAX_RECORDING_SESSION } from '@/constants'
@@ -47,14 +48,14 @@ export default function useCamera() {
     const path = await photo.saveToTemporaryFileAsync()
     photo.dispose()
 
-    // const context = ImageManipulator.manipulate(path).rotate(90)
+    const context = ImageManipulator.manipulate(path).rotate(90)
 
-    // const renderedImage = await context.renderAsync()
-    // const result = await renderedImage.saveAsync({
-    //   format: SaveFormat.PNG,
-    // })
+    const renderedImage = await context.renderAsync()
+    const result = await renderedImage.saveAsync({
+      format: SaveFormat.PNG,
+    })
 
-    const uri = path.startsWith('file://') ? path : `file://${path}`
+    const uri = result.uri
 
     const name = uri.split('/').pop() ?? 'photo.jpeg'
     const file: FileType = {
@@ -83,15 +84,15 @@ export default function useCamera() {
     await recorder.startRecording(
       async (filePath) => {
         setRecording(false)
-        const uri = filePath
+        const absolutePath = filePath.startsWith('file://') ? filePath : `file://${filePath}`
+        const source = new File(absolutePath)
+        const dest = new File(Paths.cache, `video_${Date.now()}.mp4`)
+        source.copy(dest)
 
-        const name = uri.split('/').pop() ?? 'video.mp4'
+        const uri = dest.uri
+        const name = dest.name
 
-        try {
-          setMedia({ uri: uri, name, type: 'video/mp4' })
-        } catch {
-          setMedia({ uri: uri, name, type: 'video/mp4' })
-        }
+        setMedia({ uri, name, type: 'video/mp4' })
       },
       () => setRecording(false)
     )

@@ -1,7 +1,7 @@
 import { API_ENDPOINTS } from '@/constants/endpoints'
 
 import { AuthenticatedAPI } from '..'
-import { InitiatePaymentResponse } from './payment.types'
+import { InitiatePaymentResponse, WithdrawalRequestType } from './payment.types'
 
 export const initiateFund = async (amount: number) => {
   try {
@@ -28,11 +28,11 @@ export const verifyPayment = async (reference: string) => {
   }
 }
 
-export const intiateWithdrawal = async (amount: number) => {
+export const intiateWithdrawal = async (payload: WithdrawalRequestType) => {
   try {
     const response = await AuthenticatedAPI.post(
       API_ENDPOINTS.payment.withdraw,
-      amount
+      payload
     )
 
     return

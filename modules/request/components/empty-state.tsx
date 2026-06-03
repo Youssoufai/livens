@@ -16,15 +16,17 @@ const EmptyState = ({
     <View style={styles.container}>
       {icon}
       <View style={styles.textWrapper}>
-        <Text
-          size={20}
-          lineHeight={24}
-          weight={600}
-          align="center"
-          color="black"
-        >
-          {title}
-        </Text>
+        {title && (
+          <Text
+            size={20}
+            lineHeight={24}
+            weight={600}
+            align="center"
+            color="black"
+          >
+            {title}
+          </Text>
+        )}
         <Text
           size={16}
           lineHeight={24}

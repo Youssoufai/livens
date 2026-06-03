@@ -45,23 +45,20 @@ export default (ctx: ConfigContext): ExpoConfig => {
       },
     },
     plugins: [
-      './plugins/withAndroidMedia3Fix',
       [
         'onesignal-expo-plugin',
         {
-          mode: 'development',
+          mode: String(process.env.EXPO_PUBLIC_ENVIRONMENT),
+          smallIcons: ['./assets/images/notification-icon.png'],
+          largeIcons: ['./assets/images/notification-icon.png'],
         },
       ],
+      './plugins/withAndroidMedia3Fix',
       [
-        'react-native-video',
+        'expo-video',
         {
-          enableNotificationControls: true,
-          androidExtensions: {
-            useExoplayerRtsp: false,
-            useExoplayerSmoothStreaming: false,
-            useExoplayerHls: false,
-            useExoplayerDash: false,
-          },
+          supportsBackgroundPlayback: true,
+          supportsPictureInPicture: true,
         },
       ],
       'expo-web-browser',
@@ -76,6 +73,7 @@ export default (ctx: ConfigContext): ExpoConfig => {
           },
           android: {
             enableProguardInReleaseBuilds: true,
+            extraProguardRules: '-dontwarn org.slf4j.impl.StaticLoggerBinder',
           },
         },
       ],

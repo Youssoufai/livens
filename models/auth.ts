@@ -62,5 +62,4 @@ export interface BankAccount {
   bank_name: string
   account_number: string
   recipient_code: string
-  amount: number
 }

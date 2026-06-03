@@ -1,9 +1,11 @@
 import { ReactElement, ReactNode } from 'react'
 import { DimensionValue, TextStyle, ViewStyle } from 'react-native'
 import { OtpInputProps } from 'react-native-otp-entry'
+import { ExternalPathString, Href, RelativePathString } from 'expo-router'
+import { BottomSheetBackdropProps } from '@gorhom/bottom-sheet'
+import { BackdropPressBehavior } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
 
 import { FONTS } from '@/constants/fonts'
-import { ExternalPathString, Href, RelativePathString } from 'expo-router'
 
 export type ColorType =
   | 'primary-50'
@@ -96,6 +98,28 @@ export interface ActionRowProps {
   onPress?: VoidFunction
 }
 
+export interface CustomBottomSheetProps {
+  portalName?: string
+  children: ReactNode
+  title?: ReactNode
+  description?: ReactNode
+  index?: number
+  alignIcon?: 'right' | 'left'
+  lastIndex?: number
+  snapPoints: (string | number)[]
+  isVisible: boolean
+  backdropComponent?: (props: BottomSheetBackdropProps) => ReactElement
+  backdropPress?: BackdropPressBehavior
+  backdropOpacity?: number
+  backgroundColor?: string
+  disappearsOnIndex?: number
+  onClose?: VoidFunction
+  enableDynamicSizing?: boolean
+  enablePanDownToClose?: boolean
+  showIndicator?: boolean
+  hideCloseIcon?: boolean
+}
+
 export interface ScreenLoaderProps {
   isLoading: boolean
   content?: ReactNode
@@ -179,6 +203,8 @@ export interface SkeletonLoaderProps {
 }
 
 export interface VideoProps {
-  source: string | FileType
+  source: string
+  play?: VoidFunction
+  pause?: VoidFunction
   style?: ViewStyle
 }

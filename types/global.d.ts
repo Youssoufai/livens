@@ -66,6 +66,28 @@ global {
     formattedAddress: string
   }
 
+  type SheetContentType = {
+    title: string
+    description?: string
+    index: number
+    content: ReactNode
+  }
+
+  type Transaction = {
+    id: number
+    type: string
+    reference: string | null
+    amount: string
+    email: string
+    status: string
+    created_at: string
+    updated_at: string
+  }
+
+  type UserPreference = {
+    pushEnabled: boolean
+  }
+
   type ColorsType = typeof COLORS
 
   type FirstColorFieldType = keyof ColorsType

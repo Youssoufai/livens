@@ -4,6 +4,7 @@ import { Link } from 'expo-router'
 
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
+import Switch from '@/components/ui/switch'
 
 import { TileProps } from '../profile.types'
 
@@ -15,46 +16,59 @@ const Tile = ({
   isEnabled,
   link,
   onPress,
+  onToggle,
   hasBorder = true,
   textColor,
 }: TileProps) => {
   const Icon = icon
 
   const content = (
-    <TouchableOpacity activeOpacity={0.7}>
-      <View
-        style={[
-          styles.mainContent,
-          hasBorder && {
-            borderBottomWidth: 1,
-            borderBottomColor: '#0000001A',
-          },
-        ]}
-      >
-        <View style={styles.iconWrapper}>
-          {<Icon height={24} width={24} />}
-        </View>
-        <View style={styles.textWrapper}>
-          <Text size={16} lineHeight={20} color="black" weight={600}>
-            {title}
+    <View
+      style={[
+        styles.mainContent,
+        hasBorder && {
+          borderBottomWidth: 1,
+          borderBottomColor: '#0000001A',
+        },
+      ]}
+    >
+      <View style={styles.iconWrapper}>{<Icon height={24} width={24} />}</View>
+      <View style={styles.textWrapper}>
+        <Text size={16} lineHeight={20} color="black" weight={600}>
+          {title}
+        </Text>
+        {description && (
+          <Text size={14} lineHeight={20} color="grey-400">
+            {description}
           </Text>
-          {description && (
-            <Text size={14} lineHeight={20} color="grey-400">
-              {description}
-            </Text>
-          )}
-        </View>
-        <ChevronRight size={24} color={COLORS.grey[200]} />
+        )}
       </View>
-    </TouchableOpacity>
+      {onToggle ? (
+        <Switch
+          value={isEnabled}
+          onValueChange={onToggle}
+          trackColor={COLORS.primary[500]}
+          thumbColor={COLORS.white}
+        />
+      ) : (
+        <ChevronRight size={24} color={COLORS.grey[200]} />
+      )}
+    </View>
   )
 
-  return link ? (
+  return onToggle ? (
+    content
+  ) : link ? (
     <Link href={link} asChild>
-      {content}
+      <TouchableOpacity activeOpacity={0.7}>{content}</TouchableOpacity>
     </Link>
   ) : (
-    <Pressable onPress={onPress}>{content}</Pressable>
+    <Pressable
+      style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+      onPress={onPress}
+    >
+      {content}
+    </Pressable>
   )
 }
 

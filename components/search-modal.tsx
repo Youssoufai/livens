@@ -132,10 +132,10 @@ const SearchModal = ({
             onChangeText={setSearch}
             onClear={clearSearch}
           />
-          <SearchFilter
+          {/* <SearchFilter
             value={filterOption ?? ''}
             onValueChange={onChangeOption}
-          />
+          /> */}
         </View>
         <ScrollView style={styles.scrollContent}>
           {loading ? (

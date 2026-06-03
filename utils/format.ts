@@ -22,6 +22,7 @@ export const formatDate = (
   countCode: 'en-NG' | 'en-GB' | 'en-US' | 'zh-CH' = 'en-NG',
   day: '2-digit' | 'numeric' = '2-digit',
   month: '2-digit' | 'numeric' | 'long' | 'short' = '2-digit',
+  year?: 'numeric' | '2-digit',
   weekday?: 'long' | 'short' | 'narrow'
 ) => {
   if (typeof date === 'string' || typeof date === 'number')
@@ -31,7 +32,7 @@ export const formatDate = (
 
   return new Intl.DateTimeFormat(
     countCode,
-    createDateFormatOptions(day, month, 'numeric', weekday)
+    createDateFormatOptions(day, month, year ?? 'numeric', weekday)
   ).format(date)
 }
 

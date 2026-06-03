@@ -115,7 +115,7 @@ const Dropdown = ({
                 onPress={() => handleSuggestionPress(item.value.toString())}
               >
                 <Text size={16} lineHeight={20} color="grey-600" weight={600}>
-                  {item.value}
+                  {item.label}
                 </Text>
               </Pressable>
             ))}

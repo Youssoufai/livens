@@ -42,7 +42,7 @@ const Switch = memo(
           <Animated.View
             style={[
               styles.thumb,
-              { backgroundColor: value ? thumbColor : trackColor },
+              { backgroundColor: thumbColor },
               { transform: [{ translateX }] },
             ]}
           ></Animated.View>

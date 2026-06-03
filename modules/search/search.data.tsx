@@ -1,6 +1,11 @@
 import { Image } from 'react-native'
 
-import { OptionType } from './search.types'
+import {
+  OptionType,
+  SearchDateFilter,
+  SearchHasResponsesFilter,
+  SearchSortFilter,
+} from './search.types'
 
 export const HOME_OPTIONS: OptionType[] = [
   {
@@ -18,7 +23,7 @@ export const HOME_OPTIONS: OptionType[] = [
   {
     title: 'Ask the public',
     description:
-      'Get answers from locals about what’s happening in a location.',
+      "Get answers from locals about what's happening in a location.",
     icon: () => (
       <Image
         source={require('@/assets/images/chat-bubble.png')}
@@ -32,23 +37,53 @@ export const HOME_OPTIONS: OptionType[] = [
     title: 'See nearby requests',
     description: 'Earn fast cash by responding to nearby requests',
     icon: () => (
-      <Image source={{ uri: '' }} style={{ width: 45, height: 45 }} />
+      <Image
+        source={require('@/assets/images/earn.png')}
+        style={{ width: 45, height: 45 }}
+      />
     ),
     link: '/(tabs)/requests',
   },
 ]
 
 export const searchFilterOptions = [
+  { label: 'Date posted', value: 'date-posted' },
+  { label: 'Sort by', value: 'sort' },
+  { label: 'Has responses?', value: 'has-responses' },
+]
+
+export const DATE_FILTER_OPTIONS: {
+  label: string
+  shortLabel: string
+  value: SearchDateFilter
+}[] = [
+  { label: 'Posted Anytime', shortLabel: 'Anytime', value: 'anytime' },
   {
-    label: 'Date posted',
-    value: 'date-posted',
+    label: 'Posted in the last 24 hours',
+    shortLabel: 'Last 24 hours',
+    value: 'last-24h',
   },
   {
-    label: 'Sort by',
-    value: 'sort',
+    label: 'Posted in the last week',
+    shortLabel: 'Last week',
+    value: 'last-week',
   },
   {
-    label: 'Has responses?',
-    value: 'has-responses',
+    label: 'Posted in the last month',
+    shortLabel: 'Last month',
+    value: 'last-month',
   },
+]
+
+export const HAS_RESPONSES_OPTIONS: {
+  label: string
+  value: SearchHasResponsesFilter
+}[] = [
+  { label: 'Yes', value: 'yes' },
+  { label: 'No', value: 'no' },
+]
+
+export const SORT_OPTIONS: { label: string; value: SearchSortFilter }[] = [
+  { label: 'Newest first', value: 'newest' },
+  { label: 'Oldest first', value: 'oldest' },
 ]

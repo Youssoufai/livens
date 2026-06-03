@@ -39,6 +39,8 @@ export function useGoogleSignIn() {
       if (error instanceof AxiosError) {
         errorMsg = catchErr(error).message ?? 'Something went wrong'
       } else if (isErrorWithCode(error)) {
+        console.log(error)
+
         switch (error.code) {
           case statusCodes.IN_PROGRESS:
             errorMsg = 'operation (eg. sign in) already in progress'

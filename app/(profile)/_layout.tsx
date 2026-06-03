@@ -2,7 +2,6 @@ import { Stack } from 'expo-router'
 import { StyleSheet } from 'react-native'
 
 import { CustomHeader } from '@/components/custom-header'
-import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { COLORS } from '@/constants/theme'
 import { FONTS } from '@/constants/fonts'
 
@@ -34,6 +33,25 @@ const ProfileLayout = () => {
       }}
     >
       <Stack.Screen name="fund-wallet" options={{ title: 'Fund wallet' }} />
+      <Stack.Screen name="edit" options={{ title: 'Edit profile' }} />
+      <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+      <Stack.Screen
+        name="password-and-security"
+        options={{ title: 'Change Password' }}
+      />
+      <Stack.Screen name="withdraw" options={{ title: 'Withdraw' }} />
+      <Stack.Screen
+        name="transaction-history"
+        options={{ title: 'Transaction history' }}
+      />
+      <Stack.Screen name="support" options={{ title: 'Help & support' }} />
+      <Stack.Screen name="faqs" options={{ title: 'FAQs' }} />
+      <Stack.Screen name="contact" options={{ title: 'About' }} />
+      <Stack.Screen
+        name="delete-account"
+        options={{ title: 'Delete account' }}
+      />
+      <Stack.Screen name="refer" options={{ title: 'Refer & Earn' }} />
     </Stack>
   )
 }
