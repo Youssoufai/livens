@@ -1,5 +1,6 @@
 import { COLORS } from '@/constants/theme'
-import { RequestStatusType } from '@/services/requests/request.types'
+
+import { OfferStatusType } from './offers.types'
 
 export const DEFAULT_CHECKLIST = [
   'Clearly and carefully taken.',
@@ -9,7 +10,7 @@ export const DEFAULT_CHECKLIST = [
 
 export const BADGE_CONFIG: Partial<
   Record<
-    RequestStatusType,
+    OfferStatusType,
     { bg: string; color: string; label: string; headerBg: string }
   >
 > = {
@@ -20,6 +21,18 @@ export const BADGE_CONFIG: Partial<
     headerBg: COLORS.white,
   },
   'waiting for approval': {
+    bg: COLORS.primary[50],
+    color: COLORS.primary[400],
+    label: 'Pending response approval',
+    headerBg: COLORS.primary[50],
+  },
+  completed: {
+    bg: COLORS.green[50],
+    color: COLORS.green[400],
+    label: 'Response approved',
+    headerBg: COLORS.green[50],
+  },
+  rejected: {
     bg: COLORS.grey[50],
     color: COLORS.grey[400],
     label: 'Not selected',

@@ -3,6 +3,7 @@ import { OneSignal } from 'react-native-onesignal'
 export const getPushSubscriptionId = async () => {
   try {
     const alreadyGranted = await OneSignal.Notifications.getPermissionAsync()
+
     let isGranted = false
 
     if (alreadyGranted) {

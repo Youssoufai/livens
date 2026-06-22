@@ -68,8 +68,6 @@ export default function CaptureProcess() {
 
   const showHeader = step < 4
 
-  console.log(request_id)
-
   return (
     <ThemedView style={styles.container} hasBottomPadding>
       {showHeader && (

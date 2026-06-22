@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
   },
   search: {
     occassion: '/search-requests',
+    getDetails: (id: string) => `/searched-request/${id}`,
   },
   chat: {
     start: '/conversations',

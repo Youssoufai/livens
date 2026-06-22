@@ -9,9 +9,9 @@ export const useGetOfferListQuery = (requestId: string) => {
   })
 }
 
-export const useGetSentOfferListQuery = () => {
+export const useGetSentOfferListQuery = (type: string) => {
   return useQuery({
-    queryKey: ['sent-offers'],
-    queryFn: getSentOfferList,
+    queryKey: ['sent-offers', type],
+    queryFn: () => getSentOfferList(type),
   })
 }

@@ -3,14 +3,37 @@ import { SearchResultItem } from '@/modules/search/search.types'
 
 import { AuthenticatedAPI } from '..'
 
-export const getSearchResults = async (query: string): Promise<SearchResultItem[]> => {
+export const getSearchResults = async (query: {
+  location?: LocationType
+  period?: string
+}): Promise<SearchResultItem[]> => {
   try {
-    const { data } = await AuthenticatedAPI.post(
+    const { data } = await AuthenticatedAPI.get(
       API_ENDPOINTS.search.occassion,
-      { search: query }
+      {
+        params: {
+          longitude: query.location?.longitude,
+          latitude: query.location?.latitude,
+          period: query.period,
+        },
+      }
     )
 
-    return (data.data ?? []) as SearchResultItem[]
+    return (data ?? []) as SearchResultItem[]
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getSearchDetails = async (
+  id: string
+): Promise<SearchResultItem> => {
+  try {
+    const { data } = await AuthenticatedAPI.get(
+      API_ENDPOINTS.search.getDetails(id)
+    )
+
+    return data as SearchResultItem
   } catch (error) {
     throw error
   }

@@ -1,35 +1,20 @@
-import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { FlatList, StyleSheet, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { Image } from 'expo-image'
 import { useCallback, useState } from 'react'
-import { EllipsisVertical, Video as VideoIcon } from 'lucide-react-native'
-import { ActivityIndicator } from 'react-native-paper'
+import { Video as VideoIcon } from 'lucide-react-native'
 
 import { ThemedView } from '@/components/themed-view'
 import Text from '@/components/text'
 import { useGetResponseStatus } from '@/hooks/queries/use-requests'
-import FullScreenModal from '@/components/ui/modal'
 import { COLORS } from '@/constants/theme'
-import { useDeviceFiles } from '@/hooks/use-device-files'
-import { showToastMessage } from '@/components/notification'
-import Video from '@/components/video'
 import { MediaType } from '@/services/requests/request.types'
+import MediaDisplay from '@/components/media-display'
 
 const UploadedImage = () => {
   const queryParams = useLocalSearchParams<{ id: string }>()
 
   const [selectedImage, setSelectedImage] = useState<MediaType | null>(null)
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false)
-  const [option, setOption] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-
-  const { saveFile } = useDeviceFiles()
 
   const { data: responseStatusData } = useGetResponseStatus(queryParams.id)
 
@@ -40,31 +25,6 @@ const UploadedImage = () => {
   const dismissModal = () => {
     setSelectedImage(null)
   }
-
-  const selectOption = (value: string) => {
-    setOption(value)
-    setIsOptionsOpen(false)
-  }
-
-  const handleImageSave = async () => {
-    setIsLoading(true)
-    setIsOptionsOpen(false)
-
-    if (!selectedImage?.url) return
-
-    const value = await saveFile(selectedImage?.url)
-
-    if (value?.length) {
-      showToastMessage('Saved successfully', 'success')
-
-      setTimeout(() => {
-        setSelectedImage(null)
-      }, 2000)
-    }
-    setIsLoading(false)
-  }
-
-  console.log(selectedImage)
 
   return (
     <>
@@ -77,7 +37,7 @@ const UploadedImage = () => {
           numColumns={2}
           keyExtractor={(_, index) => `uploaded_images_${index}`}
           renderItem={({ item, index }) => {
-            if (item.type.startsWith('video')) {
+            if (item?.url?.endsWith('mp4')) {
               return (
                 <TouchableOpacity
                   key={`request_media_${index}`}
@@ -118,58 +78,7 @@ const UploadedImage = () => {
           contentContainerStyle={styles.contentContainer}
         />
       </ThemedView>
-      <FullScreenModal
-        visible={!!selectedImage}
-        contentStyle={styles.modalContainer}
-        statusBarStyle="light"
-        onDismiss={dismissModal}
-      >
-        <View style={styles.modalContent}>
-          <View style={styles.moreAction}>
-            {!isOptionsOpen ? (
-              <Pressable
-                style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
-                onPress={() => setIsOptionsOpen(true)}
-              >
-                <EllipsisVertical size={24} color={COLORS.white} />
-              </Pressable>
-            ) : (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.option,
-                  { opacity: pressed ? 0.75 : 1 },
-                ]}
-                onPress={handleImageSave}
-              >
-                <Text lineHeight={20} weight={600} color="grey-700">
-                  Save to camera roll
-                </Text>
-              </Pressable>
-            )}
-          </View>
-
-          <View style={styles.modalImgWrapper}>
-            {selectedImage?.type.startsWith('video') ? (
-              <Video
-                source={{ uri: selectedImage?.url }}
-                style={styles.modalImage}
-              />
-            ) : (
-              <Image
-                source={{ uri: selectedImage?.url }}
-                priority="high"
-                contentFit="fill"
-                style={styles.modalImage}
-              />
-            )}
-          </View>
-        </View>
-        {isLoading && (
-          <View style={[styles.loaderWrapper, StyleSheet.absoluteFill]}>
-            <ActivityIndicator size={75} color={COLORS.yellow[500]} />
-          </View>
-        )}
-      </FullScreenModal>
+      <MediaDisplay selectedMedia={selectedImage} onDismiss={dismissModal} />
     </>
   )
 }
@@ -197,41 +106,8 @@ const styles = StyleSheet.create({
     height: 200,
     width: '100%',
   },
-  modalContainer: {
-    backgroundColor: COLORS.black,
-    position: 'relative',
-  },
-  modalContent: {
-    flex: 1,
-    justifyContent: 'center',
-    rowGap: 24,
-    position: 'relative',
-  },
-  modalImgWrapper: {
-    height: '80%',
-    paddingTop: 48,
-  },
-  modalImage: {
-    height: '100%',
-  },
   videoIcon: {
     position: 'absolute',
-  },
-  moreAction: {
-    alignSelf: 'flex-end',
-    position: 'absolute',
-    top: '10%',
-    zIndex: 10,
-  },
-  option: {
-    backgroundColor: COLORS.white,
-    padding: 16,
-  },
-  loaderWrapper: {
-    backgroundColor: '#00000061',
-    zIndex: 1000,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 })
 

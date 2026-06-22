@@ -87,10 +87,14 @@ export default function FundWalletScreen() {
       if (isRedirecting) {
         const timeoutId = setTimeout(() => {
           setIsRedirecting(false)
-          router.replace({
-            pathname: '/(requests)/create-request',
-            params: { step: '4' },
-          })
+          if (queryParams.prevScreen) {
+            router.replace({
+              pathname: '/(requests)/create-request',
+              params: { step: '4' },
+            })
+          } else {
+            router.back()
+          }
         }, 2500)
 
         return () => clearTimeout(timeoutId)

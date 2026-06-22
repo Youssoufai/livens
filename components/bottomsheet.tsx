@@ -124,8 +124,6 @@ const BottomSheet = memo(
       [backgroundColor]
     )
 
-    console.log(title)
-
     return (
       <Portal>
         <GBottomSheet
@@ -164,8 +162,8 @@ const BottomSheet = memo(
                 <View style={styles.header}>
                   {title && (
                     <Text
-                      size={24}
-                      lineHeight={32}
+                      size={16}
+                      lineHeight={24}
                       color="grey-800"
                       weight={700}
                       style={styles.title}

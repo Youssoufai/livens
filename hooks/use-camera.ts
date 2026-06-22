@@ -12,7 +12,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { Paths, File } from 'expo-file-system'
 
 import { AuthenticatedAPI } from '@/services'
-import { MAX_RECORDING_SESSION } from '@/constants'
+import { MAX_RECORDING_SESSION, OPTIMAL_VIDEO_BITRATE } from '@/constants'
 
 export default function useCamera() {
   const { hasPermission, requestPermission } = useCameraPermission()
@@ -24,13 +24,16 @@ export default function useCamera() {
 
   const photoOutput = usePhotoOutput({
     targetResolution: CommonResolutions.FHD_4_3,
-    qualityPrioritization: 'balanced',
-    quality: 0.8,
+    qualityPrioritization: 'speed',
+    quality: 0.7,
     containerFormat: 'jpeg',
   })
   const videoOutput = useVideoOutput({
     enableAudio: true,
     fileType: 'mp4',
+    targetBitRate: OPTIMAL_VIDEO_BITRATE,
+    targetResolution: CommonResolutions.FHD_4_3,
+    enableHigherResolutionCodecs: true,
   })
 
   const [recording, setRecording] = useState(false)
@@ -84,7 +87,9 @@ export default function useCamera() {
     await recorder.startRecording(
       async (filePath) => {
         setRecording(false)
-        const absolutePath = filePath.startsWith('file://') ? filePath : `file://${filePath}`
+        const absolutePath = filePath.startsWith('file://')
+          ? filePath
+          : `file://${filePath}`
         const source = new File(absolutePath)
         const dest = new File(Paths.cache, `video_${Date.now()}.mp4`)
         source.copy(dest)

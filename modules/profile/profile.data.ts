@@ -3,11 +3,18 @@ import { Href } from 'expo-router'
 import Lock from '@/assets/icons/lock.svg'
 import Notification from '@/assets/icons/notification-unread.svg'
 import Support from '@/assets/icons/chat.svg'
+import LocationIcon from '@/assets/icons/tab-location.svg'
 
 import { FaqSection, ProfileDataType, TransactionStatus } from './profile.types'
 import { COLORS } from '@/constants/theme'
 
 export const PROFILE_DATA: ProfileDataType[] = [
+  {
+    title: 'Location update',
+    description: 'Update your location and be visibile to more request.',
+    icon: LocationIcon,
+    link: '/(profile)/update-location',
+  },
   {
     title: 'Password & security',
     description: 'Update your password and manage your account security.',

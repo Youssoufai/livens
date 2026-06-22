@@ -1,5 +1,6 @@
 import {
   FlatList,
+  Modal,
   Pressable,
   StyleSheet,
   TextInput,
@@ -8,19 +9,18 @@ import {
 } from 'react-native'
 import { useDebounce } from 'use-debounce'
 import { Search } from 'lucide-react-native'
+import { useRouter } from 'expo-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Portal } from 'react-native-paper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { GooglePlacesTextInputRef } from 'react-native-google-places-textinput'
 
-import { API, AuthenticatedAPI } from '@/services'
 import { COLORS } from '@/constants/theme'
-import SearchFilter from '@/modules/search/components/search-filter'
-import { generateArray } from '@/utils/generator'
 
 import SearchInput from './search-input'
-import FullScreenModal from './ui/modal'
-import ScrollView from './scrollview'
 import { SearchModalProps } from './components.types'
 import Text from './text'
-import { SkeletonLoader } from './skeleton-loader'
+import LocationInput from './location-input'
 
 const EmptSearchResult = ({ search }: { search: string }) => {
   return (
@@ -45,21 +45,18 @@ const EmptSearchResult = ({ search }: { search: string }) => {
 }
 
 const SearchModal = ({
-  endpoint,
-  extraPayload,
-  needsAuthentication,
-  filterOption,
+  placeholder,
   onChangeOption,
   onSelect,
 }: SearchModalProps) => {
   const [search, setSearch] = useState('')
-  const [suggestions, setSuggestions] = useState<ListItem[]>([])
   const [isVisible, setIsVisible] = useState(false)
-  const [loading, setLoading] = useState(false)
 
-  const inputRef = useRef<TextInput>(null)
+  const { top, bottom } = useSafeAreaInsets()
 
-  const [debouncedValue] = useDebounce(search, 1000)
+  const inputRef = useRef<GooglePlacesTextInputRef>(null)
+
+  const router = useRouter()
 
   const clearSearch = () => {
     setSearch('')
@@ -79,28 +76,15 @@ const SearchModal = ({
     }
   }, [isVisible])
 
-  useEffect(() => {
-    const fetchSearchResult = async () => {
-      try {
-        setLoading(true)
-        if (debouncedValue && endpoint) {
-          const response = await (
-            needsAuthentication ? AuthenticatedAPI : API
-          ).post(endpoint, { search: debouncedValue, ...extraPayload })
-
-          return []
-        }
-      } catch (error) {
-        return []
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSearchResult()
-  }, [debouncedValue, endpoint, needsAuthentication, extraPayload])
-
-  const searchData = loading ? generateArray<string>(6) : suggestions
+  const handleLocation = (values: LocationType) => {
+    setIsVisible(false)
+    router.push({
+      pathname: '/(search)/search-result',
+      params: {
+        location: JSON.stringify(values),
+      },
+    })
+  }
 
   return (
     <>
@@ -114,63 +98,42 @@ const SearchModal = ({
           <View pointerEvents="none">
             <SearchInput
               value={search}
+              placeholder="Search places and areas around you"
               onChangeText={() => {}}
               onClear={clearSearch}
             />
           </View>
         </View>
       </View>
-      <FullScreenModal
-        visible={isVisible}
-        onDismiss={() => setIsVisible(false)}
-        contentStyle={styles.modalContent}
-      >
-        <View style={styles.searchWrapper}>
-          <SearchInput
-            ref={inputRef}
-            value={search}
-            onChangeText={setSearch}
-            onClear={clearSearch}
-          />
-          {/* <SearchFilter
+      <Portal>
+        <Modal
+          visible={isVisible}
+          allowSwipeDismissal
+          onRequestClose={() => setIsVisible(false)}
+          onDismiss={() => setIsVisible(false)}
+        >
+          <View
+            style={[
+              styles.modalContent,
+              { paddingTop: top, paddingBottom: bottom },
+            ]}
+          >
+            <View style={styles.searchWrapper}>
+              <LocationInput
+                ref={inputRef}
+                defaultValue={search}
+                placeholder=""
+                onLocation={handleLocation}
+                inputContainerStyle={styles.searchInput}
+              />
+            </View>
+            {/* <SearchFilter
             value={filterOption ?? ''}
             onValueChange={onChangeOption}
           /> */}
-        </View>
-        <ScrollView style={styles.scrollContent}>
-          {loading ? (
-            generateArray<string>(6, '').map((_, index) => (
-              <SkeletonLoader
-                key={`search_placeholder_${index}`}
-                height={18}
-                style={styles.loader}
-              />
-            ))
-          ) : suggestions.length ? (
-            suggestions.map((item, index) => {
-              return (
-                <Pressable
-                  key={`${item.value}_${index}`}
-                  style={({ pressed }) => [
-                    styles.option,
-                    suggestions.length - 1 === index && styles.onBorder,
-                    pressed && { opacity: 0.75 },
-                  ]}
-                  onPress={() =>
-                    onSelect(item?.id ?? item?.value.toString() ?? '')
-                  }
-                >
-                  <Text size={16} lineHeight={24} weight={600} color="grey-600">
-                    {item.label}
-                  </Text>
-                </Pressable>
-              )
-            })
-          ) : search && !suggestions.length ? (
-            <EmptSearchResult search={search} />
-          ) : null}
-        </ScrollView>
-      </FullScreenModal>
+          </View>
+        </Modal>
+      </Portal>
     </>
   )
 }
@@ -181,6 +144,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     paddingHorizontal: 0,
+    flex: 1,
+    backgroundColor: COLORS.white,
   },
   searchWrapper: {
     paddingHorizontal: 16,
@@ -190,6 +155,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: COLORS.grey[50],
   },
+  searchInput: {
+    borderRadius: 30,
+  },
+
   scrollContent: {
     rowGap: 16,
     paddingHorizontal: 16,

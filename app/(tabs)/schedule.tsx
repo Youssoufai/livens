@@ -7,31 +7,22 @@ import { useGetSentOfferListQuery } from '@/hooks/queries/use-response'
 import SentOfferList from '@/modules/offers/components/sent-offer-list'
 import { SentOfferResponseType } from '@/services/response/response.types'
 import useRefresh from '@/hooks/use-pull-refresh'
-import { QueryObserverResult } from '@tanstack/react-query'
 
 const OFFERS_TABS: ListItem[] = [
-  { label: 'Sent offers', value: 'sent' },
+  { label: 'Sent offers', value: 'sent_offers' },
   { label: 'Archived offers', value: 'archived' },
 ]
 
 const Schedule = () => {
-  const [activeTab, setActiveTab] = useState('sent')
-  const { data, isLoading, refetch } = useGetSentOfferListQuery()
+  const [activeTab, setActiveTab] = useState(OFFERS_TABS[0].value.toString())
+  const { data, isLoading, refetch, error } =
+    useGetSentOfferListQuery(activeTab)
 
   const { refreshing, onRefreshQuery } = useRefresh()
 
   const responseData = data as unknown as SentOfferResponseType
-  const allOffers = responseData?.approved ?? []
 
-  const sentOffers = allOffers.filter(
-    (o) =>
-      o.status === 'pending' ||
-      o.status === 'active' ||
-      o.status === 'waiting for approval'
-  )
-  const archivedOffers = allOffers.filter((o) => o.status === 'completed')
-
-  const isSentTab = activeTab === 'sent'
+  const isSentTab = activeTab === OFFERS_TABS[0].value
 
   const handleRefresh = () => {
     onRefreshQuery(refetch)
@@ -48,7 +39,7 @@ const Schedule = () => {
       <ThemedView style={styles.content}>
         <SentOfferList
           type={activeTab}
-          data={isSentTab ? sentOffers : archivedOffers}
+          data={data?.data}
           isLoading={isLoading}
           refreshing={refreshing}
           onRefresh={handleRefresh}

@@ -4,15 +4,13 @@ import { useRouter } from 'expo-router'
 
 import SentOfferCardSkeleton from '@/components/placeholder/sent-offer-card-skeleton'
 import EmptyState from '@/modules/request/components/empty-state'
+import { GLOBAL_HORIZONTAL_PADDING } from '@/constants'
+import ScheduleSendIcon from '@/assets/icons/schedule_send_lg.svg'
+import { generateArray } from '@/utils/generator'
 import { Approved } from '@/services/response/response.types'
 
-import ScheduleSendIcon from '@/assets/icons/schedule_send_lg.svg'
-
 import SentOfferCard from './sent-offer-card'
-import { SentOfferListProps } from '../offers.types'
-import { GLOBAL_HORIZONTAL_PADDING } from '@/constants'
-
-const SKELETON_COUNT = 3
+import { OfferStatusType, SentOfferListProps } from '../offers.types'
 
 const SentOfferList = ({
   type,
@@ -25,6 +23,8 @@ const SentOfferList = ({
 }: SentOfferListProps) => {
   const router = useRouter()
 
+  console.log({ data })
+
   const handlePress = useCallback(
     (id: string) => {
       router.push({ pathname: '/(offers)/sent', params: { id } })
@@ -32,25 +32,20 @@ const SentOfferList = ({
     [router]
   )
 
-  if (isLoading) {
-    return (
-      <FlatList
-        data={Array.from({ length: SKELETON_COUNT })}
-        keyExtractor={(_, i) => `skeleton-${i}`}
-        renderItem={() => <SentOfferCardSkeleton />}
-        scrollEnabled={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={styles.list}
-      />
-    )
-  }
+  const offersData: (Approved | string)[] | undefined = isLoading
+    ? generateArray<string>(3)
+    : data
 
   return (
     <FlatList
-      data={data ?? []}
-      keyExtractor={(item, index) => item.id}
+      data={offersData}
+      keyExtractor={(item, index) => {
+        if (typeof item === 'string') {
+          return `offers_placeholder_${index}`
+        }
+
+        return item.id
+      }}
       ListEmptyComponent={
         <EmptyState
           icon={<ScheduleSendIcon />}
@@ -58,15 +53,30 @@ const SentOfferList = ({
           description={emptyDescription}
         />
       }
-      renderItem={({ item }) => (
-        <SentOfferCard
-          id={item.id}
-          description={item.description}
-          status={item.status}
-          timestamp={item.created_at}
-          onPress={handlePress}
-        />
-      )}
+      renderItem={({ item }) => {
+        if (typeof item === 'string') {
+          return <SentOfferCardSkeleton />
+        }
+
+        const description =
+          type === 'archived' ? item.request?.description : item.description
+        const createdAt =
+          type === 'archived' ? item.request?.created_at : item.created_at
+
+        return (
+          <SentOfferCard
+            id={item.id}
+            description={description ?? ''}
+            status={
+              type === 'archived'
+                ? 'rejected'
+                : (item.status.toLowerCase() as OfferStatusType)
+            }
+            timestamp={createdAt ?? ''}
+            onPress={handlePress}
+          />
+        )
+      }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         onRefresh ? (

@@ -73,8 +73,6 @@ const RequestOverview = ({ id }: { id: string }) => {
     [data?.location, locationDetails?.name]
   )
 
-  console.log(data?.id)
-
   const handleEdit = useCallback(() => {
     if (!data) {
       showToastMessage('Editing is currently unavailable for this request.')

@@ -1,26 +1,35 @@
-import { VideoView, useVideoPlayer, VideoViewProps } from 'expo-video'
-import { StyleSheet } from 'react-native'
+import { VideoView, useVideoPlayer } from 'expo-video'
+import { StyleSheet, View } from 'react-native'
 
 import { VideoProps } from './components.types'
 
-const Video = ({ source, style, ...props }: VideoProps) => {
-  const player = useVideoPlayer(source, (player) => {
-    player.loop = true
-    player.play()
+const Video = ({ source, style, videoStyle, allowFullScreen }: VideoProps) => {
+  const player = useVideoPlayer(source, (p) => {
+    p.play()
   })
 
   return (
-    <VideoView
-      player={player}
-      style={[styles.video, style]}
-      pointerEvents="none"
-      {...props}
-    />
+    <View style={[styles.container, style]}>
+      <VideoView
+        player={player}
+        style={[styles.videoView, videoStyle]}
+        fullscreenOptions={{ enable: !!allowFullScreen }}
+        allowsPictureInPicture
+        nativeControls
+      />
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  video: {},
+  container: {
+    overflow: 'hidden',
+  },
+  videoView: {
+    height: '95%',
+    width: '100%',
+    borderRadius: 8,
+  },
 })
 
 export default Video

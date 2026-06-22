@@ -236,10 +236,13 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
                     <>
                       <View style={styles.uploadWrapper}>
                         <View style={styles.uploadeContent}>
-                          {media.map((photo, index) => {
-                            if (photo.type.startsWith('video/')) {
+                          {media.map((asset, index) => {
+                            if (asset?.url?.endsWith('mp4')) {
                               return (
-                                <View style={styles.videoThumb}>
+                                <View
+                                  key={`uploaded_response_media_${index}`}
+                                  style={styles.videoThumb}
+                                >
                                   <Video
                                     size={24}
                                     color={COLORS.white}
@@ -253,7 +256,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
                               <Image
                                 key={`uploaded_response_media_${index}`}
                                 source={{
-                                  uri: photo.url,
+                                  uri: asset.url,
                                 }}
                                 priority="high"
                                 style={styles.uploadedImage}
@@ -492,8 +495,8 @@ const styles = StyleSheet.create({
     columnGap: 6,
   },
   videoThumb: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    height: 103,
     position: 'relative',
     borderRadius: 10,
     backgroundColor: COLORS.grey[800],
