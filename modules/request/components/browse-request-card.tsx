@@ -9,6 +9,7 @@ import { getResolvedAvataUri } from '@/utils/resolver'
 
 import { BrowseRequestCardProps } from '../requests.types'
 import { getTimeLeftFromDuration } from '../requests.handler'
+import Button from '@/components/ui/button'
 
 const BrowseRequestCard = ({
   id,
@@ -46,13 +47,7 @@ const BrowseRequestCard = ({
   const requesterAddress = addressParts.slice(-2).join(',').trim()
 
   return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        pressed && globalStyles.pressedOpacity,
-      ]}
-      onPress={() => onPress(id)}
-    >
+    <View style={styles.card}>
       <View style={styles.titleRow}>
         <View style={styles.titleWrapper}>
           <Text size={16} lineHeight={22} weight={600} color="grey-800">
@@ -100,7 +95,12 @@ const BrowseRequestCard = ({
           </Text>
         ) : null}
       </View>
-    </Pressable>
+      <Button
+        label="View details"
+        onPress={() => onPress(id)}
+        btnStyle={styles.button}
+      />
+    </View>
   )
 }
 
@@ -162,6 +162,9 @@ const styles = StyleSheet.create({
   requesterDetails: {
     flex: 1,
     // rowGap: 4,
+  },
+  button: {
+    height: 40,
   },
 })
 

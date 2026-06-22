@@ -30,7 +30,7 @@ export default (ctx: ConfigContext): ExpoConfig => {
         UIBackgroundModes: ['remote-notification'],
       },
       entitlements: {
-        'aps-environment': 'development',
+        'aps-environment': String(process.env.EXPO_PUBLIC_ENVIRONMENT),
       },
     },
     android: {
@@ -43,6 +43,7 @@ export default (ctx: ConfigContext): ExpoConfig => {
         foregroundImage: './assets/images/logo.png',
         backgroundColor: '#E6F4FE',
       },
+      googleServicesFile: './assets/json/google-services.json',
     },
     plugins: [
       [

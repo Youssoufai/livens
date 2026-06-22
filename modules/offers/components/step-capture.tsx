@@ -33,8 +33,8 @@ export default function StepCapture({
 }: StepCaptureProps) {
   const [cameraOpen, setCameraOpen] = useState(false)
 
-  const photos = media.filter((m) => m.type.startsWith('image/'))
-  const video = media.find((m) => m.type.startsWith('video/')) ?? null
+  const photos = media.filter((m) => m.type?.startsWith('image'))
+  const video = media.find((m) => m.type?.startsWith('video')) ?? null
 
   const canAddPhoto = photos.length < MAX_PHOTOS
   const canAddVideo = !video
@@ -44,7 +44,7 @@ export default function StepCapture({
   }
 
   const addVideo = (v: FileType) => {
-    onMediaChange([...media.filter((m) => m.type.startsWith('image/')), v])
+    onMediaChange([...media.filter((m) => m.type?.startsWith('image')), v])
   }
 
   const removeMedia = (index: number) => {
@@ -85,7 +85,7 @@ export default function StepCapture({
           <View style={styles.mediaGrid}>
             {media.map((file, i) => (
               <View key={i} style={styles.mediaCell}>
-                {file.type.startsWith('video/') ? (
+                {file.type?.startsWith('video') ? (
                   <View style={styles.videoThumb}>
                     <Video
                       size={24}
@@ -94,7 +94,10 @@ export default function StepCapture({
                     />
                   </View>
                 ) : (
-                  <Image source={{ uri: file.uri }} style={styles.mediaImage} />
+                  <Image
+                    source={{ uri: 'uri' in file ? file.uri : file.url }}
+                    style={styles.mediaImage}
+                  />
                 )}
                 <TouchableOpacity
                   style={styles.removeBtn}

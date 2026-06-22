@@ -6,6 +6,7 @@ import { BottomSheetBackdropProps } from '@gorhom/bottom-sheet'
 import { BackdropPressBehavior } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
 
 import { FONTS } from '@/constants/fonts'
+import { MediaType } from '@/services/requests/request.types'
 
 export type ColorType =
   | 'primary-50'
@@ -49,6 +50,7 @@ export interface TextProps {
   lineHeight?: number
   fontFamily?: keyof typeof FONTS
   weight?: 400 | 500 | 600 | 700
+  numberOfLines?: number
   align?: TextStyle['textAlign']
   style?: TextStyle | (TextStyle | undefined)[]
   children: ReactNode
@@ -140,18 +142,16 @@ export interface LocationInputProps {
   defaultCoords?: LocationType
   placeholder?: string
   label?: string
+  enableScroll?: boolean
   labelStyle?: TextStyle
+  inputContainerStyle?: ViewStyle
   onLocation: (values: LocationType) => void
 }
 
 export interface SearchModalProps {
-  endpoint: string
   placeholder?: string
-  needsAuthentication: boolean
-  extraPayload?: Record<string, string | number | boolean>
-  filterOption: string
-  onChangeOption: (value?: string) => void
-  onSelect: (value: string) => void
+  onChangeOption?: (value?: string) => void
+  onSelect?: (value: string) => void
 }
 
 export interface SuccessModalProps {
@@ -170,6 +170,12 @@ export interface NoticeProps {
   type?: 'success' | 'error' | 'info'
   containerStyle?: ViewStyle
   textStyle?: TextStyle
+}
+
+export interface MediaDisplayProps {
+  selectedMedia: MediaType | null
+  onDismiss: VoidFunction
+  canSaveMedia?: boolean
 }
 
 export interface StepTransitionProps {
@@ -206,5 +212,14 @@ export interface VideoProps {
   source: string
   play?: VoidFunction
   pause?: VoidFunction
+  allowFullScreen?: boolean
   style?: ViewStyle
+  videoStyle?: ViewStyle
+}
+
+export interface RadioGroupProps {
+  name?: string
+  list: ListItem[]
+  value: string
+  onValueChange: (value: string) => void
 }

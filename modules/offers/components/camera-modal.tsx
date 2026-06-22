@@ -11,6 +11,7 @@ import { Camera } from 'react-native-vision-camera'
 import { Flashlight, FlashlightOff, XIcon } from 'lucide-react-native'
 
 import Text from '@/components/text'
+import { MAX_RECORDING_SESSION } from '@/constants'
 import { COLORS } from '@/constants/theme'
 import useCamera from '@/hooks/use-camera'
 
@@ -43,6 +44,7 @@ function CameraModal({
   const [mode, setMode] = useState<'photo' | 'video'>('photo')
   const [torch, setTorch] = useState<'on' | 'off'>()
   const [cameraReady, setCameraReady] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
   const recordingStarted = useRef(false)
 
   useEffect(() => {
@@ -51,6 +53,24 @@ function CameraModal({
       setTorch('off')
     }
   }, [visible])
+
+  useEffect(() => {
+    if (!recording) {
+      setElapsed(0)
+      return
+    }
+    const interval = setInterval(() => {
+      setElapsed((prev) => {
+        const next = prev + 100
+        if (next >= MAX_RECORDING_SESSION) {
+          stopRecording()
+          return MAX_RECORDING_SESSION
+        }
+        return next
+      })
+    }, 100)
+    return () => clearInterval(interval)
+  }, [recording])
 
   useEffect(() => {
     if (!recordingStarted.current) return
@@ -80,6 +100,13 @@ function CameraModal({
 
   const shutterDisabled =
     mode === 'photo' ? !canAddPhoto : !canAddVideo && !recording
+
+  const formatTime = (ms: number) => {
+    const total = Math.floor(ms / 1000)
+    const m = Math.floor(total / 60)
+    const s = total % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
 
   const TorchIcon = torch === 'on' ? Flashlight : FlashlightOff
 
@@ -167,6 +194,12 @@ function CameraModal({
                   </Text>
                 </Pressable>
               </View>
+
+              {recording && (
+                <Text size={13} color="white">
+                  {formatTime(elapsed)} / {formatTime(MAX_RECORDING_SESSION)}
+                </Text>
+              )}
 
               <Pressable
                 onPress={handleShutter}

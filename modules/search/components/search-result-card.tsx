@@ -6,98 +6,118 @@ import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import { formatTimeAgo } from '@/utils/format'
 import { getResolvedAvataUri } from '@/utils/resolver'
+import LineBlock from '@/components/line-block'
+import { LINE_BLOCK_SPACING } from '@/constants'
 
-import { SearchResultItem } from '../search.types'
+import { SearchResultCardProps } from '../search.types'
 
-type SearchResultCardProps = {
-  item: SearchResultItem
-  onPress: (id: string) => void
-}
+const MEDIA_SIZE = 32
+const OVERLAP = 16
+const DISPLAY_COUNT = 3
 
-const SearchResultCard = ({ item, onPress }: SearchResultCardProps) => {
-  const topResponse = item.responses?.[0]
-  const requesterAvatar = getResolvedAvataUri(item.user?.name ?? 'U')
+const SearchResultCard = ({
+  description,
+  location,
+  user,
+  responderName,
+  responderCreatedAt,
+  responderComment,
+  responderMediaPaths,
+  onPress,
+}: SearchResultCardProps) => {
+  const requesterAvatar = getResolvedAvataUri(user?.name ?? 'U')
 
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      onPress={() => onPress(item.id)}
+      onPress={onPress}
     >
-      {/* Requester row */}
       <View style={styles.userRow}>
         <Image source={{ uri: requesterAvatar }} style={styles.avatar} />
         <View style={styles.userMeta}>
           <Text size={14} lineHeight={18} weight={600} color="grey-700">
-            {item.user?.name ?? 'Unknown'}
+            {user?.name ?? 'Unknown'}
           </Text>
           <Text size={12} lineHeight={16} color="grey-300">
-            {item.user?.location ?? ''}
+            {user?.location ?? ''}
           </Text>
         </View>
       </View>
 
-      {/* Request question */}
-      <Text size={15} lineHeight={22} weight={600} color="grey-800">
-        {item.description}
+      <Text size={18} lineHeight={24} color="grey-800">
+        {description}
       </Text>
 
-      {/* Request location */}
-      {item.location ? (
+      {location ? (
         <Text size={12} lineHeight={16} color="grey-300">
-          Request location: {item.location}
+          Request location: {location}
         </Text>
       ) : null}
 
-      {/* Response preview */}
-      {topResponse ? (
+      {responderName ? (
         <View style={styles.responsePreview}>
+          <LineBlock />
           <View style={styles.responseHeader}>
             <Image
-              source={{ uri: getResolvedAvataUri(topResponse.user?.name ?? 'R') }}
+              source={{ uri: getResolvedAvataUri(responderName) }}
               style={styles.responderAvatar}
             />
-            <View style={styles.responderMeta}>
-              <Text size={13} lineHeight={18} weight={600} color="grey-700">
-                {topResponse.user?.name ?? 'Responder'}
-              </Text>
-              <Text size={11} lineHeight={16} color="grey-300">
-                {topResponse.user?.location ?? ''}{' '}
-                {topResponse.created_at
-                  ? `• ${formatTimeAgo(topResponse.created_at)}`
-                  : ''}
-              </Text>
+            <View style={styles.responderDetails}>
+              <View style={styles.responderMeta}>
+                <Text size={13} lineHeight={18} weight={600} color="grey-700">
+                  {responderName}
+                </Text>
+                <Text size={11} lineHeight={16} color="grey-300">
+                  Responded
+                  {responderCreatedAt
+                    ? ` • ${formatTimeAgo(responderCreatedAt)}`
+                    : ''}
+                </Text>
+              </View>
+              <View style={styles.responderActionsWrapper}>
+                {responderComment ? (
+                  <RNText
+                    numberOfLines={2}
+                    style={[styles.responseComment, styles.commentText]}
+                  >
+                    {responderComment}
+                  </RNText>
+                ) : null}
+
+                {responderMediaPaths &&
+                  responderMediaPaths.slice(0, 3).length > 0 && (
+                    <View style={styles.mediaThumbnailRow}>
+                      {responderMediaPaths
+                        .slice(0, DISPLAY_COUNT)
+                        .map((media, index) => (
+                          <View
+                            key={`thumb_${media.public_id}_${index}`}
+                            style={[
+                              styles.thumbnailWrapper,
+                              {
+                                left: index * (MEDIA_SIZE - OVERLAP),
+                                zIndex: DISPLAY_COUNT + index,
+                              },
+                            ]}
+                          >
+                            {media.url.endsWith('mp4') ? (
+                              <View style={styles.videoThumb}>
+                                <VideoIcon size={16} color={COLORS.white} />
+                              </View>
+                            ) : (
+                              <Image
+                                source={{ uri: media.url }}
+                                style={styles.thumbnail}
+                                priority="normal"
+                              />
+                            )}
+                          </View>
+                        ))}
+                    </View>
+                  )}
+              </View>
             </View>
           </View>
-
-          {topResponse.comment ? (
-            <RNText
-              numberOfLines={2}
-              style={[styles.responseComment, styles.commentText]}
-            >
-              {topResponse.comment}
-            </RNText>
-          ) : null}
-
-          {/* Media thumbnail */}
-          {topResponse.media_paths?.length > 0 && (
-            <View style={styles.mediaThumbnailRow}>
-              {topResponse.media_paths.slice(0, 3).map((media, index) => (
-                <View key={`thumb_${index}`} style={styles.thumbnailWrapper}>
-                  {media.type.startsWith('video') ? (
-                    <View style={styles.videoThumb}>
-                      <VideoIcon size={16} color={COLORS.white} />
-                    </View>
-                  ) : (
-                    <Image
-                      source={{ uri: media.url }}
-                      style={styles.thumbnail}
-                      priority="normal"
-                    />
-                  )}
-                </View>
-              ))}
-            </View>
-          )}
         </View>
       ) : (
         <Text size={13} lineHeight={18} color="grey-300">
@@ -126,8 +146,8 @@ const styles = StyleSheet.create({
     columnGap: 10,
   },
   avatar: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: 18,
     backgroundColor: COLORS.grey[50],
   },
@@ -135,21 +155,22 @@ const styles = StyleSheet.create({
     rowGap: 2,
     flex: 1,
   },
+  responderDetails: {
+    flex: 1,
+  },
   responsePreview: {
     marginTop: 4,
-    paddingLeft: 12,
-    borderLeftWidth: 2,
-    borderLeftColor: COLORS.grey[50],
+    paddingLeft: LINE_BLOCK_SPACING,
     rowGap: 6,
   },
   responseHeader: {
+    paddingTop: 12,
     flexDirection: 'row',
-    alignItems: 'center',
     columnGap: 8,
   },
   responderAvatar: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     borderRadius: 14,
     backgroundColor: COLORS.grey[50],
   },
@@ -157,8 +178,14 @@ const styles = StyleSheet.create({
     rowGap: 1,
     flex: 1,
   },
+  responderActionsWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 6,
+    justifyContent: 'space-between',
+  },
   responseComment: {
-    paddingLeft: 36,
+    flex: 1,
   },
   commentText: {
     fontSize: 13,
@@ -168,13 +195,18 @@ const styles = StyleSheet.create({
   mediaThumbnailRow: {
     flexDirection: 'row',
     columnGap: 6,
-    paddingLeft: 36,
+    height: 32,
+    position: 'relative',
+    width: MEDIA_SIZE * 3 - OVERLAP * 2,
   },
   thumbnailWrapper: {
-    width: 64,
-    height: 64,
-    borderRadius: 4,
+    width: MEDIA_SIZE,
+    height: MEDIA_SIZE,
+    borderRadius: 6,
     overflow: 'hidden',
+    borderWidth: 0.5,
+    borderColor: COLORS.grey[50],
+    position: 'absolute',
   },
   thumbnail: {
     width: '100%',

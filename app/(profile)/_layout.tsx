@@ -48,6 +48,10 @@ const ProfileLayout = () => {
       <Stack.Screen name="faqs" options={{ title: 'FAQs' }} />
       <Stack.Screen name="contact" options={{ title: 'About' }} />
       <Stack.Screen
+        name="update-location"
+        options={{ title: 'Update location' }}
+      />
+      <Stack.Screen
         name="delete-account"
         options={{ title: 'Delete account' }}
       />

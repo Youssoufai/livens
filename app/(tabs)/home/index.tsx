@@ -1,4 +1,4 @@
-import { router } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { ImageBackground, StyleSheet, Text as RNText, View } from 'react-native'
 
@@ -15,13 +15,14 @@ import { useBoundStore } from '@/state'
 import { grantLocationPermission } from '@/utils/resolver'
 import { registerForPushNoft } from '@/services/profile'
 import AppStorage from '@/utils/storage'
-import LocationInput from '@/components/location-input'
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterOption, setFilterOption] = useState<string>()
+
+  const router = useRouter()
 
   const userLocation = useBoundStore((state) => state.user?.location)
+  const userId = useBoundStore((state) => state.user?.id)
   const getUser = useBoundStore((state) => state.getUser)
 
   const storage = new AppStorage()
@@ -29,10 +30,6 @@ export default function SearchScreen() {
   const location = userLocation
     ?.slice(userLocation.lastIndexOf(',') + 1)
     .trimStart()
-
-  const handlePushSubscription = async () => {
-    await registerForPushNoft(storage, API_ENDPOINTS.profile.notification)
-  }
 
   useEffect(() => {
     ;(async () => {
@@ -47,8 +44,9 @@ export default function SearchScreen() {
   }, [])
 
   useEffect(() => {
-    handlePushSubscription()
-  }, [])
+    if (!userId) return
+    registerForPushNoft(storage, API_ENDPOINTS.profile.notification, userId)
+  }, [userId])
 
   const headerImage = (
     <View style={styles.headerText}>
@@ -69,8 +67,6 @@ export default function SearchScreen() {
     }
   }, [])
 
-  const handleLocation = (values: LocationType) => {}
-
   return (
     <ImageBackground
       source={require('@/assets/images/search.png')}
@@ -85,7 +81,7 @@ export default function SearchScreen() {
         contentBackgroundColor="white"
       >
         <View style={styles.main}>
-          <LocationInput placeholder="" onLocation={handleLocation} />
+          <SearchModal />
 
           <View>
             <Text

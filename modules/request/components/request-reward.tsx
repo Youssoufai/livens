@@ -11,7 +11,7 @@ import { useRequestStore } from '@/state/request'
 import KeyboardScrollView from '@/components/keyboard-scrollview'
 
 import RewardCard from './reward-option'
-import { animatedComponentDetails, REWARD_OPTIONS } from '../requests.data'
+import { REWARD_OPTIONS } from '../requests.data'
 import StepTransition from '@/components/step-animate-wrapper'
 
 const RequestReward = ({
@@ -30,7 +30,7 @@ const RequestReward = ({
   const reward = +(requestReward ?? 0)
 
   useEffect(() => {
-    if (typeof reward === 'undefined') return
+    if (typeof requestReward === 'undefined') return
 
     if (reward === 0) {
       setNoReward(true)
@@ -45,7 +45,7 @@ const RequestReward = ({
       setSelected(REWARD_OPTIONS[2].id)
       setCustomAmount(isNaN(+reward) ? '0' : (+reward).toFixed(1))
     }
-  }, [reward])
+  }, [reward, requestReward])
 
   const canProceed =
     noReward ||

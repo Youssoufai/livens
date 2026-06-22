@@ -8,10 +8,6 @@ export const editProfileSchema = Yup.object({
   email: Yup.string()
     .email('Invalid email address')
     .required('Email is required'),
-  phone: Yup.string()
-    .trim()
-    .min(10, 'Phone number is too short')
-    .required('Phone number is required'),
 })
 
 export const changePasswordSchema = Yup.object({

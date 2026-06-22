@@ -1,7 +1,11 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { StyleSheet, View } from 'react-native'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import PhoneInput, {
+  IPhoneInputRef,
+} from 'react-native-international-phone-number'
+import parsePhoneNumberFromString from 'libphonenumber-js'
 
 import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
@@ -14,9 +18,15 @@ import { API_ENDPOINTS } from '@/constants/endpoints'
 import { editProfileSchema, EditProfileFormValues } from '@/schemas/profile'
 import ProfilePhoto from '@/modules/profile/components/profile-photo'
 import { envConfig } from '@/utils/config'
+import { phoneModalStyles, phoneStyles } from '@/styles/globalStyles'
+import { COLORS } from '@/constants/theme'
+import Text from '@/components/text'
 
 export default function EditProfileScreen() {
   const [photo, setPhoto] = useState<FileType | null>()
+  const [isPhoneValid, setIsPhoneValid] = useState(false)
+
+  const phoneInputRef = useRef<IPhoneInputRef>(null)
 
   const user = useBoundStore((state) => state.user)
   const getUser = useBoundStore((state) => state.getUser)
@@ -30,20 +40,30 @@ export default function EditProfileScreen() {
     defaultValues: {
       name: user?.name ?? '',
       email: user?.email ?? '',
-      phone: user?.phone ?? '',
     },
   })
+
+  const confirmPhoneValidity = () => {
+    const value = phoneInputRef.current?.value || ''
+    const phoneNumber = value.startsWith('+')
+      ? parsePhoneNumberFromString(value)
+      : parsePhoneNumberFromString(value, 'NG')
+
+    setIsPhoneValid(!!phoneNumber?.isValid())
+  }
+
+  const cleanedPhone = phoneInputRef.current?.fullPhoneNumber.replace(/\s/g, '')
 
   const onSubmit: SubmitHandler<EditProfileFormValues> = async (values) => {
     try {
       const formdata = new FormData()
 
-      if (values.name !== user?.name) {
+      if (values.name && values.name !== user?.name) {
         formdata.append('name', values.name)
       }
 
-      if (values.phone !== user?.phone) {
-        formdata.append('phone', values.phone)
+      if (cleanedPhone && cleanedPhone !== user?.phone) {
+        formdata.append('phone', cleanedPhone ?? '')
       }
 
       if (photo) {
@@ -94,21 +114,29 @@ export default function EditProfileScreen() {
             editable={false}
             error={errors.email?.message}
           />
-          <Input
-            control={control}
-            name="phone"
-            label="Phone number"
-            placeholder="08012345678"
-            keyboardType="phone-pad"
-            error={errors.phone?.message}
-          />
+          <View style={styles.phoneInputWrapper}>
+            <Text size={14} lineHeight={20} weight={600} color="grey-500">
+              Phone number
+            </Text>
+            <PhoneInput
+              ref={phoneInputRef}
+              defaultCountry="NG"
+              placeholder="Phone number"
+              defaultValue={user?.phone}
+              placeholderTextColor={COLORS.grey[300]}
+              phoneInputStyles={phoneStyles}
+              modalStyles={phoneModalStyles}
+              visibleCountries={['NG']}
+              onEndEditing={confirmPhoneValidity}
+            />
+          </View>
         </View>
       </View>
       <Button
         label="Save"
         onPress={handleSubmit(onSubmit)}
         loading={isSubmitting}
-        disabled={(!isDirty && !photo) || !isValid}
+        disabled={(!isDirty && !photo && !isPhoneValid) || !isValid}
         btnStyle={styles.button}
       />
     </ThemedView>
@@ -129,5 +157,8 @@ const styles = StyleSheet.create({
   },
   button: {
     marginBottom: 20,
+  },
+  phoneInputWrapper: {
+    rowGap: 8,
   },
 })

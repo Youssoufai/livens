@@ -8,8 +8,12 @@ export const DROPDOWN_BOTTOM_MARGIN = 16
 
 export const MAX_RECORDING_SESSION = 90_000
 export const MIN_RECORDING_SESSION = 3000
+export const OPTIMAL_VIDEO_BITRATE = 2500000
 
 export const PUSHER_CHANNEL_NAME = 'livelens_channel'
+
+export const LINE_BLOCK_WIDTH = 24
+export const LINE_BLOCK_SPACING = 12 + LINE_BLOCK_WIDTH + 4
 
 export const STORE_KEYS = {
   token: 'livens_token',

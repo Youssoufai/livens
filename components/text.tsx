@@ -16,6 +16,7 @@ const Text = ({
   children,
   color = 'grey-800',
   align,
+  numberOfLines,
   style,
 }: TextProps) => {
   const customFontProps = useMemo(() => {
@@ -33,7 +34,11 @@ const Text = ({
     }
   }, [align, color, size, fontFamily, lineHeight, weight])
 
-  return <RNText style={[customFontProps, style]}>{children}</RNText>
+  return (
+    <RNText style={[customFontProps, style]} numberOfLines={numberOfLines}>
+      {children}
+    </RNText>
+  )
 }
 
 const styles = StyleSheet.create({})

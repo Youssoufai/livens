@@ -25,6 +25,7 @@ const UserProfile = () => {
   const [isSwitchOn, setIsSwitchOn] = useState(false)
 
   const logout = useBoundStore((state) => state.logout)
+  const userId = useBoundStore((state) => state.user?.id ?? '')
   const storage = useRef(new AppStorage()).current
 
   const router = useRouter()
@@ -37,14 +38,16 @@ const UserProfile = () => {
   }
 
   useEffect(() => {
-    const storedPreference = storage.getItem<'string'>(STORE_KEYS.preference)
+    if (!userId) return
+    const preferenceKey = `${STORE_KEYS.preference}_${userId}`
+    const storedPreference = storage.getItem<'string'>(preferenceKey)
 
     if (!storedPreference) return
 
     const preference = JSON.parse(storedPreference) as UserPreference
 
     setIsSwitchOn(!!preference['pushEnabled'])
-  }, [])
+  }, [userId])
 
   const handleNotification = async (value: boolean) => {
     let errMsg = ''
@@ -55,8 +58,8 @@ const UserProfile = () => {
         enabled: value,
       })
 
-      setIsSwitchOn(true)
-      storePreference(storage, { key: 'pushEnabled', value })
+      setIsSwitchOn(value)
+      storePreference(storage, { key: 'pushEnabled', value }, userId)
     } catch (error) {
       errMsg = catchErr(error).message ?? 'Something went wrong'
     } finally {

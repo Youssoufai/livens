@@ -12,10 +12,12 @@ import { useSubmitResponseMutation } from '@/hooks/mutations/use-response'
 import { catchErr } from '@/utils/error-handlers'
 import { showToastMessage } from '@/components/notification'
 import { REQUESTS_TABS } from '@/modules/request/requests.data'
+import ScreenLoader from '@/components/screen-loader'
+import { MediaType } from '@/services/requests/request.types'
+import MediaDisplay from '@/components/media-display'
 
 import { StepReviewProps } from '../offers.types'
 import ResponseHeader from './response-header'
-import ScreenLoader from '@/components/screen-loader'
 
 export default function StepReview({
   requestId,
@@ -26,10 +28,10 @@ export default function StepReview({
 }: StepReviewProps) {
   const router = useRouter()
 
+  const [selectedMedia, setSelectedMedia] = useState<MediaType | null>(null)
   const [isRedirecting, setIsRedirecting] = useState(false)
 
-  const { mutateAsync: submitResponse, isPending } =
-    useSubmitResponseMutation()
+  const { mutateAsync: submitResponse, isPending } = useSubmitResponseMutation()
 
   useEffect(() => {
     if (isRedirecting) {
@@ -61,6 +63,10 @@ export default function StepReview({
         errorMsg ? 'error' : 'success'
       )
     }
+  }
+
+  const dismissModal = () => {
+    setSelectedMedia(null)
   }
 
   return (
@@ -99,21 +105,38 @@ export default function StepReview({
 
                 if (isVideo) {
                   return (
-                    <View
+                    <Pressable
                       key={`captured_video_uri_${i}`}
                       style={[styles.mediaThumb, styles.videoThumb]}
+                      onPress={() =>
+                        setSelectedMedia({
+                          public_id: '',
+                          url: asset.uri,
+                          type: 'video',
+                        })
+                      }
                     >
                       <Video size={24} color={COLORS.white} />
-                    </View>
+                    </Pressable>
                   )
                 }
 
                 return (
-                  <Image
+                  <Pressable
                     key={`captured_photo_uri_${i}`}
-                    source={{ uri: asset.uri }}
-                    style={styles.mediaThumb}
-                  />
+                    onPress={() =>
+                      setSelectedMedia({
+                        public_id: '',
+                        url: asset.uri,
+                        type: 'jpeg',
+                      })
+                    }
+                  >
+                    <Image
+                      source={{ uri: asset.uri }}
+                      style={styles.mediaThumb}
+                    />
+                  </Pressable>
                 )
               })}
             </View>
@@ -159,6 +182,11 @@ export default function StepReview({
           </View>
         </View>
       </View>
+      <MediaDisplay
+        selectedMedia={selectedMedia}
+        canSaveMedia={false}
+        onDismiss={dismissModal}
+      />
       <ScreenLoader isLoading={isRedirecting} content="Redirecting..." />
     </>
   )

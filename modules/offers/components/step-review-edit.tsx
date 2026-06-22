@@ -19,6 +19,7 @@ import ResponseHeader from './response-header'
 
 export default function StepReviewEdit({
   requestId,
+  responseId,
   media,
   comment,
   disableEdit,
@@ -46,11 +47,13 @@ export default function StepReviewEdit({
     }
   }, [isRedirecting])
 
+  console.log(media)
+
   const handleUpdate = async () => {
     let errorMsg = ''
 
     try {
-      await editResponse({ media, comment, request_id: requestId })
+      await editResponse({ media, comment, response_id: responseId ?? '' })
       setIsRedirecting(true)
     } catch (error) {
       errorMsg = catchErr(error).message ?? 'Something went wrong'
@@ -93,8 +96,7 @@ export default function StepReviewEdit({
             </View>
             <View style={styles.mediaGrid}>
               {media.map((asset, i) => {
-                const isVideo =
-                  asset.name.includes('mp4') || asset.uri.includes('mp4')
+                const isVideo = asset.type.startsWith('video')
 
                 if (isVideo) {
                   return (
@@ -110,7 +112,7 @@ export default function StepReviewEdit({
                 return (
                   <Image
                     key={`edit_photo_${i}`}
-                    source={{ uri: asset.uri }}
+                    source={{ uri: 'uri' in asset ? asset.uri : asset.url }}
                     style={styles.mediaThumb}
                   />
                 )

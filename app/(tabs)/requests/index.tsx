@@ -1,6 +1,6 @@
-import { useLayoutEffect, useState } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 import { StyleSheet } from 'react-native'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { FAB } from 'react-native-paper'
 
 import { ThemedView } from '@/components/themed-view'
@@ -54,11 +54,11 @@ export default function Requests() {
     router.push({ pathname: '/(requests)/request-details', params: { id } })
   }
 
-  useLayoutEffect(() => {
-    if (tab) {
-      setSelectedTab(tab)
-    }
-  }, [tab])
+  useFocusEffect(
+    useCallback(() => {
+      setSelectedTab(tab ?? BROWSE_TAB)
+    }, [tab])
+  )
 
   const isMyRequestsTab = selectedTab === MY_REQUESTS_TAB
   const isBrowseTab = selectedTab === BROWSE_TAB

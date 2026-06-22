@@ -25,9 +25,8 @@ import { getMessages, sendMessage } from '@/services/chat'
 import { getRequestById } from '@/services/requests'
 import { Message } from '@/services/chat/chat.types'
 import { COLORS } from '@/constants/theme'
+import { ChatBubble, OptimisticMessage } from '@/modules/request/components/chat-bubble'
 import { ThemedView } from '@/components/themed-view'
-import { showToastMessage } from '@/components/notification'
-import { catchErr } from '@/utils/error-handlers'
 import { getResolvedAvataUri } from '@/utils/resolver'
 import { pusherService } from '@/lib/pusher'
 import { generateId } from '@/utils/generator'
@@ -44,10 +43,9 @@ export default function ChatScreen() {
   const { bottom } = useSafeAreaInsets()
   const flatListRef = useRef<FlatList>(null)
 
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<OptimisticMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sending, setSending] = useState(false)
   const [keyboardOffset, setKeyboardOffset] = useState(0)
   const [receiver, setReceiver] = useState<User>()
 
@@ -72,16 +70,16 @@ export default function ChatScreen() {
     }
   }, [])
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
 
       if (!conversationId) return
 
       const data = await getMessages(conversationId)
       setMessages(Array.isArray(data) ? data.reverse() : [])
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [conversationId])
 
@@ -113,7 +111,20 @@ export default function ChatScreen() {
     const subscribeChat = async () => {
       await pusherService.subscribe(channel, (data: Message) => {
         if (typeof data === 'string') return
-        setMessages((prev) => [...prev, data])
+        setMessages((prev) => {
+          const optimisticIdx = prev.findIndex(
+            (m) =>
+              m.status === 'pending' &&
+              m.sender_id === data.sender_id &&
+              m.message === data.message
+          )
+          if (optimisticIdx !== -1) {
+            const updated = [...prev]
+            updated[optimisticIdx] = data
+            return updated
+          }
+          return [...prev, data]
+        })
       })
     }
 
@@ -127,48 +138,72 @@ export default function ChatScreen() {
   const handleSend = async () => {
     if (!input.trim() || !conversationId) return
 
+    const tempId = generateId()
+    const text = input.trim()
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        message: text,
+        conversation_id: conversationId,
+        sender_id: currentUser?.id ?? '',
+        status: 'pending' as const,
+      },
+    ])
+    setInput('')
+    flatListRef.current?.scrollToEnd({ animated: true })
+
     try {
-      setSending(true)
-
-      await sendMessage(conversationId, input)
-
-      setMessages((prevMessage) => [
-        ...prevMessage,
-        {
-          id: generateId(),
-          message: input,
-          conversation_id: conversationId,
-          sender_id: currentUser?.id ?? '',
-        },
-      ])
-      setInput('')
-
-      flatListRef.current?.scrollToEnd({ animated: true })
-    } catch (error) {
-      showToastMessage(
-        catchErr(error).message ?? 'Failed to send a message',
-        'error'
+      await sendMessage(conversationId, text)
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId ? { ...m, status: 'sent' as const } : m
+        )
       )
-    } finally {
-      setSending(false)
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId ? { ...m, status: 'failed' as const } : m
+        )
+      )
+    }
+  }
+
+  const handleResend = async (msg: OptimisticMessage) => {
+    if (!conversationId) return
+
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === msg.id ? { ...m, status: 'pending' as const } : m
+      )
+    )
+
+    try {
+      await sendMessage(conversationId, msg.message)
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msg.id ? { ...m, status: 'sent' as const } : m
+        )
+      )
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msg.id ? { ...m, status: 'failed' as const } : m
+        )
+      )
     }
   }
 
   const lastSeen = receiver?.last_seen ? new Date(receiver.last_seen) : null
 
-  const renderItem = ({ item }: { item: Message }) => {
-    const isMe = item.sender_id == currentUser?.id
-
-    return (
-      <View
-        style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleOther]}
-      >
-        <Text size={14} style={{ color: isMe ? COLORS.grey[800] : '#111' }}>
-          {item.message}
-        </Text>
-      </View>
-    )
-  }
+  const renderItem = ({ item }: { item: OptimisticMessage }) => (
+    <ChatBubble
+      {...item}
+      isMe={item.sender_id == currentUser?.id}
+      onRetry={() => handleResend(item)}
+    />
+  )
 
   return (
     <ThemedView hasTopPadding style={styles.container}>
@@ -215,7 +250,7 @@ export default function ChatScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
-                onRefresh={() => onRefreshQuery(fetchMessages)}
+                onRefresh={() => onRefreshQuery(() => fetchMessages(true))}
               />
             }
             showsVerticalScrollIndicator={false}
@@ -231,18 +266,11 @@ export default function ChatScreen() {
             style={styles.textInput}
           />
           <TouchableOpacity
-            disabled={sending || !input.trim()}
+            disabled={!input.trim()}
             onPress={handleSend}
-            style={[
-              styles.sendBtn,
-              (sending || !input.trim()) && { opacity: 0.5 },
-            ]}
+            style={[styles.sendBtn, !input.trim() && { opacity: 0.5 }]}
           >
-            {sending ? (
-              <ActivityIndicator size="small" color={COLORS.white} />
-            ) : (
-              <Ionicons name="send" color="#fff" size={18} />
-            )}
+            <Ionicons name="send" color="#fff" size={18} />
           </TouchableOpacity>
         </View>
       </View>
@@ -274,27 +302,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 9999,
-  },
-  bubble: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 18,
-    marginVertical: 6,
-    maxWidth: '75%',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  bubbleMe: {
-    alignSelf: 'flex-end',
-    backgroundColor: COLORS.blue[50],
-    borderBottomRightRadius: 4,
-  },
-  bubbleOther: {
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.grey[50],
-    borderBottomLeftRadius: 4,
   },
   loaderContainer: {
     flex: 1,

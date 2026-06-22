@@ -79,7 +79,7 @@ export default function LoginScreen() {
 
       if (!response?.token) return
 
-      completeSignin(response.token, !!response?.user?.location)
+      await completeSignin(response.token, !!response?.user?.location)
     } catch (error) {
     } finally {
       setIsLoadingGoogle(false)
@@ -96,7 +96,7 @@ export default function LoginScreen() {
       const authToken = data?.access_token
       if (!authToken) throw new Error('Authentication token missing')
 
-      completeSignin(authToken, !!data?.user?.location)
+      await completeSignin(authToken, !!data?.user?.location)
     } catch (error) {
       showToastMessage(catchErr(error).message ?? '', 'error')
     }
