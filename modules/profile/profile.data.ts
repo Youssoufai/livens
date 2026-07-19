@@ -94,12 +94,16 @@ export const FAQ_DATA: FaqSection[] = [
 ]
 
 export const STATUS_COLORS = {
-  credit: {
+  success: {
     text: COLORS.green[500],
     background: COLORS.green[50],
   },
-  debit: {
-    text: COLORS.primary[500],
+  pending: {
+    text: COLORS.yellow[500],
+    background: COLORS.yellow[100],
+  },
+  failed: {
+    text: COLORS.danger,
     background: COLORS.primary[50],
   },
 }

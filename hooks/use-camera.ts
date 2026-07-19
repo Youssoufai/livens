@@ -10,9 +10,12 @@ import {
 import type { CameraRef, Recorder } from 'react-native-vision-camera'
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { Paths, File } from 'expo-file-system'
+import { Video } from 'react-native-compressor'
+import { Platform } from 'react-native'
 
 import { AuthenticatedAPI } from '@/services'
 import { MAX_RECORDING_SESSION, OPTIMAL_VIDEO_BITRATE } from '@/constants'
+import { showToastMessage } from '@/components/notification'
 
 export default function useCamera() {
   const { hasPermission, requestPermission } = useCameraPermission()
@@ -30,13 +33,13 @@ export default function useCamera() {
   })
   const videoOutput = useVideoOutput({
     enableAudio: true,
-    fileType: 'mp4',
     targetBitRate: OPTIMAL_VIDEO_BITRATE,
     targetResolution: CommonResolutions.FHD_4_3,
-    enableHigherResolutionCodecs: true,
+    enableHigherResolutionCodecs: false,
   })
 
   const [recording, setRecording] = useState(false)
+  const [compressing, setCompressing] = useState(false)
   const [media, setMedia] = useState<FileType | null>(null)
   const [uploading, setUploading] = useState(false)
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
@@ -44,14 +47,15 @@ export default function useCamera() {
   const cameraRef = useRef<CameraRef>(null)
   const recorderRef = useRef<Recorder | null>(null)
 
-  //  HANDLE PICTURES CAPTURE
   const takePicture = async (): Promise<FileType | null> => {
     photoOutput.outputOrientation = 'right'
     const photo = await photoOutput.capturePhoto({}, {})
     const path = await photo.saveToTemporaryFileAsync()
     photo.dispose()
 
-    const context = ImageManipulator.manipulate(path).rotate(90)
+    const context = ImageManipulator.manipulate(path).rotate(
+      Platform.select({ ios: -90, android: 90, default: 0 })
+    )
 
     const renderedImage = await context.renderAsync()
     const result = await renderedImage.saveAsync({
@@ -70,16 +74,26 @@ export default function useCamera() {
     return file
   }
 
-  // HANDLES VIDEO RECORDING
   const startRecording = async () => {
     if (recording) return
     if (!hasMicPermission) {
       const granted = await requestMicPermission()
       if (!granted) return
     }
-    const recorder = await videoOutput.createRecorder({
-      maxDuration: MAX_RECORDING_SESSION,
-    })
+
+    let recorder: Recorder
+    try {
+      if (Platform.OS === 'ios') {
+        videoOutput.outputOrientation = 'up'
+      }
+
+      recorder = await videoOutput.createRecorder({
+        maxDuration: MAX_RECORDING_SESSION,
+      })
+    } catch (error) {
+      showToastMessage('Recording failed. Please try again.', 'error')
+      return
+    }
     recorderRef.current = recorder
 
     setRecording(true)
@@ -90,16 +104,40 @@ export default function useCamera() {
         const absolutePath = filePath.startsWith('file://')
           ? filePath
           : `file://${filePath}`
-        const source = new File(absolutePath)
-        const dest = new File(Paths.cache, `video_${Date.now()}.mp4`)
-        source.copy(dest)
 
-        const uri = dest.uri
-        const name = dest.name
+        setCompressing(true)
+        try {
+          const compressedResult = await Video.compress(absolutePath, {
+            compressionMethod: 'manual',
+            bitrate: OPTIMAL_VIDEO_BITRATE,
+            maxSize: 10240,
+          })
+          const outputPath = compressedResult.startsWith('file://')
+            ? compressedResult
+            : `file://${compressedResult}`
 
-        setMedia({ uri, name, type: 'video/mp4' })
+          const source = new File(outputPath)
+          const dest = new File(Paths.cache, `video_${Date.now()}.mp4`)
+          source.move(dest)
+
+          new File(absolutePath).delete()
+
+          const uri = dest.uri
+          const name = dest.name
+
+          setMedia({ uri, name, type: 'video/mp4' })
+        } finally {
+          setCompressing(false)
+        }
       },
-      () => setRecording(false)
+      (error) => {
+        const message = error.message.includes('Disk Full')
+          ? 'Not enough storage space to record video. Free up some space and try again.'
+          : 'Recording failed. Please try again.'
+        showToastMessage(message, 'error')
+
+        setRecording(false)
+      }
     )
   }
 
@@ -136,6 +174,7 @@ export default function useCamera() {
     hasMicPermission,
     requestMicPermission,
     recording,
+    compressing,
     media,
     uploading,
     mediaUrl,

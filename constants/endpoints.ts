@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     edit: '/edit-request',
     fetch: '/get-requests',
     fetch_all: '/all-requests',
+    browse_request: '/browse-request',
     details: (id: string) => `/get-request/${id}`,
     send_response: '/temp-response',
     get_responses: (id: string) => `/get-temp-responses/${id}`,

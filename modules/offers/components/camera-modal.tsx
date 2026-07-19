@@ -6,9 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { ReactNativeModal } from 'react-native-modal'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Camera } from 'react-native-vision-camera'
 import { Flashlight, FlashlightOff, XIcon } from 'lucide-react-native'
+
+import { ActivityIndicator } from 'react-native-paper'
 
 import Text from '@/components/text'
 import { MAX_RECORDING_SESSION } from '@/constants'
@@ -16,6 +19,7 @@ import { COLORS } from '@/constants/theme'
 import useCamera from '@/hooks/use-camera'
 
 import { CameraModalProps } from '../offers.types'
+import { styles } from '@/styles/redirectStyle'
 
 function CameraModal({
   visible,
@@ -35,6 +39,7 @@ function CameraModal({
     hasMicPermission,
     requestMicPermission,
     recording,
+    compressing,
     media,
     takePicture,
     startRecording,
@@ -111,7 +116,13 @@ function CameraModal({
   const TorchIcon = torch === 'on' ? Flashlight : FlashlightOff
 
   return (
-    <Modal visible={visible} animationType="fade" statusBarTranslucent>
+    <ReactNativeModal
+      isVisible={visible}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      statusBarTranslucent
+      style={cam.modal}
+    >
       <View style={cam.container}>
         {!hasPermission || !hasMicPermission ? (
           <SafeAreaView style={cam.permissionBox}>
@@ -216,12 +227,33 @@ function CameraModal({
             </View>
           </>
         ) : null}
+
+        {compressing && (
+          <View style={cam.compressingOverlay}>
+            <View style={cam.compressingCard}>
+              <ActivityIndicator size={45} color={COLORS.primary[500]} />
+              <Text
+                size={16}
+                lineHeight={20}
+                color="grey-700"
+                align="center"
+                weight={600}
+              >
+                Please hold on...
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
-    </Modal>
+    </ReactNativeModal>
   )
 }
 
 const cam = StyleSheet.create({
+  modal: {
+    margin: 0,
+    padding: 0,
+  },
   container: { flex: 1, backgroundColor: '#000' },
   permissionBox: {
     flex: 1,
@@ -284,6 +316,22 @@ const cam = StyleSheet.create({
     height: 28,
   },
   shutterDisabled: { opacity: 0.4 },
+  compressingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0000001a',
+    paddingHorizontal: 16,
+  },
+  compressingCard: {
+    backgroundColor: COLORS.white,
+    rowGap: 12,
+    paddingVertical: 24,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
+  },
 })
 
 export default CameraModal

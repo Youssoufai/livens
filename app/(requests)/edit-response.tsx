@@ -15,15 +15,10 @@ import { COLORS } from '@/constants/theme'
 import { useGetResponseStatus } from '@/hooks/queries/use-requests'
 import { ThemedView } from '@/components/themed-view'
 import { DEFAULT_CHECKLIST } from '@/modules/offers/offer.data'
-import { envConfig } from '@/utils/config'
-import {
-  MediaType,
-  RequestResponseStatusType,
-} from '@/services/requests/request.types'
+import { MediaType } from '@/services/requests/request.types'
 import { CustomHeader } from '@/components/custom-header'
 import { globalStyles } from '@/styles/globalStyles'
 import EditResponseSkeleton from '@/components/placeholder/edit-response-skeleton'
-import { storeMediaViaUrl } from '@/modules/request/requests.handler'
 
 import StepCapture from '@/modules/offers/components/step-capture'
 import StepComment from '@/modules/offers/components/step-comment'

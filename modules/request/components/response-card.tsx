@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native'
 import { Star } from 'lucide-react-native'
+import { Image } from 'expo-image'
 
+import { getResolvedAvataUri } from '@/utils/resolver'
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import Button from '@/components/ui/button'
@@ -11,6 +13,8 @@ import { ResponseCardProps } from '../requests.types'
 const ResponseCard = ({
   id,
   responder,
+  profileImg,
+  name,
   location,
   starRating,
   requestCompleted,
@@ -22,10 +26,12 @@ const ResponseCard = ({
   const [firstName] = responder.split(' ')
   const newLocation = location.length > 15 ? `${location}...` : location
 
+  const avatar = getResolvedAvataUri(profileImg ?? name ?? 'R')
+
   return (
     <View style={styles.container}>
       <View style={styles.detailsContent}>
-        <View style={styles.imageWrapper}></View>
+        <Image source={{ uri: avatar }} style={styles.imageWrapper} />
         <View style={styles.responderDetails}>
           <Text
             size={16}
@@ -76,7 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     backgroundColor: COLORS.white,
-    rowGap: 8,
+    rowGap: 20,
     shadowColor: COLORS.black,
     shadowOffset: {
       width: -2,

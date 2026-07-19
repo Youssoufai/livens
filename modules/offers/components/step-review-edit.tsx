@@ -47,8 +47,6 @@ export default function StepReviewEdit({
     }
   }, [isRedirecting])
 
-  console.log(media)
-
   const handleUpdate = async () => {
     let errorMsg = ''
 

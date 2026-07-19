@@ -103,6 +103,8 @@ export interface RequestCardProps {
 export interface ResponseCardProps {
   id: string
   responder: string
+  profileImg?: string
+  name?: string
   location: string
   starRating: number
   requestCompleted: number
@@ -119,6 +121,7 @@ export interface BrowseRequestListProps {
   onRefresh: (keys: QueryKey[]) => void
   userLat?: number
   userLon?: number
+  onAddRequestToCache?: (request: RequestData) => void
 }
 
 export interface OutgoingRequestListProps {

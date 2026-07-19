@@ -25,7 +25,10 @@ import { getMessages, sendMessage } from '@/services/chat'
 import { getRequestById } from '@/services/requests'
 import { Message } from '@/services/chat/chat.types'
 import { COLORS } from '@/constants/theme'
-import { ChatBubble, OptimisticMessage } from '@/modules/request/components/chat-bubble'
+import {
+  ChatBubble,
+  OptimisticMessage,
+} from '@/modules/request/components/chat-bubble'
 import { ThemedView } from '@/components/themed-view'
 import { getResolvedAvataUri } from '@/utils/resolver'
 import { pusherService } from '@/lib/pusher'
@@ -70,18 +73,21 @@ export default function ChatScreen() {
     }
   }, [])
 
-  const fetchMessages = useCallback(async (silent = false) => {
-    try {
-      if (!silent) setLoading(true)
+  const fetchMessages = useCallback(
+    async (silent = false) => {
+      try {
+        if (!silent) setLoading(true)
 
-      if (!conversationId) return
+        if (!conversationId) return
 
-      const data = await getMessages(conversationId)
-      setMessages(Array.isArray(data) ? data.reverse() : [])
-    } finally {
-      if (!silent) setLoading(false)
-    }
-  }, [conversationId])
+        const data = await getMessages(conversationId)
+        setMessages(Array.isArray(data) ? data.reverse() : [])
+      } finally {
+        if (!silent) setLoading(false)
+      }
+    },
+    [conversationId]
+  )
 
   const getReceiver = useCallback(async () => {
     try {

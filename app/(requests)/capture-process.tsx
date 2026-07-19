@@ -16,6 +16,7 @@ import { globalStyles } from '@/styles/globalStyles'
 import StepCapture from '@/modules/offers/components/step-capture'
 import StepComment from '@/modules/offers/components/step-comment'
 import StepReview from '@/modules/offers/components/step-review'
+import { MediaType } from '@/services/requests/request.types'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -29,7 +30,7 @@ export default function CaptureProcess() {
 
   const [step, setStep] = useState<Step>(1)
   const [direction, setDirection] = useState<Direction>('forward')
-  const [media, setMedia] = useState<FileType[]>([])
+  const [media, setMedia] = useState<(FileType | MediaType)[]>([])
   const [comment, setComment] = useState('')
 
   const goBack = useCallback(() => {

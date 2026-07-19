@@ -22,4 +22,5 @@ export const STORE_KEYS = {
   onboarding: 'livens_onboarding',
   preference: 'livens_preference',
   pushToken: 'livens_push_token',
+  rememberMe: 'livens_remember_me',
 }

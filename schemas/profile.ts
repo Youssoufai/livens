@@ -27,9 +27,7 @@ export const addBankSchema = Yup.object({
 })
 
 export const deleteAccountSchema = Yup.object({
-  confirmation: Yup.string()
-    .oneOf(['Delete my account'], 'Please type "Delete my account" exactly')
-    .required('Confirmation is required'),
+  confirmation: Yup.string().required('Confirmation is required'),
 })
 
 export const contactSchema = Yup.object({

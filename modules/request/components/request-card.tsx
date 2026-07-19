@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   statusBar: {
     height: 32,

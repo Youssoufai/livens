@@ -5,7 +5,7 @@ import { TextInput, type TextInputProps } from 'react-native-paper'
 
 import { FONTS } from '@/constants/fonts'
 import { COLORS } from '@/constants/theme'
-import { actuateFontSize } from '@/utils/normalize'
+import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 
 import Text from '../text'
 import { type InputPropType } from './ui.types'
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: FONTS.dm_sans[500],
     fontSize: actuateFontSize(16),
+    lineHeight: actuateLineHeight(16, 20),
     backgroundColor: '#ffffff',
     height: 52,
     paddingHorizontal: 3,

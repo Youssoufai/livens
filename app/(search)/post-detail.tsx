@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   uploadContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    // flex: 1,
     columnGap: 10,
     height: 200,
   },

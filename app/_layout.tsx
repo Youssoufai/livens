@@ -17,6 +17,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { PaystackProvider } from 'react-native-paystack-webview'
 
 import { toastOptions } from '@/components/notification'
+import { initStorage } from '@/utils/storage'
 import { queryClient } from '@/services'
 import AppStorage from '@/utils/storage'
 import { useBoundStore } from '@/state'
@@ -94,6 +95,7 @@ const InitialLayout = () => {
   useEffect(() => {
     async function prepare() {
       try {
+        await initStorage()
         await new Promise((resolve) => setTimeout(resolve, 2500))
       } catch (err) {
         console.warn(err)
@@ -145,7 +147,7 @@ export default function RootLayout() {
           <PaperProvider>
             <KeyboardProvider>
               {/*<RequestProvider> */}
-              <PaystackProvider publicKey={envConfig.paystackPubKey || ''}>
+              <PaystackProvider publicKey={envConfig.paystackPubKey || ''} defaultChannels={['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer']}>
                 <InitialLayout />
               </PaystackProvider>
               {/*  </RequestProvider> */}

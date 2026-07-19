@@ -1,0 +1,28 @@
+diff --git a/node_modules/react-native-paystack-webview/production/lib/PaystackProvider.js b/node_modules/react-native-paystack-webview/production/lib/PaystackProvider.js
+index c0f0a86..e9152de 100644
+--- a/node_modules/react-native-paystack-webview/production/lib/PaystackProvider.js
++++ b/node_modules/react-native-paystack-webview/production/lib/PaystackProvider.js
+@@ -88,9 +88,10 @@ const PaystackProvider = ({ publicKey, currency, defaultChannels = ['card'], dee
+     }
+     return (<exports.PaystackContext.Provider value={{ popup: { checkout, newTransaction } }}>
+             {children}
+-            <react_native_1.Modal visible={visible} transparent animationType="slide">
+-                <react_native_safe_area_context_1.SafeAreaView style={styles_1.styles.container}>
+-                    <react_native_webview_1.WebView originWhitelist={["*"]} source={{ html: paystackHTML }} onMessage={handleMessage} onShouldStartLoadWithRequest={(request) => {
++            <react_native_1.Modal visible={visible} transparent animationType="slide" statusBarTranslucent>
++                <react_native_safe_area_context_1.SafeAreaProvider>
++                    <react_native_safe_area_context_1.SafeAreaView style={styles_1.styles.container}>
++                        <react_native_webview_1.WebView originWhitelist={["*"]} source={{ html: paystackHTML }} onMessage={handleMessage} onShouldStartLoadWithRequest={(request) => {
+             const url = request.url ?? '';
+             if (!(0, utils_1.shouldHandleExternally)(url, resolvedDeepLinkHosts)) {
+                 return true;
+@@ -100,7 +101,8 @@ const PaystackProvider = ({ publicKey, currency, defaultChannels = ['card'], dee
+             void (0, utils_1.openExternalUrl)(url, debug);
+             return false;
+         }} javaScriptEnabled domStorageEnabled startInLoadingState onLoadStart={() => debug && console.log('[Paystack] WebView Load Start')} onLoadEnd={() => debug && console.log('[Paystack] WebView Load End')} renderLoading={() => <react_native_1.ActivityIndicator size="large"/>}/>
+-                </react_native_safe_area_context_1.SafeAreaView>
++                    </react_native_safe_area_context_1.SafeAreaView>
++                </react_native_safe_area_context_1.SafeAreaProvider>
+             </react_native_1.Modal>
+         </exports.PaystackContext.Provider>);
+ };

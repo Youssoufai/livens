@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { FAB } from 'react-native-paper'
@@ -7,8 +7,8 @@ import { ThemedView } from '@/components/themed-view'
 import HeaderTabs from '@/modules/request/components/header-tabs'
 import { REQUESTS_TABS } from '@/modules/request/requests.data'
 import {
-  useGetRequestsQuery,
   useGetAllRequestsQuery,
+  useGetBrowseRequestsQuery,
 } from '@/hooks/queries/use-requests'
 import RequestList from '@/modules/request/components/request-list'
 import BrowseRequestList from '@/modules/request/components/browse-request-list'
@@ -16,6 +16,8 @@ import useRefresh from '@/hooks/use-pull-refresh'
 import useGetLocation from '@/hooks/use-get-location'
 import { COLORS } from '@/constants/theme'
 import OngoingRequestList from '@/modules/request/components/outgoing-request-list'
+import { queryClient } from '@/services'
+import { RequestData } from '@/services/requests/request.types'
 
 const styles = StyleSheet.create({
   content: {
@@ -47,8 +49,11 @@ export default function Requests() {
 
   const { tab } = useLocalSearchParams<{ tab: string }>()
 
-  const { data: allRequestsData, isLoading: browseLoading } =
+  const { data: allRequestsData, isLoading: isAllLoading } =
     useGetAllRequestsQuery(selectedTab)
+
+  const { data: browseRequestData, isLoading: isBrowseReqLoading } =
+    useGetBrowseRequestsQuery(selectedTab)
 
   const handleViewResponders = (id: string) => {
     router.push({ pathname: '/(requests)/request-details', params: { id } })
@@ -59,6 +64,17 @@ export default function Requests() {
       setSelectedTab(tab ?? BROWSE_TAB)
     }, [tab])
   )
+
+  const setBrowseQueryData = (newRequest: RequestData) => {
+    queryClient.setQueryData(
+      ['browse-requests'],
+      (oldRequests: RequestData[]) => {
+        if (!oldRequests) return [newRequest]
+
+        return [...oldRequests, newRequest]
+      }
+    )
+  }
 
   const isMyRequestsTab = selectedTab === MY_REQUESTS_TAB
   const isBrowseTab = selectedTab === BROWSE_TAB
@@ -77,18 +93,19 @@ export default function Requests() {
       <ThemedView style={styles.content}>
         {isBrowseTab ? (
           <BrowseRequestList
-            data={allRequestsData ?? []}
-            isLoading={browseLoading}
+            data={browseRequestData ?? []}
+            isLoading={isBrowseReqLoading}
             refreshing={refreshing}
             onRefresh={onRefresh}
             userLat={userLat}
             userLon={userLon}
+            onAddRequestToCache={setBrowseQueryData}
           />
         ) : isMyRequestsTab ? (
           <>
             <RequestList
               list={allRequestsData ?? []}
-              isLoading={browseLoading}
+              isLoading={isAllLoading}
               onRefresh={onRefresh}
               refreshing={refreshing}
               onViewResponders={handleViewResponders}
@@ -105,7 +122,7 @@ export default function Requests() {
         ) : ongoingTab ? (
           <OngoingRequestList
             data={allRequestsData ?? []}
-            isLoading={browseLoading}
+            isLoading={isAllLoading}
             refreshing={refreshing}
             onRefresh={onRefresh}
           />

@@ -20,6 +20,7 @@ import { API_ENDPOINTS } from '@/constants/endpoints'
 import { catchErr } from '@/utils/error-handlers'
 import { showToastMessage } from '@/components/notification'
 import { storePreference } from '@/modules/profile/profile.handlers'
+import { sessionToken } from '@/utils/session-token'
 
 const UserProfile = () => {
   const [isSwitchOn, setIsSwitchOn] = useState(false)
@@ -32,6 +33,7 @@ const UserProfile = () => {
 
   const handleLogout = () => {
     logout()
+    sessionToken.clear()
     storage.removeItem(STORE_KEYS.token)
 
     router.replace('/(auth)/login' as any)
@@ -116,6 +118,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     rowGap: 24,
+    paddingBottom: 16,
   },
   divider: {
     backgroundColor: COLORS.grey[50],

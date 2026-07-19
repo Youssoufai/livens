@@ -14,6 +14,21 @@ const resolveCloudinaryApi = (type: 'image' | 'video') =>
 const resolveMediaType = (file: FileType): 'image' | 'video' =>
   file.type?.startsWith('video') ? 'video' : 'image'
 
+const COMPATIBLE_VIDEO_TRANSFORM = 'f_mp4,vc_h264,ac_aac'
+
+const toCompatibleMp4Url = (secureUrl: string) =>
+  secureUrl
+    .replace('/upload/', `/upload/${COMPATIBLE_VIDEO_TRANSFORM}/`)
+    .replace(/\.\w+$/, '.mp4')
+
+export const toStreamUrl = (mediaUrl: string) =>
+  mediaUrl.includes('res.cloudinary.com/') &&
+  mediaUrl.includes(`/upload/${COMPATIBLE_VIDEO_TRANSFORM}/`)
+    ? mediaUrl
+        .replace(`/upload/${COMPATIBLE_VIDEO_TRANSFORM}/`, '/upload/sp_auto/')
+        .replace(/\.\w+$/, '.m3u8')
+    : mediaUrl
+
 export const uploadMedia = async (
   file: FileType,
   onProgress?: (percent: number) => void
@@ -39,8 +54,11 @@ export const uploadMedia = async (
       }
     )
 
+    const rawUrl = data.secure_url ?? data.url
+    const url = type === 'video' ? toCompatibleMp4Url(rawUrl) : rawUrl
+
     return {
-      url: data.secure_url ?? data.url,
+      url,
       public_id: data.public_id,
       type: data.resource_type,
     }

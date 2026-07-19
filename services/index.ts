@@ -6,6 +6,7 @@ import Appstorage from '@/utils/storage'
 import { STORE_KEYS } from '@/constants'
 import { QueryClient } from '@tanstack/react-query'
 import { showToastMessage } from '@/components/notification'
+import { sessionToken } from '@/utils/session-token'
 
 const storage = new Appstorage()
 
@@ -27,13 +28,10 @@ export const AuthenticatedAPI = axios.create({
 export const queryClient = new QueryClient()
 
 AuthenticatedAPI.interceptors.request.use((config) => {
-  const storedToken = storage.getItem<'string'>(STORE_KEYS.token)
+  const token = sessionToken.get() ?? storage.getItem<'string'>(STORE_KEYS.token)
 
-  if (storedToken) {
-    config.headers.set(
-      'Authorization',
-      storedToken ? `Bearer ${storedToken}` : null
-    )
+  if (token) {
+    config.headers.set('Authorization', `Bearer ${token}`)
   }
   return config
 })
@@ -44,9 +42,9 @@ AuthenticatedAPI.interceptors.response.use(
     const originalRequest = error.config
 
     if (error.response?.status === 401) {
+      sessionToken.clear()
       storage.removeItem(STORE_KEYS.token)
 
-      // Optional: clear headers
       delete AuthenticatedAPI.defaults.headers.common['Authorization']
 
       showToastMessage('Session expired. Please log in again.', 'error')

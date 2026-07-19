@@ -1,7 +1,6 @@
 import { BadgeAlert, BadgeCheck, BadgeInfo, XIcon } from 'lucide-react-native'
 import React, { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { Pressable as RNGPressable } from 'react-native-gesture-handler'
 import {
   toast,
   ToasterProps,
@@ -94,23 +93,22 @@ const CustomToast = ({
   )
 }
 
+const TOAST_ID = 'app-toast'
+
 export function showToastMessage(
   message: string,
   type: 'success' | 'error' = 'success',
   position?: ToastPosition
 ) {
-  let toastId = Math.random().toString(36)
-
   const options: Partial<ToastProps> = {
-    id: toastId,
+    id: TOAST_ID,
     position: position ?? ('bottom-center' as ToastPosition),
     duration: 5000,
     icon: getToastIcon(type),
-    closeButton: true,
     close: (
-      <RNGPressable onPress={() => toast.dismiss(toastId)}>
+      <Pressable hitSlop={10} onPress={() => toast.dismiss()}>
         <XIcon size={28} color={COLORS.white} />
-      </RNGPressable>
+      </Pressable>
     ),
   }
 

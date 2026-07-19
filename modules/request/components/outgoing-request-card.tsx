@@ -27,7 +27,7 @@ const STATUS_COLORS: Partial<
     label: 'Ongoing',
     color: COLORS.white,
     bgColor: COLORS.primary[500],
-    btnColor: COLORS.primary[400],
+    btnColor: COLORS.primary[500],
   },
   'waiting for approval': {
     label: 'Pending Approval & Payment',
@@ -111,63 +111,68 @@ const OngoingRequestCard = ({
     ) : null
 
   return (
-    <View style={styles.cardContainer}>
-      <View
-        style={[styles.statusBar, { backgroundColor: statusDetails?.bgColor }]}
-      >
-        <Text
-          size={11}
-          lineHeight={14}
-          color="white"
-          weight={500}
-          style={[styles.statusText, contentStyle.text]}
+    <View style={styles.shadowWrapper}>
+      <View style={styles.cardContainer}>
+        <View
+          style={[
+            styles.statusBar,
+            { backgroundColor: statusDetails?.bgColor },
+          ]}
         >
-          {statusDetails?.label}
-        </Text>
-      </View>
-      <View style={styles.content}>
-        <View>
-          <View style={styles.titleWrapper}>
-            <View style={styles.location}>
-              <Text size={16} lineHeight={20} weight={600} color="black">
-                {typeof locationDetails === 'string'
-                  ? locationDetails
-                  : locationDetails?.region}
-              </Text>
-            </View>
-            {moreOptionsContent}
-          </View>
-          <Text size={14} lineHeight={20} color="grey-300">
-            {description}
+          <Text
+            size={11}
+            lineHeight={14}
+            color="white"
+            weight={500}
+            style={[styles.statusText, contentStyle.text]}
+          >
+            {statusDetails?.label}
           </Text>
         </View>
-        <View style={styles.buttonWrapper}>
-          {buttonText && (
-            <Button
-              label={buttonText}
-              onPress={() => {
-                if (status === 'active') {
-                  onAddResponse(id ?? '')
-                } else if (status === 'waiting for approval') {
-                  onEditResponse(id ?? '')
+        <View style={styles.content}>
+          <View>
+            <View style={styles.titleWrapper}>
+              <View style={styles.location}>
+                <Text size={16} lineHeight={20} weight={600} color="black">
+                  {typeof locationDetails === 'string'
+                    ? locationDetails
+                    : locationDetails?.region}
+                </Text>
+              </View>
+              {moreOptionsContent}
+            </View>
+            <Text size={14} lineHeight={20} color="grey-300">
+              {description}
+            </Text>
+          </View>
+          <View style={styles.buttonWrapper}>
+            {buttonText && (
+              <Button
+                label={buttonText}
+                onPress={() => {
+                  if (status === 'active') {
+                    onAddResponse(id ?? '')
+                  } else if (status === 'waiting for approval') {
+                    onEditResponse(id ?? '')
+                  }
+                }}
+                labelStyle={
+                  status === 'active' ? styles.buttonLabel : contentStyle.text
                 }
-              }}
-              labelStyle={
-                status === 'active' ? styles.buttonLabel : contentStyle.text
-              }
-              btnStyle={contentStyle.button}
-            />
-          )}
-          {status !== 'completed' && (
-            <Button
-              label="Send message"
-              onPress={() => onMessage(id ?? '', requesterId, conversationId)}
-              buttonColor="white"
-              labelColor="grey-800"
-              loading={isChatLoading}
-              btnStyle={styles.button}
-            />
-          )}
+                btnStyle={contentStyle.button}
+              />
+            )}
+            {status !== 'completed' && (
+              <Button
+                label="Send message"
+                onPress={() => onMessage(id ?? '', requesterId, conversationId)}
+                buttonColor="white"
+                labelColor="grey-800"
+                loading={isChatLoading}
+                btnStyle={styles.button}
+              />
+            )}
+          </View>
         </View>
       </View>
     </View>
@@ -175,9 +180,7 @@ const OngoingRequestCard = ({
 }
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+  shadowWrapper: {
     shadowColor: '#000',
     shadowOffset: {
       width: -2,
@@ -186,6 +189,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+  },
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
     overflow: 'hidden',
   },
   statusBar: {

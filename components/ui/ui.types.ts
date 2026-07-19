@@ -51,6 +51,7 @@ export interface Modalprops {
   statusBarStyle?: StatusBarStyle
   onDismiss?: VoidFunction
   showCloseButton?: boolean
+  scrollEnabled?: boolean
 }
 
 export interface SwitchProps {

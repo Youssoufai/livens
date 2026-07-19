@@ -2,7 +2,7 @@ import { Href } from 'expo-router'
 import { FC, FunctionComponent } from 'react'
 import { SvgProps } from 'react-native-svg'
 
-export type TransactionStatus = 'credit' | 'debit'
+export type TransactionStatus = 'success' | 'pending' | 'failed'
 
 export interface TileProps {
   type?: string

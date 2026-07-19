@@ -37,7 +37,7 @@ const UploadedImage = () => {
           numColumns={2}
           keyExtractor={(_, index) => `uploaded_images_${index}`}
           renderItem={({ item, index }) => {
-            if (item?.url?.endsWith('mp4')) {
+            if (item?.type.startsWith('video')) {
               return (
                 <TouchableOpacity
                   key={`request_media_${index}`}
@@ -49,6 +49,7 @@ const UploadedImage = () => {
                     key={item.public_id}
                     source={{ uri: item.url }}
                     style={styles.image}
+                    priority="high"
                   />
                   <VideoIcon
                     size={24}
@@ -105,6 +106,7 @@ const styles = StyleSheet.create({
   image: {
     height: 200,
     width: '100%',
+    backgroundColor: COLORS.grey[100],
   },
   videoIcon: {
     position: 'absolute',

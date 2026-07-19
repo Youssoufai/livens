@@ -6,6 +6,7 @@ import { intiateWithdrawal } from '@/services/payment'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
 import SheetInput from '@/components/ui/sheet-input'
+import { useBoundStore } from '@/state'
 
 import { WithdrawalContentProps } from '../profile.types'
 
@@ -15,6 +16,8 @@ const WithdrawAmount = ({
 }: WithdrawalContentProps) => {
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const getUser = useBoundStore((state) => state.getUser)
 
   const handleWithdrawal = async () => {
     if (!amount) return
@@ -26,6 +29,8 @@ const WithdrawAmount = ({
         amount: +amount,
         recipient_code: recipientCode,
       })
+
+      getUser()
       onCloseSheet()
     } catch (error) {
       errMsg = catchErr(error)?.message ?? 'Failed to initiate withdrawal'

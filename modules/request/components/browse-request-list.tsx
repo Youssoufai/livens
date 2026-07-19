@@ -1,16 +1,16 @@
 import { FlatList, RefreshControl, StyleSheet } from 'react-native'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useRouter } from 'expo-router'
 
 import { RequestData } from '@/services/requests/request.types'
 import ForumIcon from '@/assets/icons/forum.svg'
 import { generateArray } from '@/utils/generator'
 import BrowseRequestCardSkeleton from '@/components/placeholder/browse-request-card-skeleton'
+import { pusherService } from '@/lib/pusher'
 
 import BrowseRequestCard from './browse-request-card'
 import EmptyState from './empty-state'
 import { BrowseRequestListProps } from '../requests.types'
-import { REQUESTS_TABS } from '../requests.data'
 
 const BrowseRequestList = ({
   data,
@@ -19,8 +19,27 @@ const BrowseRequestList = ({
   onRefresh,
   userLat,
   userLon,
+  onAddRequestToCache,
 }: BrowseRequestListProps) => {
   const router = useRouter()
+
+  useEffect(() => {
+    const channel = `nearby-requests`
+    const subscribeChat = async () => {
+      await pusherService.subscribe(
+        channel,
+        (data: { request: RequestData }) => {
+          if (typeof data === 'string') return
+          onAddRequestToCache?.(data.request)
+        }
+      )
+    }
+    subscribeChat()
+
+    return () => {
+      pusherService.unsubscribe(channel)
+    }
+  }, [])
 
   const handleBrowsePress = useCallback((id: string) => {
     router.push({
@@ -58,7 +77,7 @@ const BrowseRequestList = ({
         return (
           <BrowseRequestCard
             id={item.id}
-            name={item.user.name ?? ''}
+            name={item?.user?.name ?? ''}
             description={item.description}
             reward={item.reward}
             createdAt={item.created_at}
@@ -68,7 +87,7 @@ const BrowseRequestList = ({
             location={item.location ?? ''}
             userLat={userLat}
             userLon={userLon}
-            requesterLocation={item.user.location ?? ''}
+            requesterLocation={item?.user?.location ?? ''}
             onPress={handleBrowsePress}
           />
         )
@@ -77,9 +96,7 @@ const BrowseRequestList = ({
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() =>
-            onRefresh([['all-requests', REQUESTS_TABS[0].value.toString()]])
-          }
+          onRefresh={() => onRefresh([['browse-requests']])}
         />
       }
       contentContainerStyle={styles.browseList}

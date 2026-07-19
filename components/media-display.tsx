@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, View } from 'react-native'
 import { useState } from 'react'
-import { EllipsisVertical } from 'lucide-react-native'
+import { EllipsisVertical, XIcon } from 'lucide-react-native'
 import { ActivityIndicator } from 'react-native-paper'
 import { Image } from 'expo-image'
 
@@ -51,9 +51,22 @@ const MediaDisplay = ({
       contentStyle={styles.modalContainer}
       statusBarStyle="light"
       onDismiss={onDismiss}
+      scrollEnabled={false}
     >
-      <View style={styles.modalContent}>
-        <View style={styles.moreAction}>
+      <View style={styles.modalContent} pointerEvents="box-none">
+        <View
+          style={[
+            styles.moreAction,
+            Platform.select({ android: styles.androidMoreAction }),
+          ]}
+        >
+          {Platform.select({
+            ios: (
+              <Pressable style={styles.closeIcon} onPress={onDismiss}>
+                <XIcon size={24} color="#ffffff" />
+              </Pressable>
+            ),
+          })}
           {canSaveMedia ? (
             !isOptionsOpen ? (
               <Pressable
@@ -79,7 +92,7 @@ const MediaDisplay = ({
         </View>
 
         <View style={styles.modalImgWrapper}>
-          {selectedMedia?.url?.endsWith('mp4') ? (
+          {selectedMedia?.type.startsWith('video') ? (
             <Video
               source={selectedMedia?.url}
               allowFullScreen
@@ -131,11 +144,19 @@ const styles = StyleSheet.create({
   modalImage: {
     height: '100%',
   },
+  closeIcon: {
+    marginBottom: 24,
+  },
   moreAction: {
-    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     position: 'absolute',
+    width: '100%',
     top: '10%',
     zIndex: 10,
+  },
+  androidMoreAction: {
+    justifyContent: 'flex-end',
   },
   option: {
     backgroundColor: COLORS.white,

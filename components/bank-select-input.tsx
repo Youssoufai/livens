@@ -13,6 +13,7 @@ import { useController } from 'react-hook-form'
 import { COLORS } from '@/constants/theme'
 import { FONTS } from '@/constants/fonts'
 import { actuateFontSize } from '@/utils/normalize'
+
 import { InputPropType } from './ui/ui.types'
 import Input from './ui/input'
 import Text from './text'

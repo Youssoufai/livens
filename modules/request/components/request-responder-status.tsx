@@ -23,12 +23,13 @@ import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
 import ScreenLoader from '@/components/screen-loader'
 import { startConversation } from '@/services/chat'
-
-import { RequestSuccessModalType } from '../requests.types'
-import { getRequestSuccessModalContent } from '../requests.data'
 import ScrollView from '@/components/scrollview'
 import useRefresh from '@/hooks/use-pull-refresh'
 import { queryClient } from '@/services'
+import { getResolvedAvataUri } from '@/utils/resolver'
+
+import { RequestSuccessModalType } from '../requests.types'
+import { getRequestSuccessModalContent } from '../requests.data'
 
 const RequestResponderStatus = ({ id }: { id: string }) => {
   const [isPublic, setIsPublic] = useState(false)
@@ -71,6 +72,12 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
     dismissModal,
     setVisibleModal,
     visibleModal
+  )
+
+  const responderAvatar = getResolvedAvataUri(
+    responseStatusData?.response?.user?.profile_photo ??
+      responseStatusData?.response?.user?.name ??
+      'R'
   )
 
   const isButtonDisabled = !responseStatusData.response?.media_paths?.length
@@ -147,7 +154,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
         params: {
           conversationId: conversation_id,
           requestId: responseStatusData.request.id,
-          receiverId: responseStatusData.response.user_id,
+          receiverId: responseStatusData.request.responder,
         },
       })
     } catch (error) {
@@ -211,7 +218,10 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
           <View style={styles.responderCard}>
             <View style={styles.responderCardContent}>
               <View style={styles.responderLeft}>
-                <View style={styles.avatar} />
+                <Image
+                  source={{ uri: responderAvatar }}
+                  style={styles.avatar}
+                />
                 <View style={styles.responderInfo}>
                   <Text size={16} lineHeight={20} weight={700} color="grey-500">
                     {responder?.name}
@@ -237,7 +247,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
                       <View style={styles.uploadWrapper}>
                         <View style={styles.uploadeContent}>
                           {media.map((asset, index) => {
-                            if (asset?.url?.endsWith('mp4')) {
+                            if (asset?.type.startsWith('video')) {
                               return (
                                 <View
                                   key={`uploaded_response_media_${index}`}

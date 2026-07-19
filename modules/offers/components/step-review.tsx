@@ -33,6 +33,8 @@ export default function StepReview({
 
   const { mutateAsync: submitResponse, isPending } = useSubmitResponseMutation()
 
+  const reviewedMedia = media as FileType[]
+
   useEffect(() => {
     if (isRedirecting) {
       const timeout = setTimeout(() => {
@@ -52,7 +54,11 @@ export default function StepReview({
     let errorMsg = ''
 
     try {
-      await submitResponse({ media, comment, request_id: requestId })
+      await submitResponse({
+        media: reviewedMedia,
+        comment,
+        request_id: requestId,
+      })
       setIsRedirecting(true)
     } catch (error) {
       errorMsg = catchErr(error).message ?? 'Something went wrong'
@@ -99,7 +105,7 @@ export default function StepReview({
               </Pressable>
             </View>
             <View style={styles.mediaGrid}>
-              {media.map((asset, i) => {
+              {reviewedMedia.map((asset, i) => {
                 const isVideo =
                   asset.name.includes('mp4') || asset.uri.includes('mp4')
 

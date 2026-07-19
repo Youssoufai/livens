@@ -23,8 +23,6 @@ const SentOfferList = ({
 }: SentOfferListProps) => {
   const router = useRouter()
 
-  console.log({ data })
-
   const handlePress = useCallback(
     (id: string) => {
       router.push({ pathname: '/(offers)/sent', params: { id } })
