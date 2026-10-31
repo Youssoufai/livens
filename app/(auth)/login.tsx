@@ -29,6 +29,8 @@ import { API } from '@/services'
 import { showToastMessage } from '@/components/notification'
 import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
 import KeyboardScrollView from '@/components/keyboard-scrollview'
+import AppleAuthButton from '@/components/apple-auth-button'
+import { AppleAuthenticationButtonType } from 'expo-apple-authentication'
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets()
@@ -53,7 +55,7 @@ export default function LoginScreen() {
   const completeSignin = async (
     token: string,
     hasLocation: boolean,
-    rememberMe: boolean
+    rememberMe?: boolean
   ) => {
     try {
       sessionToken.set(token)
@@ -109,7 +111,7 @@ export default function LoginScreen() {
 
       await completeSignin(authToken, !!data?.user?.location, rememberMeChecked)
     } catch (error) {
-      showToastMessage(catchErr(error).message ?? '', 'error')
+      showToastMessage(catchErr(error).message ?? 'Failed to login', 'error')
     }
   }
 
@@ -181,6 +183,10 @@ export default function LoginScreen() {
               loading={isLoadingGoogle}
               btnStyle={styles.socialButton}
               onPress={handleGoogleLogin}
+            />
+            <AppleAuthButton
+              type={AppleAuthenticationButtonType.SIGN_IN}
+              onLogin={completeSignin}
             />
           </View>
         </View>

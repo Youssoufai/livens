@@ -93,6 +93,7 @@ const RequestCard = ({
           color="white"
           weight={500}
           style={styles.statusText}
+          numberOfLines={1}
         >
           {statusDetails?.label}
         </Text>
@@ -100,7 +101,13 @@ const RequestCard = ({
       <View style={styles.content}>
         <View style={styles.titleWrapper}>
           <View style={styles.location}>
-            <Text size={16} lineHeight={20} weight={600} color="black">
+            <Text
+              size={16}
+              lineHeight={20}
+              weight={600}
+              color="black"
+              numberOfLines={1}
+            >
               {typeof locationDetails === 'string'
                 ? locationDetails
                 : locationDetails?.name}
@@ -124,7 +131,7 @@ const RequestCard = ({
 const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: -2,
@@ -172,7 +179,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 8,
-    height: 36,
+    minHeight: 36,
   },
 })
 

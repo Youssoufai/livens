@@ -7,10 +7,11 @@ import { useGetSentOfferListQuery } from '@/hooks/queries/use-response'
 import SentOfferList from '@/modules/offers/components/sent-offer-list'
 import { SentOfferResponseType } from '@/services/response/response.types'
 import useRefresh from '@/hooks/use-pull-refresh'
+import { HeaderTabList } from '@/modules/request/requests.types'
 
-const OFFERS_TABS: ListItem[] = [
-  { label: 'Sent offers', value: 'sent_offers' },
-  { label: 'Archived offers', value: 'archived' },
+const OFFERS_TABS: HeaderTabList[] = [
+  { label: 'Sent offers', value: 'sent_offers', width: '30%' },
+  { label: 'Archived offers', value: 'archived', width: '40%' },
 ]
 
 const Schedule = () => {

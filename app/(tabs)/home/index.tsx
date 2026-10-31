@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ImageBackground, StyleSheet, Text as RNText, View } from 'react-native'
 
 import Text from '@/components/text'
@@ -15,17 +15,26 @@ import { useBoundStore } from '@/state'
 import { grantLocationPermission } from '@/utils/resolver'
 import { registerForPushNoft } from '@/services/profile'
 import AppStorage from '@/utils/storage'
+import { STORE_KEYS } from '@/constants'
+import { Coordinates } from '@/services/services.type'
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const router = useRouter()
 
+  const userLatitude = useBoundStore((state) =>
+    state.user?.latitude ? +state.user?.latitude : null
+  )
+  const userLongitude = useBoundStore((state) =>
+    state.user?.longitude ? +state.user?.longitude : null
+  )
   const userLocation = useBoundStore((state) => state.user?.location)
   const userId = useBoundStore((state) => state.user?.id)
   const getUser = useBoundStore((state) => state.getUser)
 
-  const storage = new AppStorage()
+  const storage = useRef(new AppStorage()).current
+  const hasSetCoords = useRef(false)
 
   const location = userLocation
     ?.slice(userLocation.lastIndexOf(',') + 1)
@@ -38,6 +47,41 @@ export default function SearchScreen() {
       }
     })()
   }, [userLocation])
+
+  useEffect(() => {
+    if (
+      !userId ||
+      userLatitude == null ||
+      userLongitude == null ||
+      hasSetCoords.current
+    ) {
+      return
+    }
+
+    const coordinates: Coordinates = {
+      latitude: userLatitude,
+      longitude: userLongitude,
+    }
+
+    storage.setItem(
+      `${STORE_KEYS.auto_location}_${userId}`,
+      JSON.stringify(coordinates)
+    )
+    hasSetCoords.current = true
+
+    const preferenceKey = `${STORE_KEYS.preference}_${userId}`
+    const storedPreference = storage.getItem<'string'>(preferenceKey)
+    const preference = storedPreference
+      ? (JSON.parse(storedPreference) as Partial<UserPreference>)
+      : {}
+
+    if (typeof preference.autoLocation !== 'undefined') return
+
+    storage.setItem(
+      preferenceKey,
+      JSON.stringify({ ...preference, autoLocation: true })
+    )
+  }, [userId, userLatitude, userLongitude])
 
   useEffect(() => {
     grantLocationPermission()

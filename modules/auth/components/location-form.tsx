@@ -21,6 +21,7 @@ import { showToastMessage } from '@/components/notification'
 import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
 import { API, AuthenticatedAPI } from '@/services'
 import { API_ENDPOINTS } from '@/constants/endpoints'
+import { PlacesData } from '@/components/components.types'
 
 const LocationForm = () => {
   const [location, setLocation] = useState<LocationType>()
@@ -33,11 +34,16 @@ const LocationForm = () => {
   const { getCurrentLocation } = useGetLocation()
 
   const handleLocationChange = (place: Place, sessionToken?: string | null) => {
+    let placeData: PlacesData = { ...place }
+
     place?.details?.location &&
       setLocation({
         latitude: place.details.location.latitude,
         longitude: place.details.location.longitude,
-        formattedAddress: place.details.formattedAddress,
+        formattedAddress:
+          placeData.text?.text ??
+          place.structuredFormat.mainText.text ??
+          place.details.formattedAddress,
       })
   }
 

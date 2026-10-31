@@ -106,8 +106,6 @@ const OngoingRequestList = ({
       renderItem={({ item }) => {
         if (typeof item !== 'object') return <OngoingRequestCardSkeleton />
 
-        console.log(item.user_id)
-
         return (
           <OutgoingRequestCard
             id={item.id}

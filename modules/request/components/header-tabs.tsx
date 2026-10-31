@@ -16,7 +16,7 @@ const HeaderTabs = ({
 }: HeaderTabProps) => {
   return (
     <View style={[styles.container, containerStyle]}>
-      <ScrollView style={[styles.scrollWrapper, contentStyle]}>
+      <View style={[styles.scrollWrapper, contentStyle]}>
         {list.map((tab, index) => (
           <Pressable
             key={`${tab.value}_${index}`}
@@ -24,6 +24,7 @@ const HeaderTabs = ({
               styles.tabItem,
               selected === tab.value && styles.selected,
               pressed && globalStyles.pressedOpacity,
+              { flexBasis: tab.width },
             ]}
             onPress={() => onSelect(String(tab.value))}
           >
@@ -33,12 +34,13 @@ const HeaderTabs = ({
               weight={600}
               color={selected === tab.value ? 'grey-500' : 'grey-300'}
               align="center"
+              numberOfLines={1}
             >
               {tab.label}
             </Text>
           </Pressable>
         ))}
-      </ScrollView>
+      </View>
     </View>
   )
 }

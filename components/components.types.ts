@@ -7,6 +7,8 @@ import { BackdropPressBehavior } from '@gorhom/bottom-sheet/lib/typescript/compo
 
 import { FONTS } from '@/constants/fonts'
 import { MediaType } from '@/services/requests/request.types'
+import { AppleAuthenticationButtonType } from 'expo-apple-authentication'
+import { Place } from 'react-native-google-places-textinput'
 
 export type ColorType =
   | 'primary-50'
@@ -222,4 +224,20 @@ export interface RadioGroupProps {
   list: ListItem[]
   value: string
   onValueChange: (value: string) => void
+}
+
+export interface AppleAuthButtonProps {
+  type: AppleAuthenticationButtonType
+  onLogin: (token: string, hasLocation: boolean) => Promise<void>
+}
+
+export type AppleErrorType = {
+  code: string
+  error: string
+}
+
+export interface PlacesData extends Place {
+  text?: {
+    text: string
+  }
 }

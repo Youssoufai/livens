@@ -35,7 +35,11 @@ const Text = ({
   }, [align, color, size, fontFamily, lineHeight, weight])
 
   return (
-    <RNText style={[customFontProps, style]} numberOfLines={numberOfLines}>
+    <RNText
+      style={[customFontProps, style]}
+      numberOfLines={numberOfLines}
+      ellipsizeMode="tail"
+    >
       {children}
     </RNText>
   )

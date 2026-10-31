@@ -23,7 +23,7 @@ class PusherService {
       },
 
       onError: (msg, code, err) => {
-        console.log('[PUSHER ERROR]', msg, code, err)
+        console.error('[PUSHER ERROR]', msg, code, err)
       },
     })
 
@@ -40,12 +40,10 @@ class PusherService {
       },
 
       onSubscriptionError: (channel, message, error) => {
-        console.log('[SUBSCRIPTION ERROR]', channel, message, error)
+        console.error('[SUBSCRIPTION ERROR]', channel, message, error)
       },
 
       onEvent: (event) => {
-        console.log('[EVENT]', event)
-
         if (event.eventName.startsWith('pusher:')) {
           return
         }

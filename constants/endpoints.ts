@@ -61,5 +61,9 @@ export const API_ENDPOINTS = {
     transactions: '/user-transactions',
     notification: '/device-token',
     toggle_notification: '/toggle-notifications',
+    delete: '/delete-user',
+  },
+  user: {
+    presence: '/presence/activity',
   },
 }

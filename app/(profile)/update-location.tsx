@@ -23,6 +23,7 @@ import { AuthenticatedAPI } from '@/services'
 import { API_ENDPOINTS } from '@/constants/endpoints'
 import { ThemedView } from '@/components/themed-view'
 import ScreenLoader from '@/components/screen-loader'
+import { PlacesData } from '@/components/components.types'
 
 const LocationScreen = () => {
   const [location, setLocation] = useState<LocationType>()
@@ -48,11 +49,16 @@ const LocationScreen = () => {
   )
 
   const handleLocationChange = (place: Place, sessionToken?: string | null) => {
+    let placeData: PlacesData = { ...place }
+
     place?.details?.location &&
       setLocation({
         latitude: place.details.location.latitude,
         longitude: place.details.location.longitude,
-        formattedAddress: place.details.formattedAddress,
+        formattedAddress:
+          placeData.text?.text ??
+          place.structuredFormat.mainText.text ??
+          place.details.formattedAddress,
       })
   }
 
@@ -221,6 +227,7 @@ const googleLocationStyles = StyleSheet.create({
     color: COLORS.grey[700],
     fontFamily: FONTS.dm_sans[400],
     height: INPUT_HEIGHT,
+    paddingRight: 20,
   },
   placeholder: {
     color: COLORS.grey[300],

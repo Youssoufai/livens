@@ -122,7 +122,7 @@ const SearchResult = () => {
 
   return (
     <>
-      <ThemedView hasBottomPadding hasTopPadding style={styles.container}>
+      <ThemedView hasBottomPadding style={styles.container}>
         <View style={styles.searchWrapper}>
           <LocationInput
             placeholder="Search places and areas around you"
@@ -202,6 +202,7 @@ const SearchResult = () => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 0,
+    paddingTop: 16,
   },
   searchWrapper: {
     paddingHorizontal: 16,

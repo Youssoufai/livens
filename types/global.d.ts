@@ -14,6 +14,8 @@ global {
     rating?: string
     completed_requests?: string
     location?: string | null
+    longitude?: string
+    latitude?: string
     balance?: string
     ledger?: string
     referral_code?: string
@@ -86,6 +88,7 @@ global {
 
   type UserPreference = {
     pushEnabled: boolean
+    autoLocation: boolean
   }
 
   type ColorsType = typeof COLORS

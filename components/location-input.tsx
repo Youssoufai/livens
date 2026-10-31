@@ -14,7 +14,7 @@ import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { FONTS } from '@/constants/fonts'
 import { INPUT_HEIGHT } from '@/constants'
 
-import { type LocationInputProps } from './components.types'
+import { PlacesData, type LocationInputProps } from './components.types'
 import Text from './text'
 import SearchIcon from './icons/search'
 
@@ -60,11 +60,14 @@ const LocationInput = ({
     place: Place,
     _sessionToken?: string | null
   ) => {
+    let placeData: PlacesData = { ...place }
+
     place?.details?.location &&
       onLocation({
         latitude: place.details.location.latitude,
         longitude: place.details.location.longitude,
-        formattedAddress: place.details.formattedAddress,
+        formattedAddress:
+          placeData.text?.text ?? place.structuredFormat.mainText.text,
       })
   }
 

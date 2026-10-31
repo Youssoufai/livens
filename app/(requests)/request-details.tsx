@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, Dimensions } from 'react-native'
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import * as ToggleGroupPrimitive from '@rn-primitives/toggle-group'
 import { useLocalSearchParams } from 'expo-router'
@@ -12,6 +12,8 @@ import RequestOverview from '@/modules/request/components/request-overview'
 import RequestResponsesStatus from '@/modules/request/components/request-responder-status'
 import RequestResponses from '@/modules/request/components/request-responses'
 import { useGetRequestResponders } from '@/hooks/queries/use-requests'
+
+const screenWidth = Dimensions.get('screen').width
 
 const RequestDetails = () => {
   const queryParams = useLocalSearchParams<{ id: string }>()
@@ -29,7 +31,7 @@ const RequestDetails = () => {
   )
 
   useEffect(() => {
-    setCurrentTab(list[0].value)
+    setCurrentTab(list[0].value.toString())
   }, [list[0].value])
 
   useEffect(() => {
@@ -39,7 +41,7 @@ const RequestDetails = () => {
   }, [responsesData?.length])
 
   const moveToStatus = useCallback(() => {
-    setCurrentTab(list[2]?.value)
+    setCurrentTab(list[2]?.value.toString())
   }, [list])
 
   const content: Record<string, ReactElement> = useMemo(
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     width: '100%',
-    maxWidth: 260,
+    maxWidth: screenWidth - 50,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
   },

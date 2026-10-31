@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native'
 import { useDebounce } from 'use-debounce'
-import { Search } from 'lucide-react-native'
+import { ArrowLeft, Search } from 'lucide-react-native'
 import { useRouter } from 'expo-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Portal } from 'react-native-paper'
@@ -118,6 +118,12 @@ const SearchModal = ({
               { paddingTop: top, paddingBottom: bottom },
             ]}
           >
+            <Pressable
+              style={styles.backArrow}
+              onPress={() => setIsVisible(false)}
+            >
+              <ArrowLeft size={24} />
+            </Pressable>
             <View style={styles.searchWrapper}>
               <LocationInput
                 ref={inputRef}
@@ -146,6 +152,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     flex: 1,
     backgroundColor: COLORS.white,
+    rowGap: 24,
+  },
+  backArrow: {
+    marginLeft: 16,
   },
   searchWrapper: {
     paddingHorizontal: 16,

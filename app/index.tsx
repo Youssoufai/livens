@@ -72,7 +72,7 @@ export default function Onboarding() {
       }
 
       if (onboarding === OnboardingStatus.completed) {
-        router.replace(token ? '/(tabs)/home' : '/(onboarding)/welcome')
+        router.replace(token ? '/(tabs)/home' : '/(auth)/login')
       }
     } catch (error) {
       console.error('Failed to resolve onboarding state:', error)

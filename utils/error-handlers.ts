@@ -45,8 +45,6 @@ export const handleAxiosErrors = (
 ): NetworkResponse<undefined> => {
   const axiosErr = error instanceof AxiosError
   if (axiosErr && error.response) {
-    console.log(error.response)
-
     const statusCode = error.response.status
     const parsed = normalizeResponseData(error.response.data)
 
@@ -61,7 +59,6 @@ export const handleAxiosErrors = (
       message,
       error: parsed,
     }
-    console.log({ errMsg: message })
 
     if (statusCode >= 500) {
       return {
@@ -83,8 +80,6 @@ export const handleAxiosErrors = (
 
     return normalizedError
   } else if (axiosErr && error.request) {
-    console.log(error.request)
-
     return {
       error: 'Connection Error',
       message: 'No internet connection found. Please, check your network.',

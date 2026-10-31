@@ -35,6 +35,22 @@ const SearchLayout = () => {
         }}
         name="post-detail"
       />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: '',
+          header(props) {
+            return (
+              <CustomHeader
+                title={props.options.title}
+                containerStyle={styles.container}
+                showBack
+              />
+            )
+          },
+        }}
+        name="search-result"
+      />
     </Stack>
   )
 }

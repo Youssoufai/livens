@@ -1,17 +1,12 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   CheckCircle,
   Camera as CameraIcon,
   Video,
   XIcon,
 } from 'lucide-react-native'
-import {
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Pressable,
-} from 'react-native'
+import { StyleSheet, TouchableOpacity, View, Pressable } from 'react-native'
+import { Image } from 'expo-image'
 
 import Button from '@/components/ui/button'
 import Text from '@/components/text'
@@ -43,13 +38,18 @@ export default function StepCapture({
     onMediaChange([...media, photo])
   }
 
-  const addVideo = (v: FileType) => {
-    onMediaChange([...media.filter((m) => m.type?.startsWith('image')), v])
-  }
+  const addVideo = useCallback(
+    (v: FileType) => {
+      onMediaChange([...media.filter((m) => m.type?.startsWith('image')), v])
+    },
+    [media, onMediaChange]
+  )
 
   const removeMedia = (index: number) => {
     onMediaChange(media.filter((_, i) => i !== index))
   }
+
+  const closeCamera = useCallback(() => setCameraOpen(false), [])
 
   const canAddMore = canAddPhoto || canAddVideo
 
@@ -81,7 +81,7 @@ export default function StepCapture({
           </View>
         </View>
 
-        {media.length > 0 && (
+        {media.length > 0 && !cameraOpen && (
           <View style={styles.mediaGrid}>
             {media.map((file, i) => (
               <View key={i} style={styles.mediaCell}>
@@ -97,6 +97,8 @@ export default function StepCapture({
                   <Image
                     source={{ uri: 'uri' in file ? file.uri : file.url }}
                     style={styles.mediaImage}
+                    contentFit="cover"
+                    recyclingKey={'uri' in file ? file.uri : file.url}
                   />
                 )}
                 <TouchableOpacity
@@ -155,7 +157,7 @@ export default function StepCapture({
 
       <CameraModal
         visible={cameraOpen}
-        onClose={() => setCameraOpen(false)}
+        onClose={closeCamera}
         onPhotoCaptured={addPhoto}
         onVideoCaptured={addVideo}
         canAddPhoto={canAddPhoto}

@@ -40,9 +40,10 @@ export default function useGetLocation() {
       setCurrentLocation(location)
       return {
         address:
-          (address[0].formattedAddress ?? address[0].country)
+          address[0].formattedAddress ||
+          (address[0].country
             ? `${address[0].city}, ${address[0].country}`
-            : '',
+            : ''),
         location,
       }
     } catch (error) {

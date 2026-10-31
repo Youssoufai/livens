@@ -71,6 +71,7 @@ const InitialLayout = () => {
     dmSansMedium: require('@/assets/fonts/DM_Sans/DMSans-Medium.ttf'),
     dmSansSemiBold: require('@/assets/fonts/DM_Sans/DMSans-SemiBold.ttf'),
     dmSansBold: require('@/assets/fonts/DM_Sans/DMSans-Bold.ttf'),
+    // TwemojiMozilla: require('../node_modules/rn-country-select/lib/assets/fonts/TwemojiMozilla.woff2'),
   })
 
   const [appIsReady, setAppIsReady] = useState(false)
@@ -146,11 +147,19 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <PaperProvider>
             <KeyboardProvider>
-              {/*<RequestProvider> */}
-              <PaystackProvider publicKey={envConfig.paystackPubKey || ''} defaultChannels={['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer']}>
+              <PaystackProvider
+                publicKey={envConfig.paystackPubKey || ''}
+                defaultChannels={[
+                  'card',
+                  'bank',
+                  'ussd',
+                  'qr',
+                  'mobile_money',
+                  'bank_transfer',
+                ]}
+              >
                 <InitialLayout />
               </PaystackProvider>
-              {/*  </RequestProvider> */}
               <Toaster toastOptions={toastOptions} />
             </KeyboardProvider>
           </PaperProvider>

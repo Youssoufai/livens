@@ -9,10 +9,10 @@ import Input from '@/components/ui/input'
 import { COLORS } from '@/constants/theme'
 import { useRequestStore } from '@/state/request'
 import KeyboardScrollView from '@/components/keyboard-scrollview'
+import StepTransition from '@/components/step-animate-wrapper'
 
 import RewardCard from './reward-option'
 import { REWARD_OPTIONS } from '../requests.data'
-import StepTransition from '@/components/step-animate-wrapper'
 
 const RequestReward = ({
   direction,

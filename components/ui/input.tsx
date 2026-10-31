@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontSize: actuateFontSize(16),
     lineHeight: actuateLineHeight(16, 20),
     backgroundColor: '#ffffff',
-    height: 52,
+    minHeight: 52,
     paddingHorizontal: 3,
   },
   outlined: {

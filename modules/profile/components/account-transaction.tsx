@@ -16,11 +16,36 @@ const AccountTransaction = () => {
   return (
     <View style={styles.container}>
       <View style={styles.topContent}>
-        <View style={styles.balanceWrapper}>
-          <Text size={14} lineHeight={20} color="grey-400">
-            Balance:
-          </Text>
-          <Text size={24} lineHeight={28} weight={600} color="grey-800">
+        <View style={styles.topContentLabelWrapper}>
+          <View style={styles.balanceWrapper}>
+            <Text size={14} lineHeight={20} color="grey-400" numberOfLines={1}>
+              Balance:
+            </Text>
+          </View>
+          <Pressable
+            style={styles.transaction}
+            onPress={() => router.push('/(profile)/transaction-history')}
+          >
+            <Text
+              size={14}
+              lineHeight={18}
+              color="grey-800"
+              weight={600}
+              numberOfLines={1}
+            >
+              Transaction history
+            </Text>
+            <ChevronRight />
+          </Pressable>
+        </View>
+        <View>
+          <Text
+            size={24}
+            lineHeight={28}
+            weight={600}
+            color="grey-800"
+            numberOfLines={2}
+          >
             {formatCurrency(
               balance && !isNaN(+(balance ?? 0)) ? +balance : 0,
               2,
@@ -28,15 +53,6 @@ const AccountTransaction = () => {
             )}
           </Text>
         </View>
-        <Pressable
-          style={styles.transaction}
-          onPress={() => router.push('/(profile)/transaction-history')}
-        >
-          <Text size={14} lineHeight={18} color="grey-800" weight={600}>
-            Transaction history
-          </Text>
-          <ChevronRight />
-        </Pressable>
       </View>
       <View style={styles.bottomContent}>
         <Button
@@ -72,14 +88,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   topContent: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
+    rowGap: 5,
+  },
+  topContentLabelWrapper: {
+    flexDirection: 'row',
   },
   balanceWrapper: {
-    flex: 1,
+    flexBasis: '30%',
     rowGap: 4,
   },
   transaction: {
+    flexBasis: '60%',
     flexDirection: 'row',
     alignItems: 'center',
     columnGap: 4,
@@ -90,7 +110,7 @@ const styles = StyleSheet.create({
     columnGap: 12,
   },
   button: {
-    height: 36,
+    minHeight: 36,
     flex: 1,
   },
   fundButton: {

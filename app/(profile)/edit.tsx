@@ -2,9 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { StyleSheet, View } from 'react-native'
 import { useRef, useState } from 'react'
-import PhoneInput, {
-  IPhoneInputRef,
-} from 'react-native-international-phone-number'
+import PhoneInput, { IPhoneInputRef } from 'rn-international-phone-number'
 import parsePhoneNumberFromString from 'libphonenumber-js'
 
 import Button from '@/components/ui/button'
@@ -44,7 +42,7 @@ export default function EditProfileScreen() {
   })
 
   const confirmPhoneValidity = () => {
-    const value = phoneInputRef.current?.value || ''
+    const value = phoneInputRef.current?.internationalPhoneNumber || ''
     const phoneNumber = value.startsWith('+')
       ? parsePhoneNumberFromString(value)
       : parsePhoneNumberFromString(value, 'NG')
@@ -52,7 +50,8 @@ export default function EditProfileScreen() {
     setIsPhoneValid(!!phoneNumber?.isValid())
   }
 
-  const cleanedPhone = phoneInputRef.current?.fullPhoneNumber.replace(/\s/g, '')
+  const cleanedPhone =
+    phoneInputRef.current?.internationalPhoneNumberFormatted.replace(/\s/g, '')
 
   const onSubmit: SubmitHandler<EditProfileFormValues> = async (values) => {
     try {

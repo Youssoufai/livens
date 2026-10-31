@@ -23,4 +23,5 @@ export const STORE_KEYS = {
   preference: 'livens_preference',
   pushToken: 'livens_push_token',
   rememberMe: 'livens_remember_me',
+  auto_location: 'livelens_auto_location',
 }

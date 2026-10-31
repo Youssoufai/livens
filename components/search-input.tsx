@@ -60,6 +60,8 @@ const SearchInput = forwardRef<RNTextInput, SearchInputProps>(
         containerStyle={styles.inputContainer}
         outlineStyle={[styles.inputOutline, isFocused && styles.focused]}
         style={styles.input}
+        numberOfLines={1}
+        multiline={false}
       />
     )
   }

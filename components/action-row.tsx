@@ -33,6 +33,7 @@ const ActionRow = ({
           weight={600}
           color="black"
           style={{ color: textColor }}
+          numberOfLines={1}
         >
           {title}
         </Text>
@@ -41,6 +42,7 @@ const ActionRow = ({
           lineHeight={20}
           color="grey-400"
           style={{ color: textColor }}
+          numberOfLines={2}
         >
           {description}
         </Text>

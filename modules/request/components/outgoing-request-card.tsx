@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#CDCDCD',
     alignItems: 'center',
-    height: 36,
+    minHeight: 36,
     flex: 1,
   },
   sendMsgButton: {},

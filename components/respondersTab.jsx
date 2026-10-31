@@ -26,7 +26,7 @@ export const ResponderTab = ({ requestId }) => {
 
             setResponders(mapped);
         } catch (err) {
-            console.log("Failed to fetch responders:", err);
+            console.error("Failed to fetch responders:", err);
             setResponders([]);
         } finally {
             setLoadingResponders(false);
@@ -56,7 +56,6 @@ export const ResponderTab = ({ requestId }) => {
             });
 
             const data = await res.json();
-            console.log("Approval response:", data);
 
             if (data?.status === "success") {
                 setResponders((prev) =>
@@ -66,7 +65,7 @@ export const ResponderTab = ({ requestId }) => {
                 );
             }
         } catch (err) {
-            console.log("Failed to approve responder:", err);
+            console.error("Failed to approve responder:", err);
         } finally {
             setApprovingIds((prev) => prev.filter((id) => id !== userId));
         }

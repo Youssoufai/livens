@@ -16,6 +16,11 @@ export const PROFILE_DATA: ProfileDataType[] = [
     link: '/(profile)/update-location',
   },
   {
+    title: 'Auto-update location',
+    description: 'Control your visibility to more request.',
+    icon: LocationIcon,
+  },
+  {
     title: 'Password & security',
     description: 'Update your password and manage your account security.',
     icon: Lock,
@@ -31,7 +36,7 @@ export const PROFILE_DATA: ProfileDataType[] = [
     title: 'Help and support',
     description: 'Get answers to questions or contact us for help.',
     icon: Support,
-    link: '/(profile)/support' as Href,
+    link: '/(profile)/support',
   },
 ]
 

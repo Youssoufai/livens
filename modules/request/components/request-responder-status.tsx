@@ -223,10 +223,22 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
                   style={styles.avatar}
                 />
                 <View style={styles.responderInfo}>
-                  <Text size={16} lineHeight={20} weight={700} color="grey-500">
+                  <Text
+                    size={16}
+                    lineHeight={20}
+                    weight={700}
+                    color="grey-500"
+                    numberOfLines={1}
+                  >
                     {responder?.name}
                   </Text>
-                  <Text size={14} lineHeight={20} weight={600} color="grey-300">
+                  <Text
+                    size={14}
+                    lineHeight={20}
+                    weight={600}
+                    color="grey-300"
+                    numberOfLines={1}
+                  >
                     {responder?.location}
                   </Text>
                 </View>
@@ -399,6 +411,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.01,
     shadowRadius: 8,
     elevation: 3,
+    marginBottom: 12,
   },
   responderCardContent: {
     flexDirection: 'row',
@@ -451,6 +464,8 @@ const styles = StyleSheet.create({
   uploadedImage: {
     flex: 1,
     height: 103,
+    backgroundColor: COLORS.grey[50],
+    borderRadius: 8,
   },
   uploadWrapper: {
     flexDirection: 'row',

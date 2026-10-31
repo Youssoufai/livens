@@ -39,6 +39,7 @@ const ResponseCard = ({
             weight={700}
             color="grey-500"
             style={styles.responder}
+            numberOfLines={1}
           >
             {responder}
           </Text>
@@ -46,7 +47,7 @@ const ResponseCard = ({
             {newLocation}
           </Text>
         </View>
-        <View>
+        <View style={styles.userReviewWrapper}>
           <View style={styles.ratingsWrapper}>
             <Text size={12} lineHeight={16} weight={600} color="grey-400">
               {starRating}
@@ -55,8 +56,19 @@ const ResponseCard = ({
           </View>
           <View style={styles.ratingsWrapper}>
             <Text size={12} lineHeight={16} weight={600} color="grey-400">
-              {requestCompleted} requests
+              {requestCompleted}
             </Text>
+            <View style={styles.requestText}>
+              <Text
+                size={12}
+                lineHeight={16}
+                weight={600}
+                color="grey-400"
+                numberOfLines={1}
+              >
+                requests
+              </Text>
+            </View>
             <ChatReadIcon width={18} height={18} />
           </View>
         </View>
@@ -97,6 +109,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     columnGap: 12,
   },
+  userReviewWrapper: {
+    flexBasis: '33.5%',
+  },
   imageWrapper: {
     width: 50,
     height: 50,
@@ -116,6 +131,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     columnGap: 4,
+  },
+  requestText: {
+    flex: 1,
   },
 })
 

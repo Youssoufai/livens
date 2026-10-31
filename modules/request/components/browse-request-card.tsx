@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     // rowGap: 4,
   },
   button: {
-    height: 40,
+    minHeight: 40,
   },
 })
 

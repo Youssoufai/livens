@@ -1,6 +1,6 @@
 import { Href } from 'expo-router'
 import { ReactElement, ReactNode } from 'react'
-import { ViewStyle } from 'react-native'
+import { DimensionValue, ViewStyle } from 'react-native'
 import { QueryKey } from '@tanstack/react-query'
 
 import {
@@ -23,8 +23,12 @@ export type OutgoingStatusColorType = {
   btnColor: string
 }
 
+export interface HeaderTabList extends ListItem {
+  width?: DimensionValue
+}
+
 export interface HeaderTabProps {
-  list: ListItem[]
+  list: HeaderTabList[]
   selected: string
   onSelect: (value: string) => void
   containerStyle?: ViewStyle

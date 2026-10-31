@@ -23,7 +23,7 @@ const AccountOption = ({
       <View style={styles.content}>
         <BankIcon />
         <View style={styles.textWrapper}>
-          <Text lineHeight={20} weight={600} color="grey-500">
+          <Text lineHeight={20} weight={600} color="grey-500" numberOfLines={2}>
             {bankName}
           </Text>
           <Text size={14} lineHeight={20} color="grey-400">

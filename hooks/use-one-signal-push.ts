@@ -6,6 +6,7 @@ import {
   OneSignal,
 } from 'react-native-onesignal'
 import { router } from 'expo-router'
+
 import { useBoundStore } from '@/state'
 
 type NotificationData = {
@@ -13,6 +14,7 @@ type NotificationData = {
   conversation_id?: string
   request_id?: string
   receiver?: string
+  sender?: string
 }
 
 function handleNotificationNavigation(data: NotificationData) {
@@ -24,7 +26,7 @@ function handleNotificationNavigation(data: NotificationData) {
       params: {
         conversationId: data.conversation_id,
         requestId: data.request_id,
-        receiverId: data.receiver,
+        receiverId: data.sender,
       },
     })
   } else if (data.screen === 'RequestDetails' && data.request_id) {
@@ -55,12 +57,9 @@ export default function useOneSignalPushNotification() {
 
     OneSignal.initialize(process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID ?? '')
 
-    OneSignal.Notifications.requestPermission(true)
-
     const handleClick = async (event: NotificationClickEvent) => {
       const data = event.notification.additionalData as
-        | NotificationData
-        | undefined
+        NotificationData | undefined
 
       const { user, getUser } = useBoundStore.getState()
       if (!user) {

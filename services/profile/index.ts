@@ -97,6 +97,14 @@ export const getTransactions = async () => {
   }
 }
 
+export const deleteAccount = async () => {
+  try {
+    const response = await AuthenticatedAPI.delete(API_ENDPOINTS.profile.delete)
+  } catch (error) {
+    throw error
+  }
+}
+
 export const registerForPushNoft = async (
   storage: AppStorage,
   endpoint: string,
@@ -110,7 +118,7 @@ export const registerForPushNoft = async (
       ? JSON.parse(storedPreference)
       : {}
 
-    if (preference?.pushEnabled) return
+    if (typeof preference?.pushEnabled !== undefined) return
 
     const pushTokenKey = `${STORE_KEYS.pushToken}_${userId}`
     const storedPushToken = storage.getItem<'string'>(pushTokenKey)
@@ -132,7 +140,18 @@ export const registerForPushNoft = async (
     storage.setItem(pushTokenKey, pushId)
     storePreference(storage, { key: 'pushEnabled', value: true }, userId)
   } catch (error) {
-    // catchErr(error)
+    catchErr(error)
+  }
+}
+
+export const checkActivityPresence = async (isActive: boolean) => {
+  try {
+    const response = await AuthenticatedAPI.post(API_ENDPOINTS.user.presence, {
+      active: isActive ? 1 : 0,
+    })
+
+    return
+  } catch (error) {
     throw error
   }
 }

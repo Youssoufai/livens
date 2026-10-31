@@ -43,15 +43,23 @@ const SentOfferCard = ({
           },
         ]}
       >
-        <Text size={14} lineHeight={20} color="grey-400">
-          You sent an offer
-        </Text>
-        <View style={[styles.badge, { backgroundColor: badge?.bg }]}>
+        <View style={styles.offerLabel}>
+          <Text size={14} lineHeight={20} color="grey-400" numberOfLines={1}>
+            You sent an offer
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: badge?.bg, flexBasis: badge?.width },
+          ]}
+        >
           <Text
             size={11}
             lineHeight={14}
             weight={600}
             style={{ color: badge?.color }}
+            numberOfLines={1}
           >
             {badge?.label}
           </Text>
@@ -60,14 +68,20 @@ const SentOfferCard = ({
 
       <View style={styles.content}>
         <LineBlock />
-        <Text size={14} lineHeight={18} weight={600} color="grey-500">
+        <Text
+          size={14}
+          lineHeight={18}
+          weight={600}
+          color="grey-500"
+          numberOfLines={1}
+        >
           {generateRequestTitle(description)}
         </Text>
-        <Text size={14} lineHeight={20} color="grey-300">
+        <Text size={14} lineHeight={20} color="grey-300" numberOfLines={2}>
           {description}
         </Text>
         {postedDate ? (
-          <Text size={11} lineHeight={14} color="grey-300">
+          <Text size={11} lineHeight={14} color="grey-300" numberOfLines={1}>
             Posted: {postedDate}
           </Text>
         ) : null}
@@ -91,6 +105,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: COLORS.grey[50],
     borderRadius: 8,
+  },
+  offerLabel: {
+    flexBasis: '38%',
   },
   badge: {
     borderRadius: 30,

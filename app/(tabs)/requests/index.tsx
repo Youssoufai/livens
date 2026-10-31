@@ -18,6 +18,7 @@ import { COLORS } from '@/constants/theme'
 import OngoingRequestList from '@/modules/request/components/outgoing-request-list'
 import { queryClient } from '@/services'
 import { RequestData } from '@/services/requests/request.types'
+import UpdateLocation from '@/modules/request/components/update-location'
 
 const styles = StyleSheet.create({
   content: {
@@ -128,6 +129,7 @@ export default function Requests() {
           />
         ) : null}
       </ThemedView>
+      <UpdateLocation />
     </>
   )
 }

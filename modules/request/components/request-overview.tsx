@@ -98,7 +98,13 @@ const RequestOverview = ({ id }: { id: string }) => {
     <Animated.View style={styles.container} entering={FadeIn} exiting={FadeOut}>
       <View style={styles.detailsContent}>
         <View style={styles.detailsHeader}>
-          <Text size={24} lineHeight={28} weight={700} color="black">
+          <Text
+            size={24}
+            lineHeight={28}
+            weight={700}
+            color="black"
+            numberOfLines={1}
+          >
             {generateRequestTitle(data?.location ?? data?.description ?? '')}
           </Text>
           <Text size={14} lineHeight={18} weight={600} color="black">
