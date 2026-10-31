@@ -3,19 +3,19 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>850951594746-mb81ei6srl3f79dlh9josu5f4bsthan9.apps.googleusercontent.com</string>
+	<string>850951594746-c6gip8g9qns1ju0bit4hf5975l5c0pq4.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.850951594746-mb81ei6srl3f79dlh9josu5f4bsthan9</string>
+	<string>com.googleusercontent.apps.850951594746-c6gip8g9qns1ju0bit4hf5975l5c0pq4</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>850951594746-9a1ejl5aeos1keoj2dc0q9b6sob2d172.apps.googleusercontent.com</string>
+	<string>850951594746-j1474htor2t763e1tc0ns4vj768nnd17.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBwAlnYVuRr9i9A3PSBixzYWhXCMw9yGds</string>
+	<string>AIzaSyCi47vu6F04RcX9GAkkomBLwsNZMdpehNo</string>
 	<key>GCM_SENDER_ID</key>
 	<string>850951594746</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.eegour.livelens</string>
+	<string>com.livelensinc.app</string>
 	<key>PROJECT_ID</key>
 	<string>livelens-89079</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:850951594746:ios:a980041751ea2030125f43</string>
+	<string>1:850951594746:ios:52f2b8e0bbe6a00e125f43</string>
 </dict>
 </plist>

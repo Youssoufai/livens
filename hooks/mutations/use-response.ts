@@ -15,7 +15,10 @@ export const useRespondToRequest = (requestId: string) => {
     onSuccess: () => {
       Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ['all-requests', REQUESTS_TABS[0].value],
+          queryKey: ['browse-requests'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['all-requests', REQUESTS_TABS[1].value],
         }),
         queryClient.invalidateQueries({
           queryKey: ['all-requests', REQUESTS_TABS[2].value],

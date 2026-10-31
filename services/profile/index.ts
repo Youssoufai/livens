@@ -97,16 +97,39 @@ export const getTransactions = async () => {
   }
 }
 
+export const deleteAccount = async () => {
+  try {
+    const response = await AuthenticatedAPI.delete(API_ENDPOINTS.profile.delete)
+  } catch (error) {
+    throw error
+  }
+}
+
 export const registerForPushNoft = async (
   storage: AppStorage,
-  endpoint: string
+  endpoint: string,
+  userId: string
 ) => {
   try {
-    const storedPushToken = storage.getItem<'string'>(STORE_KEYS.preference)
+    const storedPreference = storage.getItem<'string'>(
+      `${STORE_KEYS.preference}_${userId}`
+    )
+    const preference: UserPreference = storedPreference
+      ? JSON.parse(storedPreference)
+      : {}
 
-    if (storedPushToken) return
+    if (typeof preference?.pushEnabled !== undefined) return
 
-    const pushId = await getPushSubscriptionId()
+    const pushTokenKey = `${STORE_KEYS.pushToken}_${userId}`
+    const storedPushToken = storage.getItem<'string'>(pushTokenKey)
+
+    let pushId: string | null = null
+
+    if (storedPushToken) {
+      pushId = storedPushToken
+    } else {
+      pushId = await getPushSubscriptionId()
+    }
 
     if (!pushId) return
 
@@ -114,10 +137,21 @@ export const registerForPushNoft = async (
 
     await AuthenticatedAPI.post(endpoint, payload)
 
-    storage.setItem(STORE_KEYS.pushToken, pushId)
-    storePreference(storage, { key: 'pushEnabled', value: true })
+    storage.setItem(pushTokenKey, pushId)
+    storePreference(storage, { key: 'pushEnabled', value: true }, userId)
   } catch (error) {
     catchErr(error)
+  }
+}
+
+export const checkActivityPresence = async (isActive: boolean) => {
+  try {
+    const response = await AuthenticatedAPI.post(API_ENDPOINTS.user.presence, {
+      active: isActive ? 1 : 0,
+    })
+
+    return
+  } catch (error) {
     throw error
   }
 }

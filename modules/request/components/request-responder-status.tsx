@@ -23,12 +23,13 @@ import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
 import ScreenLoader from '@/components/screen-loader'
 import { startConversation } from '@/services/chat'
-
-import { RequestSuccessModalType } from '../requests.types'
-import { getRequestSuccessModalContent } from '../requests.data'
 import ScrollView from '@/components/scrollview'
 import useRefresh from '@/hooks/use-pull-refresh'
 import { queryClient } from '@/services'
+import { getResolvedAvataUri } from '@/utils/resolver'
+
+import { RequestSuccessModalType } from '../requests.types'
+import { getRequestSuccessModalContent } from '../requests.data'
 
 const RequestResponderStatus = ({ id }: { id: string }) => {
   const [isPublic, setIsPublic] = useState(false)
@@ -71,6 +72,12 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
     dismissModal,
     setVisibleModal,
     visibleModal
+  )
+
+  const responderAvatar = getResolvedAvataUri(
+    responseStatusData?.response?.user?.profile_photo ??
+      responseStatusData?.response?.user?.name ??
+      'R'
   )
 
   const isButtonDisabled = !responseStatusData.response?.media_paths?.length
@@ -147,7 +154,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
         params: {
           conversationId: conversation_id,
           requestId: responseStatusData.request.id,
-          receiverId: responseStatusData.response.user_id,
+          receiverId: responseStatusData.request.responder,
         },
       })
     } catch (error) {
@@ -211,12 +218,27 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
           <View style={styles.responderCard}>
             <View style={styles.responderCardContent}>
               <View style={styles.responderLeft}>
-                <View style={styles.avatar} />
+                <Image
+                  source={{ uri: responderAvatar }}
+                  style={styles.avatar}
+                />
                 <View style={styles.responderInfo}>
-                  <Text size={16} lineHeight={20} weight={700} color="grey-500">
+                  <Text
+                    size={16}
+                    lineHeight={20}
+                    weight={700}
+                    color="grey-500"
+                    numberOfLines={1}
+                  >
                     {responder?.name}
                   </Text>
-                  <Text size={14} lineHeight={20} weight={600} color="grey-300">
+                  <Text
+                    size={14}
+                    lineHeight={20}
+                    weight={600}
+                    color="grey-300"
+                    numberOfLines={1}
+                  >
                     {responder?.location}
                   </Text>
                 </View>
@@ -236,10 +258,13 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
                     <>
                       <View style={styles.uploadWrapper}>
                         <View style={styles.uploadeContent}>
-                          {media.map((photo, index) => {
-                            if (photo.type.startsWith('video/')) {
+                          {media.map((asset, index) => {
+                            if (asset?.type.startsWith('video')) {
                               return (
-                                <View style={styles.videoThumb}>
+                                <View
+                                  key={`uploaded_response_media_${index}`}
+                                  style={styles.videoThumb}
+                                >
                                   <Video
                                     size={24}
                                     color={COLORS.white}
@@ -253,7 +278,7 @@ const RequestResponderStatus = ({ id }: { id: string }) => {
                               <Image
                                 key={`uploaded_response_media_${index}`}
                                 source={{
-                                  uri: photo.url,
+                                  uri: asset.url,
                                 }}
                                 priority="high"
                                 style={styles.uploadedImage}
@@ -386,6 +411,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.01,
     shadowRadius: 8,
     elevation: 3,
+    marginBottom: 12,
   },
   responderCardContent: {
     flexDirection: 'row',
@@ -438,6 +464,8 @@ const styles = StyleSheet.create({
   uploadedImage: {
     flex: 1,
     height: 103,
+    backgroundColor: COLORS.grey[50],
+    borderRadius: 8,
   },
   uploadWrapper: {
     flexDirection: 'row',
@@ -492,8 +520,8 @@ const styles = StyleSheet.create({
     columnGap: 6,
   },
   videoThumb: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    height: 103,
     position: 'relative',
     borderRadius: 10,
     backgroundColor: COLORS.grey[800],

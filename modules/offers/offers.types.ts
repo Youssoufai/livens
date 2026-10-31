@@ -1,4 +1,4 @@
-import { RequestStatusType } from '@/services/requests/request.types'
+import { MediaType, RequestStatusType } from '@/services/requests/request.types'
 import {
   Approved,
   OfferSentResponseType,
@@ -6,7 +6,8 @@ import {
 
 export interface StepReviewProps {
   requestId: string
-  media: FileType[]
+  responseId?: string
+  media: (MediaType | FileType)[]
   comment: string
   disableEdit?: boolean
   onEditMedia: () => void
@@ -24,18 +25,25 @@ export interface CameraModalProps {
 
 export interface StepCaptureProps {
   descriptionItems: string[]
-  media: FileType[]
-  onMediaChange: (media: FileType[]) => void
+  media: (FileType | MediaType)[]
+  onMediaChange: (media: (FileType | MediaType)[]) => void
   onNext: () => void
 }
 
 export interface SentOfferCardProps {
   id: string
   description: string
-  status?: RequestStatusType
+  status?: OfferStatusType
   timestamp: string
   onPress: (id: string) => void
 }
+
+export type OfferStatusType =
+  | 'pending'
+  | 'active'
+  | 'waiting for approval'
+  | 'completed'
+  | 'rejected'
 
 export interface SentOfferListProps {
   type: string

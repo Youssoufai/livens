@@ -11,13 +11,13 @@ import {
   RequestData,
   RequestStatusType,
 } from '@/services/requests/request.types'
+import { generateArray } from '@/utils/generator'
+import RequestCardSkeleton from '@/components/placeholder/request-card-skeleton'
 
 import EmptyState from './empty-state'
 import RequestCard from './request-card'
 import { RequestListProps } from '../requests.types'
 import { REQUESTS_TABS } from '../requests.data'
-import { generateArray } from '@/utils/generator'
-import RequestCardSkeleton from '@/components/placeholder/request-card-skeleton'
 
 const RequestList = ({
   list = [],

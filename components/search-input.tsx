@@ -7,6 +7,7 @@ import Input from '@/components/ui/input'
 import { COLORS } from '@/constants/theme'
 
 import { SearchInputProps } from './components.types'
+import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 
 const DROPDOWN_BOTTOM_MARGIN = 16
 
@@ -59,6 +60,8 @@ const SearchInput = forwardRef<RNTextInput, SearchInputProps>(
         containerStyle={styles.inputContainer}
         outlineStyle={[styles.inputOutline, isFocused && styles.focused]}
         style={styles.input}
+        numberOfLines={1}
+        multiline={false}
       />
     )
   }
@@ -67,6 +70,8 @@ const SearchInput = forwardRef<RNTextInput, SearchInputProps>(
 const styles = StyleSheet.create({
   input: {
     backgroundColor: '#F6F6F6',
+    fontSize: actuateFontSize(14),
+    lineHeight: actuateLineHeight(20),
   },
   inputOutline: {
     borderRadius: 30,

@@ -19,6 +19,8 @@ import { STORE_KEYS } from '@/constants'
 import { OnboardingStatus } from '@/modules/auth/auth.types'
 import { showToastMessage } from '@/components/notification'
 import { handleErrorInstances } from '@/utils/error-handlers'
+import AppleAuthButton from '@/components/apple-auth-button'
+import { AppleAuthenticationButtonType } from 'expo-apple-authentication'
 
 const snipImage = require('@/assets/images/snip.png')
 
@@ -60,7 +62,7 @@ const Welcome = () => {
 
       if (!data?.token) return
 
-      completeSignin(data.token, !!data?.user?.location)
+      await completeSignin(data.token, !!data?.user?.location)
     } catch (error) {
     } finally {
       setIsLoadingGoogle(false)
@@ -105,6 +107,10 @@ const Welcome = () => {
             btnStyle={styles.socialButton}
             onPress={handleGoogleLogin}
             loading={isLoadingGoogle}
+          />
+          <AppleAuthButton
+            onLogin={completeSignin}
+            type={AppleAuthenticationButtonType.SIGN_UP}
           />
           {/* LATER FACEBOOK INTEGRATION */}
           {/* <Button

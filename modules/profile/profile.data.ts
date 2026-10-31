@@ -3,11 +3,23 @@ import { Href } from 'expo-router'
 import Lock from '@/assets/icons/lock.svg'
 import Notification from '@/assets/icons/notification-unread.svg'
 import Support from '@/assets/icons/chat.svg'
+import LocationIcon from '@/assets/icons/tab-location.svg'
 
 import { FaqSection, ProfileDataType, TransactionStatus } from './profile.types'
 import { COLORS } from '@/constants/theme'
 
 export const PROFILE_DATA: ProfileDataType[] = [
+  {
+    title: 'Location update',
+    description: 'Update your location and be visibile to more request.',
+    icon: LocationIcon,
+    link: '/(profile)/update-location',
+  },
+  {
+    title: 'Auto-update location',
+    description: 'Control your visibility to more request.',
+    icon: LocationIcon,
+  },
   {
     title: 'Password & security',
     description: 'Update your password and manage your account security.',
@@ -24,7 +36,7 @@ export const PROFILE_DATA: ProfileDataType[] = [
     title: 'Help and support',
     description: 'Get answers to questions or contact us for help.',
     icon: Support,
-    link: '/(profile)/support' as Href,
+    link: '/(profile)/support',
   },
 ]
 
@@ -87,12 +99,16 @@ export const FAQ_DATA: FaqSection[] = [
 ]
 
 export const STATUS_COLORS = {
-  credit: {
+  success: {
     text: COLORS.green[500],
     background: COLORS.green[50],
   },
-  debit: {
-    text: COLORS.primary[500],
+  pending: {
+    text: COLORS.yellow[500],
+    background: COLORS.yellow[100],
+  },
+  failed: {
+    text: COLORS.danger,
     background: COLORS.primary[50],
   },
 }

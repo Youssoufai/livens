@@ -21,10 +21,10 @@ import StepTransition from '@/components/step-animate-wrapper'
 import { showToastMessage } from '@/components/notification'
 import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
 import { grantLocationPermission } from '@/utils/resolver'
+import { useBoundStore } from '@/state'
 
 import PaymentMethod from './payment-method'
 import PaymentSummary from './payment-summary'
-import { useBoundStore } from '@/state'
 
 const SummaryItem = ({ label, value }: { label: string; value: string }) => (
   <View style={styles.summaryItem}>
@@ -49,7 +49,6 @@ const RequestConfirmForm = ({
   const router = useRouter()
 
   const [paymentMethod, setPaymentMethod] = useState('')
-  const [address, setAddress] = useState('')
 
   const balance = useBoundStore((state) => state.user?.balance)
   const updateBalance = useBoundStore((state) => state.updateBalance)
@@ -76,27 +75,6 @@ const RequestConfirmForm = ({
   const userPayout = reward
     ? Math.round((reward - reward * 0.2) * 100) / 100
     : 0
-
-  useEffect(() => {
-    const getLocationDetails = async () => {
-      try {
-        const isGranted = await grantLocationPermission()
-        if (isGranted && request?.location) {
-          const location = {
-            longitude: +(request?.location.longitude ?? 0),
-            latitude: +(request?.location.latitude ?? 0),
-          }
-          const details = await Location.reverseGeocodeAsync(location)
-
-          setAddress(details[0].formattedAddress || '')
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    getLocationDetails()
-  }, [request?.location])
 
   const handleSubmit = async () => {
     try {
@@ -144,7 +122,10 @@ const RequestConfirmForm = ({
           >
             Request summary
           </Text>
-          <SummaryItem label="Location" value={address || '—'} />
+          <SummaryItem
+            label="Location"
+            value={request?.location?.formattedAddress || '—'}
+          />
           <SummaryItem
             label="Description"
             value={request?.description || '—'}

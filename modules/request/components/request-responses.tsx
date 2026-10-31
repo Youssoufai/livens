@@ -99,7 +99,9 @@ const RequestResponses = ({
                 <ResponseCard
                   key={response.id}
                   id={response.user_id}
-                  responder={response.user.name}
+                  responder={response.user?.name}
+                  profileImg={response.user?.profile_photo ?? undefined}
+                  name={response.user.name}
                   location={response.user?.location ?? ''}
                   starRating={rating}
                   requestCompleted={requestCompleted}

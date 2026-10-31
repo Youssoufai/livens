@@ -1,6 +1,6 @@
 import { Href } from 'expo-router'
 import { ReactElement, ReactNode } from 'react'
-import { ViewStyle } from 'react-native'
+import { DimensionValue, ViewStyle } from 'react-native'
 import { QueryKey } from '@tanstack/react-query'
 
 import {
@@ -23,8 +23,12 @@ export type OutgoingStatusColorType = {
   btnColor: string
 }
 
+export interface HeaderTabList extends ListItem {
+  width?: DimensionValue
+}
+
 export interface HeaderTabProps {
-  list: ListItem[]
+  list: HeaderTabList[]
   selected: string
   onSelect: (value: string) => void
   containerStyle?: ViewStyle
@@ -103,6 +107,8 @@ export interface RequestCardProps {
 export interface ResponseCardProps {
   id: string
   responder: string
+  profileImg?: string
+  name?: string
   location: string
   starRating: number
   requestCompleted: number
@@ -119,6 +125,7 @@ export interface BrowseRequestListProps {
   onRefresh: (keys: QueryKey[]) => void
   userLat?: number
   userLon?: number
+  onAddRequestToCache?: (request: RequestData) => void
 }
 
 export interface OutgoingRequestListProps {

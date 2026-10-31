@@ -41,6 +41,17 @@ export const getAllRequests = async (type: string) => {
   }
 }
 
+export const getBrowseRequests = async () => {
+  try {
+    const { data } = await AuthenticatedAPI.get(
+      API_ENDPOINTS.requests.browse_request
+    )
+    return data.data as RequestData[]
+  } catch (error) {
+    throw Error(error as any)
+  }
+}
+
 export const getRequests = async (type: string) => {
   try {
     const { data } = await AuthenticatedAPI.get(

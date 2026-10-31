@@ -2,7 +2,7 @@ import { Alert, StyleSheet, View } from 'react-native'
 import PhoneInput, {
   IPhoneInputRef,
   isValidPhoneNumber,
-} from 'react-native-international-phone-number'
+} from 'rn-international-phone-number'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRef, useState } from 'react'
@@ -50,10 +50,11 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
   const router = useRouter()
 
   const onSubmit = async (values: RegisterFormValues) => {
-    const cleanedPhone = phoneInputRef.current?.fullPhoneNumber.replace(
-      /\s/g,
-      ''
-    )
+    const cleanedPhone =
+      phoneInputRef.current?.internationalPhoneNumberFormatted.replace(
+        /\s/g,
+        ''
+      )
 
     const payload = {
       name: values.fullName.trim(),
@@ -82,7 +83,7 @@ const CreateAccountForm = ({ onNext }: { onNext: (email: string) => void }) => {
   }
 
   const confirmPhoneValidity = () => {
-    const value = phoneInputRef.current?.value || ''
+    const value = phoneInputRef.current?.internationalPhoneNumber || ''
     const phoneNumber = value.startsWith('+')
       ? parsePhoneNumberFromString(value)
       : parsePhoneNumberFromString(value, 'NG')

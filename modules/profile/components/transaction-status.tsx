@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 
 import Text from '@/components/text'
+import { COLORS } from '@/constants/theme'
 
 import { STATUS_COLORS } from '../profile.data'
 import { TransactionStatus } from '../profile.types'
@@ -9,7 +10,7 @@ const StatusBadge = ({ status }: { status: TransactionStatus }) => (
   <View
     style={[
       styles.badge,
-      { backgroundColor: STATUS_COLORS[status].background },
+      { backgroundColor: STATUS_COLORS[status]?.background ?? COLORS.grey[50] },
     ]}
   >
     <Text
@@ -17,7 +18,7 @@ const StatusBadge = ({ status }: { status: TransactionStatus }) => (
       lineHeight={16}
       weight={600}
       color="white"
-      style={[styles.text, { color: STATUS_COLORS[status].text }]}
+      style={[styles.text, { color: STATUS_COLORS[status]?.text }]}
     >
       {status}
     </Text>

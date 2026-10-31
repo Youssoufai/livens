@@ -8,10 +8,6 @@ export const editProfileSchema = Yup.object({
   email: Yup.string()
     .email('Invalid email address')
     .required('Email is required'),
-  phone: Yup.string()
-    .trim()
-    .min(10, 'Phone number is too short')
-    .required('Phone number is required'),
 })
 
 export const changePasswordSchema = Yup.object({
@@ -31,9 +27,7 @@ export const addBankSchema = Yup.object({
 })
 
 export const deleteAccountSchema = Yup.object({
-  confirmation: Yup.string()
-    .oneOf(['Delete my account'], 'Please type "Delete my account" exactly')
-    .required('Confirmation is required'),
+  confirmation: Yup.string().required('Confirmation is required'),
 })
 
 export const contactSchema = Yup.object({

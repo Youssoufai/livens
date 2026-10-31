@@ -1,17 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Link, router } from 'expo-router'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Alert, StyleSheet, View } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { StyleSheet, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Button from '@/components/ui/button'
 import Text from '@/components/text'
 import { AuthResponse } from '@/models/auth'
 import { loginSchema, LoginFormValues } from '@/schemas/auth'
-import { initDeviceToken } from '@/utils/deviceToken'
-import { saveToken } from '@/utils/secureStore'
+import { sessionToken } from '@/utils/session-token'
 import PasswordInput from '@/components/password-input'
 import AppStorage from '@/utils/storage'
 import { STORE_KEYS } from '@/constants'
@@ -30,6 +28,9 @@ import { FONTS } from '@/constants/fonts'
 import { API } from '@/services'
 import { showToastMessage } from '@/components/notification'
 import { catchErr, handleErrorInstances } from '@/utils/error-handlers'
+import KeyboardScrollView from '@/components/keyboard-scrollview'
+import AppleAuthButton from '@/components/apple-auth-button'
+import { AppleAuthenticationButtonType } from 'expo-apple-authentication'
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets()
@@ -51,9 +52,17 @@ export default function LoginScreen() {
 
   const storage = useRef(new AppStorage()).current
 
-  const completeSignin = async (token: string, hasLocation: boolean) => {
+  const completeSignin = async (
+    token: string,
+    hasLocation: boolean,
+    rememberMe?: boolean
+  ) => {
     try {
-      storage.setItem(STORE_KEYS.token, token)
+      sessionToken.set(token)
+      if (rememberMe) {
+        storage.setItem(STORE_KEYS.token, token)
+      }
+
       storage.setItem(STORE_KEYS.onboarding, OnboardingStatus.completed)
 
       if (!hasLocation) {
@@ -79,7 +88,11 @@ export default function LoginScreen() {
 
       if (!response?.token) return
 
-      completeSignin(response.token, !!response?.user?.location)
+      await completeSignin(
+        response.token,
+        !!response?.user?.location,
+        rememberMeChecked
+      )
     } catch (error) {
     } finally {
       setIsLoadingGoogle(false)
@@ -96,82 +109,88 @@ export default function LoginScreen() {
       const authToken = data?.access_token
       if (!authToken) throw new Error('Authentication token missing')
 
-      completeSignin(authToken, !!data?.user?.location)
+      await completeSignin(authToken, !!data?.user?.location, rememberMeChecked)
     } catch (error) {
-      showToastMessage(catchErr(error).message ?? '', 'error')
+      showToastMessage(catchErr(error).message ?? 'Failed to login', 'error')
     }
   }
 
   return (
     <ThemedView hasBottomPadding>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <AppLogo />
-          <Text
-            size={28}
-            weight={700}
-            color="black"
-            align="center"
-            style={styles.title}
-          >
-            Welcome back
-          </Text>
-        </View>
-
-        <View style={styles.formField}>
-          <Input
-            control={control}
-            name="email"
-            label="Email address"
-            placeholder="Enter your email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={errors.email?.message}
-          />
-
-          <PasswordInput
-            control={control}
-            name="password"
-            label="Password"
-            placeholder="Enter password"
-            error={errors.password?.message}
-            addPadding={false}
-          />
-          <View style={styles.supplementaryContent}>
-            <Checkbox
-              label="Remember me"
-              checked={rememberMeChecked}
-              onPress={() =>
-                setRememberMeChecked((prevChecked) => !prevChecked)
-              }
-            />
-            <Link
-              href="/(auth)/forgot-password"
-              style={styles.forgotPasswordLink}
+      <KeyboardScrollView>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <AppLogo />
+            <Text
+              size={28}
+              weight={700}
+              color="black"
+              align="center"
+              style={styles.title}
             >
-              Forgot password?
-            </Link>
+              Welcome back
+            </Text>
+          </View>
+
+          <View style={styles.formField}>
+            <Input
+              control={control}
+              name="email"
+              label="Email address"
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              error={errors.email?.message}
+            />
+
+            <PasswordInput
+              control={control}
+              name="password"
+              label="Password"
+              placeholder="Enter password"
+              error={errors.password?.message}
+              addPadding={false}
+            />
+            <View style={styles.supplementaryContent}>
+              <Checkbox
+                label="Remember me"
+                checked={rememberMeChecked}
+                onPress={() =>
+                  setRememberMeChecked((prevChecked) => !prevChecked)
+                }
+              />
+              <Link
+                href="/(auth)/forgot-password"
+                style={styles.forgotPasswordLink}
+              >
+                Forgot password?
+              </Link>
+            </View>
+          </View>
+
+          <View style={styles.buttonWrapper}>
+            <Button
+              label="Log in"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+              disabled={!isValid || isSubmitting}
+            />
+            <Button
+              label="Continue with Google"
+              icon={<GoogleLogo />}
+              alignIcon="left"
+              labelColor="black"
+              loading={isLoadingGoogle}
+              btnStyle={styles.socialButton}
+              onPress={handleGoogleLogin}
+            />
+            <AppleAuthButton
+              type={AppleAuthenticationButtonType.SIGN_IN}
+              onLogin={completeSignin}
+            />
           </View>
         </View>
-
-        <View style={styles.buttonWrapper}>
-          <Button
-            label="Log in"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            disabled={!isValid || isSubmitting}
-          />
-          <Button
-            label="Continue with Google"
-            icon={<GoogleLogo />}
-            alignIcon="left"
-            labelColor="black"
-            loading={isLoadingGoogle}
-            btnStyle={styles.socialButton}
-            onPress={handleGoogleLogin}
-          />
-        </View>
-      </View>
+      </KeyboardScrollView>
     </ThemedView>
   )
 }
@@ -205,6 +224,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     rowGap: 16,
     paddingBottom: 16,
+    marginTop: 20,
   },
   supplementaryContent: {
     flexDirection: 'row',

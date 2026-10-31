@@ -1,4 +1,4 @@
-import { RequestData } from '../requests/request.types'
+import { MediaType, RequestData } from '../requests/request.types'
 
 export type OfferSentResponseType = {
   offer_sent: string
@@ -12,11 +12,12 @@ export type OfferSentResponseType = {
 
 export interface Approved extends Omit<RequestData, 'responder'> {
   responder: string
+  request?: RequestData
 }
 
 export type SentOfferResponseType = {
   pending: string
-  approved: Approved[]
+  data: Approved[]
 }
 
 export type SubmitResponsePayload = {
@@ -26,7 +27,7 @@ export type SubmitResponsePayload = {
 }
 
 export type EditResponsePayload = {
-  request_id: string
+  response_id: string
   comment: string
-  media: FileType[]
+  media: (MediaType | FileType)[]
 }

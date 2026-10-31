@@ -3,8 +3,11 @@ import { Stack } from 'expo-router'
 import { CustomHeader } from '@/components/custom-header'
 import { COLORS } from '@/constants/theme'
 import { globalStyles } from '@/styles/globalStyles'
+import { useAppActivity } from '@/hooks/use-app-activity'
 
 const RequestLayout = () => {
+  useAppActivity()
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
@@ -86,9 +89,7 @@ const RequestLayout = () => {
         options={{
           headerShown: true,
           header: () => (
-            <CustomHeader
-              containerStyle={globalStyles.screenHeaderContainer}
-            />
+            <CustomHeader containerStyle={globalStyles.screenHeaderContainer} />
           ),
         }}
       />

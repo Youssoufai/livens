@@ -13,12 +13,12 @@ import { startConversation } from '@/services/chat'
 import { useBoundStore } from '@/state'
 import { showToastMessage } from '@/components/notification'
 import { catchErr } from '@/utils/error-handlers'
+import { queryClient } from '@/services'
 
 import EmptyState from './empty-state'
 import { OutgoingRequestListProps } from '../requests.types'
 import { REQUESTS_TABS } from '../requests.data'
 import OutgoingRequestCard from './outgoing-request-card'
-import { queryClient } from '@/services'
 
 const OngoingRequestList = ({
   data,

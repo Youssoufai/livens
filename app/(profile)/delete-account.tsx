@@ -28,9 +28,9 @@ export default function DeleteAccountScreen() {
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<DeleteAccountFormValues>({
+  } = useForm({
     resolver: yupResolver(deleteAccountSchema),
-    defaultValues: { confirmation: '' },
+    defaultValues: { confirmation: 'Delete my account' },
   })
 
   const confirmationValue = watch('confirmation')
@@ -55,7 +55,12 @@ export default function DeleteAccountScreen() {
       <View style={styles.content}>
         <View style={styles.warning}>
           <AlertCircle size={18} color={COLORS.red[500]} />
-          <Text size={14} lineHeight={20} color="red-500" style={styles.warningText}>
+          <Text
+            size={14}
+            lineHeight={20}
+            color="red-500"
+            style={styles.warningText}
+          >
             Deleting your account is irreversible. Please proceed with caution.
           </Text>
         </View>

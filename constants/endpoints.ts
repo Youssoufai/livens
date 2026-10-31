@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     edit: '/edit-request',
     fetch: '/get-requests',
     fetch_all: '/all-requests',
+    browse_request: '/browse-request',
     details: (id: string) => `/get-request/${id}`,
     send_response: '/temp-response',
     get_responses: (id: string) => `/get-temp-responses/${id}`,
@@ -34,6 +35,7 @@ export const API_ENDPOINTS = {
   },
   search: {
     occassion: '/search-requests',
+    getDetails: (id: string) => `/searched-request/${id}`,
   },
   chat: {
     start: '/conversations',
@@ -59,5 +61,9 @@ export const API_ENDPOINTS = {
     transactions: '/user-transactions',
     notification: '/device-token',
     toggle_notification: '/toggle-notifications',
+    delete: '/delete-user',
+  },
+  user: {
+    presence: '/presence/activity',
   },
 }

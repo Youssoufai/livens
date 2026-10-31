@@ -11,12 +11,13 @@ import { showToastMessage } from '@/components/notification'
 
 export const getFilenameFromUrl = (
   url: string,
-  type: 'jpg' | 'pdf' = 'jpg'
+  type: 'jpg' | 'pdf' | 'mp4' = 'jpg'
 ) => {
   try {
     const pathname = new URL(url).pathname
     return (
-      pathname.split('/').pop() || (type === 'jpg' ? 'image.jpg' : 'file.pdf')
+      pathname.split('/').pop() ||
+      (type === 'jpg' ? 'image.jpg' : type === 'mp4' ? 'video.mp4' : 'file.pdf')
     )
   } catch {
     return `image-${Date.now()}.jpg`
@@ -24,7 +25,7 @@ export const getFilenameFromUrl = (
 }
 
 export function useDeviceFiles() {
-  const saveFile = async (url: string, type: 'jpg' | 'pdf' = 'jpg') => {
+  const saveFile = async (url: string, type: 'jpg' | 'pdf' | 'mp4' = 'jpg') => {
     const filename = getFilenameFromUrl(url, type)
 
     try {
@@ -34,7 +35,7 @@ export function useDeviceFiles() {
 
       await File.downloadFileAsync(url, tempFile)
 
-      if (type === 'jpg') {
+      if (type === 'jpg' || type === 'mp4') {
         const { status } = await MediaLibrary.requestPermissionsAsync()
 
         if (status !== 'granted') {

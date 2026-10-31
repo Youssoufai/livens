@@ -1,4 +1,3 @@
-import { cacheDirectory, downloadAsync } from 'expo-file-system/legacy'
 import { router, useLocalSearchParams, useNavigation } from 'expo-router'
 import {
   useCallback,
@@ -16,15 +15,10 @@ import { COLORS } from '@/constants/theme'
 import { useGetResponseStatus } from '@/hooks/queries/use-requests'
 import { ThemedView } from '@/components/themed-view'
 import { DEFAULT_CHECKLIST } from '@/modules/offers/offer.data'
-import { envConfig } from '@/utils/config'
-import {
-  MediaType,
-  RequestResponseStatusType,
-} from '@/services/requests/request.types'
+import { MediaType } from '@/services/requests/request.types'
 import { CustomHeader } from '@/components/custom-header'
 import { globalStyles } from '@/styles/globalStyles'
 import EditResponseSkeleton from '@/components/placeholder/edit-response-skeleton'
-import { storeMediaViaUrl } from '@/modules/request/requests.handler'
 
 import StepCapture from '@/modules/offers/components/step-capture'
 import StepComment from '@/modules/offers/components/step-comment'
@@ -42,27 +36,15 @@ export default function EditResponse() {
 
   const [step, setStep] = useState<Step>(1)
   const [direction, setDirection] = useState<Direction>('forward')
-  const [media, setMedia] = useState<FileType[]>([])
+  const [media, setMedia] = useState<(MediaType | FileType)[]>([])
   const [comment, setComment] = useState('')
-  const [initialized, setInitialized] = useState(false)
-
-  const getResolvedMedia = async (media: MediaType[]) => {
-    const existingMedia = (media ?? []).map(async (item) => {
-      const file = await storeMediaViaUrl(item.url)
-
-      return file
-    })
-
-    setMedia(await Promise.all(existingMedia))
-    setInitialized(true)
-  }
 
   useEffect(() => {
-    if (data?.response && !initialized) {
-      getResolvedMedia(data.response?.media_paths)
+    if (data?.response) {
+      setMedia(data.response.media_paths)
       setComment(data.response?.comment ?? '')
     }
-  }, [data?.response?.media_paths, data?.response.comment, initialized])
+  }, [data?.response?.media_paths, data?.response?.comment])
 
   const goBack = useCallback(() => {
     if (step === 1) {
@@ -100,7 +82,7 @@ export default function EditResponse() {
     setStep((s) => Math.min(s + 1, 3) as Step)
   }
 
-  if (isLoading || !initialized) {
+  if (isLoading) {
     return <EditResponseSkeleton />
   }
 
@@ -137,6 +119,7 @@ export default function EditResponse() {
         {step === 3 && (
           <StepReviewEdit
             requestId={request_id}
+            responseId={data?.response.id}
             media={media}
             comment={comment}
             // disableEdit={!didPayloadChange}

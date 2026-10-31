@@ -11,6 +11,7 @@ import AccountIcon from '@/components/icons/account'
 import { CustomHeader } from '@/components/custom-header'
 import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { FONTS } from '@/constants/fonts'
+import { useAppActivity } from '@/hooks/use-app-activity'
 
 const styles = StyleSheet.create({
   tabHeaderTitle: {
@@ -36,6 +37,8 @@ const tabsIcons = (isFocused: boolean) => {
 }
 
 export default function TabsLayout() {
+  useAppActivity()
+
   return (
     <Tabs
       detachInactiveScreens={Platform.OS === 'android' ? false : true}

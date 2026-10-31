@@ -14,6 +14,7 @@ import { useGetAccountsQuery } from '@/hooks/queries/use-profile'
 import { generateArray } from '@/utils/generator'
 import AccountOptionSkeleton from '@/components/placeholder/account-option-skeleton'
 import { AccountItemType } from '@/services/profile/profile.types'
+import { showToastMessage } from '@/components/notification'
 
 export default function WithdrawScreen() {
   const [selectedBank, setSelectedBank] = useState<BankAccount | null>(null)
@@ -31,8 +32,9 @@ export default function WithdrawScreen() {
     setVisibleSheet('withdraw')
   }
 
-  const selectedDefaultAccount = useCallback((id: string) => {
+  const selectedDefaultAccount = useCallback((account: BankAccount) => {
     try {
+      setSelectedBank(account)
     } catch (error) {}
   }, [])
 
@@ -68,11 +70,13 @@ export default function WithdrawScreen() {
                   id={item.id}
                   bankName={item.bank_name}
                   accountNumber={item.account_number}
-                  isDefault={true}
+                  isDefault={
+                    selectedBank?.recipient_code === item.recipient_code
+                  }
                   isSelected={
                     selectedBank?.recipient_code === item.recipient_code
                   }
-                  onSelect={() => selectedDefaultAccount('')}
+                  onSelect={() => selectedDefaultAccount(item)}
                 />
               )
             }}
@@ -82,6 +86,7 @@ export default function WithdrawScreen() {
               </Text>
             }
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.contentContainer}
           />
           <Button
             label="Add bank account"
@@ -117,7 +122,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     rowGap: 24,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   body: {
     // flex: 1,
@@ -126,5 +131,8 @@ const styles = StyleSheet.create({
   addBankBtn: {
     borderWidth: 1,
     borderColor: COLORS.grey[50],
+  },
+  contentContainer: {
+    rowGap: 20,
   },
 })

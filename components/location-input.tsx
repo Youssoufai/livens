@@ -1,10 +1,11 @@
 import { StyleSheet, View } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import GooglePlacesTextInput, {
+  type GooglePlacesTextInputRef,
   GooglePlacesTextInputStyles,
   Place,
 } from 'react-native-google-places-textinput'
-import { useEffect, useMemo, useState } from 'react'
+import { type Ref, useEffect, useMemo, useState } from 'react'
 import * as Location from 'expo-location'
 
 import { getMapApiKey } from '@/utils/resolver'
@@ -13,23 +14,32 @@ import { actuateFontSize, actuateLineHeight } from '@/utils/normalize'
 import { FONTS } from '@/constants/fonts'
 import { INPUT_HEIGHT } from '@/constants'
 
-import { type LocationInputProps } from './components.types'
+import { PlacesData, type LocationInputProps } from './components.types'
 import Text from './text'
 import SearchIcon from './icons/search'
 
+// React 19: ref is passed as a regular prop — no forwardRef needed
 const LocationInput = ({
+  ref,
   defaultValue,
   defaultCoords,
   placeholder,
   label,
   labelStyle,
+  inputContainerStyle,
+  enableScroll,
   onLocation,
-}: LocationInputProps) => {
+}: LocationInputProps & { ref?: Ref<GooglePlacesTextInputRef> }) => {
   const [value, setValue] = useState('')
 
   const placesStyle: GooglePlacesTextInputStyles = useMemo(
     () => ({
       ...googleLocationStyles,
+      inputContainer: {
+        ...googleLocationStyles.inputContainer,
+        ...inputContainerStyle,
+      },
+
       suggestionText: {
         main: {
           fontSize: actuateFontSize(15),
@@ -43,15 +53,21 @@ const LocationInput = ({
         },
       },
     }),
-    []
+    [inputContainerStyle]
   )
 
-  const handleLocationChange = (place: Place, sessionToken?: string | null) => {
+  const handleLocationChange = (
+    place: Place,
+    _sessionToken?: string | null
+  ) => {
+    let placeData: PlacesData = { ...place }
+
     place?.details?.location &&
       onLocation({
         latitude: place.details.location.latitude,
         longitude: place.details.location.longitude,
-        formattedAddress: place.details.formattedAddress,
+        formattedAddress:
+          placeData.text?.text ?? place.structuredFormat.mainText.text,
       })
   }
 
@@ -86,19 +102,21 @@ const LocationInput = ({
         outlineStyle={styles.nativePaperInput}
         render={() => (
           <GooglePlacesTextInput
+            ref={ref}
             value={value}
             placeHolderText={placeholder ?? 'Search address'}
             onPlaceSelect={handleLocationChange}
             apiKey={getMapApiKey() || ''}
             fetchDetails
             languageCode="en"
-            debounceDelay={400}
+            debounceDelay={500}
             selectionColor={COLORS.primary[600]}
             spellCheck
             cursorColor={COLORS.grey[500]}
             includedRegionCodes={['NG']}
             showClearButton={false}
             style={placesStyle}
+            // scrollEnabled={enableScroll ?? true}
           />
         )}
         left={
@@ -139,6 +157,14 @@ const googleLocationStyles = StyleSheet.create({
   },
   placeholder: {
     color: COLORS.grey[300],
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: INPUT_HEIGHT + 2,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    elevation: 5,
   },
 })
 

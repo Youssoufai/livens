@@ -4,7 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { ActivityIndicator, TextInput } from 'react-native-paper'
 
-import SelectInput from '@/components/select-input'
+import BankSelectInput from '@/components/bank-select-input'
 import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
 import { COLORS } from '@/constants/theme'
@@ -88,7 +88,7 @@ const AddAccount = ({ onCloseSheet }: { onCloseSheet: VoidFunction }) => {
 
   return (
     <View style={styles.sheetBody}>
-      <SelectInput
+      <BankSelectInput
         control={control}
         options={bankList}
         name="bank"

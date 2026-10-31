@@ -60,7 +60,7 @@ export const formatToHHMMSS = (totalSeconds: number) => {
 }
 
 export function generateRequestTitle(text: string) {
-  const trimmed = text.trim()
+  const trimmed = text?.trim()
 
   if (!trimmed) return ''
 
@@ -93,15 +93,22 @@ function getMimeType(filename: string): string {
 }
 
 export const storeMediaViaUrl = async (url: string): Promise<FileType> => {
-  const filename = getFilenameFromUrl(url).split('?')[0]
-  const type = getMimeType(filename)
+  try {
+    const filename = getFilenameFromUrl(url).split('?')[0]
 
-  const tempUri = `${Paths.cache.uri}${filename}`
-  const tempFile = new File(tempUri)
+    const type = getMimeType(filename)
 
-  await File.downloadFileAsync(url, tempFile)
+    const tempUri = `${Paths.cache.uri}${filename}`
+    const tempFile = new File(tempUri)
 
-  return { uri: tempFile.uri, name: filename, type }
+    await File.downloadFileAsync(url, tempFile, { idempotent: true })
+
+    return { uri: tempFile.uri, name: filename, type }
+  } catch (error) {
+    console.error(error)
+
+    throw error
+  }
 }
 
 export const getResponderName = (users: { id: string; user_id: string }[]) => {

@@ -34,11 +34,17 @@ const Tile = ({
     >
       <View style={styles.iconWrapper}>{<Icon height={24} width={24} />}</View>
       <View style={styles.textWrapper}>
-        <Text size={16} lineHeight={20} color="black" weight={600}>
+        <Text
+          size={16}
+          lineHeight={20}
+          color="black"
+          weight={600}
+          numberOfLines={1}
+        >
           {title}
         </Text>
         {description && (
-          <Text size={14} lineHeight={20} color="grey-400">
+          <Text size={14} lineHeight={20} color="grey-400" numberOfLines={3}>
             {description}
           </Text>
         )}

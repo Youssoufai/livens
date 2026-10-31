@@ -15,6 +15,7 @@ import { initiateFund, verifyPayment } from '@/services/payment'
 import usePaystackView from '@/hooks/use-paystack'
 import { useBoundStore } from '@/state'
 import ScreenLoader from '@/components/screen-loader'
+import KeyboardScrollView from '@/components/keyboard-scrollview'
 
 export default function FundWalletScreen() {
   const {
@@ -51,9 +52,7 @@ export default function FundWalletScreen() {
       try {
         await verifyPayment(paymentReference)
 
-        if (queryParams.prevScreen === 'create-request') {
-          setIsRedirecting(true)
-        }
+        setIsRedirecting(true)
         updateBalance(+getValues('amount'))
         setValue('amount', '')
       } catch (error) {
@@ -87,10 +86,14 @@ export default function FundWalletScreen() {
       if (isRedirecting) {
         const timeoutId = setTimeout(() => {
           setIsRedirecting(false)
-          router.replace({
-            pathname: '/(requests)/create-request',
-            params: { step: '4' },
-          })
+          if (queryParams.prevScreen === 'create-request') {
+            router.replace({
+              pathname: '/(requests)/create-request',
+              params: { step: '4' },
+            })
+          } else {
+            router.back()
+          }
         }, 2500)
 
         return () => clearTimeout(timeoutId)
@@ -133,21 +136,23 @@ export default function FundWalletScreen() {
   return (
     <>
       <ThemedView hasBottomPadding style={styles.container}>
-        <View style={styles.content}>
-          <ProfileHeader
-            title="Add funds to your wallet"
-            description="Select a method to add external funds to your wallet. More options coming soon."
-          />
+        <KeyboardScrollView>
+          <View style={styles.content}>
+            <ProfileHeader
+              title="Add funds to your wallet"
+              description="Select a method to add external funds to your wallet. More options coming soon."
+            />
 
-          <Input
-            control={control}
-            name="amount"
-            label="Enter amount"
-            placeholder="0.00"
-            keyboardType="numeric"
-            error={errors.amount?.message}
-          />
-        </View>
+            <Input
+              control={control}
+              name="amount"
+              label="Enter amount"
+              placeholder="0.00"
+              keyboardType="numeric"
+              error={errors.amount?.message}
+            />
+          </View>
+        </KeyboardScrollView>
 
         <View style={styles.buttonWrapper}>
           <Button

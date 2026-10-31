@@ -11,11 +11,12 @@ const ScrollView = ({
   horizontal,
   style,
   refreshControl,
+  scrollEnabled,
 }: {
   children: ReactNode
   horizontal?: boolean
   style?: StyleProp<ViewStyle>
-} & Pick<ScrollViewProps, 'refreshControl'>) => {
+} & Pick<ScrollViewProps, 'refreshControl' | 'scrollEnabled'>) => {
   return (
     <RNScrollView
       contentContainerStyle={[{ flexGrow: 1 }, style]}
@@ -24,6 +25,7 @@ const ScrollView = ({
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       refreshControl={refreshControl}
+      scrollEnabled={scrollEnabled}
     >
       {children}
     </RNScrollView>

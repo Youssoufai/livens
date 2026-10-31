@@ -1,4 +1,5 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
+import withOneSignal from 'onesignal-expo-plugin/plugin'
 
 export default (ctx: ConfigContext): ExpoConfig => {
   const { config } = ctx
@@ -7,69 +8,85 @@ export default (ctx: ConfigContext): ExpoConfig => {
     ...config,
     name: 'Livelens',
     slug: 'livelens',
-    version: '1.0.0',
+    version: '1.0.3',
     orientation: 'portrait',
-    icon: './assets/images/logo.png',
+    icon: './assets/images/app-icon.png',
     splash: {
       image: './assets/images/splash-icon-main.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff',
     },
-    scheme: 'com.livelens.app',
+    scheme: 'com.livelensinc.app',
     userInterfaceStyle: 'light',
     ios: {
-      bundleIdentifier: 'com.livelens.app',
-      supportsTablet: true,
+      bundleIdentifier: 'com.livelensinc.app',
+      supportsTablet: false,
+      usesAppleSignIn: true,
       infoPlist: {
         NSCameraUsageDescription:
-          'Allow $(PRODUCT_NAME) to access your camera to capture photos and videos.',
+          'Allow $(PRODUCT_NAME) to access your camera to capture photos and videos for your profile and service requests.',
         NSMicrophoneUsageDescription:
           '$(PRODUCT_NAME) needs access to your Microphone to record audio for video recordings.',
+        NSPhotoLibraryUsageDescription:
+          'Allow $(PRODUCT_NAME) to access your photo library so you can choose images and videos to upload, such as a profile photo or a photo of a requested service.',
         NSPhotoLibraryAddUsageDescription:
-          'Allow $(PRODUCT_NAME) to save photos to your library',
+          'Allow $(PRODUCT_NAME) to save photos and videos to your library so you can keep a copy of images you upload or download in the app.',
+        NSLocationWhenInUseUsageDescription:
+          'Allow $(PRODUCT_NAME) to access your location while you use the app so we can find nearby services and show your current address when you submit a request, such as locating a nearby provider.',
         UIBackgroundModes: ['remote-notification'],
       },
       entitlements: {
-        'aps-environment': 'development',
+        'aps-environment':
+          process.env.EXPO_PUBLIC_ENVIRONMENT === 'development'
+            ? 'development'
+            : 'production',
       },
     },
     android: {
-      package: 'com.livelens.app',
+      package: 'com.livelensinc.app',
       permissions: [
         'android.permission.CAMERA',
         'android.permission.RECORD_AUDIO',
       ],
+      blockedPermissions: [
+        'android.permission.READ_MEDIA_IMAGES',
+        'android.permission.READ_MEDIA_VIDEO',
+      ],
       adaptiveIcon: {
-        foregroundImage: './assets/images/logo.png',
+        foregroundImage: './assets/images/app-icon.png',
         backgroundColor: '#E6F4FE',
       },
+      googleServicesFile: './assets/json/google-services.json',
     },
     plugins: [
-      [
-        'onesignal-expo-plugin',
-        {
-          mode: String(process.env.EXPO_PUBLIC_ENVIRONMENT),
-          smallIcons: ['./assets/images/notification-icon.png'],
-          largeIcons: ['./assets/images/notification-icon.png'],
-        },
-      ],
+      withOneSignal({
+        mode:
+          process.env.EXPO_PUBLIC_ENVIRONMENT === 'development'
+            ? 'development'
+            : 'production',
+        smallIcons: ['./assets/images/notification-icon.png'],
+        largeIcons: ['./assets/images/notification-icon.png'],
+      }),
       './plugins/withAndroidMedia3Fix',
       [
         'expo-video',
         {
-          supportsBackgroundPlayback: true,
-          supportsPictureInPicture: true,
+          supportsBackgroundPlayback: false,
+          supportsPictureInPicture: false,
         },
       ],
       'expo-web-browser',
       'expo-secure-store',
       'expo-font',
       'expo-router',
+      'react-native-compressor',
+      'expo-apple-authentication',
       [
         'expo-build-properties',
         {
           ios: {
             useFrameworks: 'static',
+            deploymentTarget: '15.1',
           },
           android: {
             enableProguardInReleaseBuilds: true,
@@ -81,7 +98,7 @@ export default (ctx: ConfigContext): ExpoConfig => {
         '@react-native-google-signin/google-signin',
         {
           iosUrlScheme:
-            'com.googleusercontent.apps.850951594746-obmitsnsu02semv5itrg90la46peq9ee',
+            'com.googleusercontent.apps.850951594746-c6gip8g9qns1ju0bit4hf5975l5c0pq4',
         },
       ],
       [
@@ -94,10 +111,11 @@ export default (ctx: ConfigContext): ExpoConfig => {
       [
         'expo-media-library',
         {
-          photosPermission: 'Allow $(PRODUCT_NAME) to access your photos.',
-          savePhotosPermission: 'Allow $(PRODUCT_NAME) to save photos.',
-          isAccessMediaLocationEnabled: true,
-          granularPermissions: ['audio', 'photo'],
+          photosPermission:
+            'Allow $(PRODUCT_NAME) to access your photo library so you can choose images and videos to upload, such as a profile photo or a photo of a requested service.',
+          savePhotosPermission:
+            'Allow $(PRODUCT_NAME) to save photos and videos to your library so you can keep a copy of images you upload or download in the app.',
+          isAccessMediaLocationEnabled: false,
         },
       ],
     ],
@@ -110,44 +128,7 @@ export default (ctx: ConfigContext): ExpoConfig => {
       googleSigninWebClientId: process.env.GOOGLE_SIGNIN_WEB_CLIENT_ID,
       googleSigninIosClientId: process.env.GOOGLE_SIGNIN_IOS_CLIENT_ID,
       eas: {
-        build: {
-          experimental: {
-            ios: {
-              appExtensions: [
-                {
-                  targetName: 'OneSignalNotificationServiceExtension',
-                  bundleIdentifier:
-                    'com.eegour.livelens.OneSignalNotificationServiceExtension',
-                  entitlements: {
-                    'com.apple.security.application-groups': [
-                      'group.com.eegour.livelens.onesignal',
-                    ],
-                  },
-                },
-                {
-                  targetName: 'OneSignalNotificationServiceExtension',
-                  bundleIdentifier:
-                    'com.eegour.livelens.OneSignalNotificationServiceExtension',
-                  entitlements: {
-                    'com.apple.security.application-groups': [
-                      'group.com.eegour.livelens.onesignal',
-                    ],
-                  },
-                },
-                {
-                  targetName: 'OneSignalNotificationServiceExtension',
-                  bundleIdentifier:
-                    'com.livelens.app.OneSignalNotificationServiceExtension',
-                  entitlements: {
-                    'com.apple.security.application-groups': [
-                      'group.com.livelens.app.onesignal',
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        },
+        build: {},
         projectId: '8fbc9bfa-fe29-4a98-8ae4-00dbf973823f',
       },
       router: {},

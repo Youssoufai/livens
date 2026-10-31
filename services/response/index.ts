@@ -7,6 +7,7 @@ import {
   SentOfferResponseType,
   SubmitResponsePayload,
 } from './response.types'
+import { uploadMedia } from '../cloudinary'
 import { catchErr } from '@/utils/error-handlers'
 
 export const getOffersList = async (requestId: string) => {
@@ -21,14 +22,16 @@ export const getOffersList = async (requestId: string) => {
   }
 }
 
-export const getSentOfferList = async () => {
+export const getSentOfferList = async (offer: string) => {
   try {
     const response = await AuthenticatedAPI<SentOfferResponseType>(
-      API_ENDPOINTS.response.sent_offers
+      `${API_ENDPOINTS.response.sent_offers}?offer=${offer}`
     )
 
     return response.data
   } catch (error) {
+    catchErr(error)
+
     throw error
   }
 }
@@ -56,28 +59,20 @@ export const respondToRequest = async (request_id: string) => {
 // }
 
 export const submitRequestResponse = async (payload: SubmitResponsePayload) => {
-  const formdata = new FormData()
-
   try {
-    payload.media.forEach((file) => {
-      formdata.append('media[]', {
-        uri: file.uri,
-        type: file.type,
-        name: file.name,
-      } as any)
-    })
+    const transformedMedia = await Promise.all(
+      payload.media.map((item) => uploadMedia(item))
+    )
 
-    formdata.append('request_id', payload.request_id)
-    formdata.append('comment', payload.comment)
+    const requestPayload = {
+      request_id: payload.request_id,
+      media: transformedMedia,
+      comment: payload.comment,
+    }
 
     await AuthenticatedAPI.post(
       API_ENDPOINTS.response.submit_response,
-      formdata,
-      {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      }
+      requestPayload
     )
   } catch (error) {
     throw error
@@ -85,27 +80,19 @@ export const submitRequestResponse = async (payload: SubmitResponsePayload) => {
 }
 
 export const editRequestResponse = async (payload: EditResponsePayload) => {
-  const formdata = new FormData()
-
   try {
-    payload.media.forEach((file) => {
-      formdata.append('media[]', {
-        uri: file.uri,
-        type: file.type,
-        name: file.name,
-      } as any)
-    })
+    const resolvedMedia = await Promise.all(
+      payload.media.map((item) => ('uri' in item ? uploadMedia(item) : item))
+    )
 
-    formdata.append('comment', payload.comment)
+    const requestPayload = {
+      media: resolvedMedia,
+      comment: payload.comment,
+    }
 
     await AuthenticatedAPI.patch(
-      API_ENDPOINTS.response.edit_response(payload.request_id),
-      formdata,
-      {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      }
+      API_ENDPOINTS.response.edit_response(payload.response_id),
+      requestPayload
     )
   } catch (error) {
     throw error

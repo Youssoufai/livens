@@ -36,4 +36,10 @@ export type Message = {
   sender?: MessageSender
 }
 
+export type UserPresence = {
+  user_id: string
+  name: string
+  is_active: 1 | 0
+}
+
 export type GetMessagesResponseType = Message[]

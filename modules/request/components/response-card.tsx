@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native'
 import { Star } from 'lucide-react-native'
+import { Image } from 'expo-image'
 
+import { getResolvedAvataUri } from '@/utils/resolver'
 import Text from '@/components/text'
 import { COLORS } from '@/constants/theme'
 import Button from '@/components/ui/button'
@@ -11,6 +13,8 @@ import { ResponseCardProps } from '../requests.types'
 const ResponseCard = ({
   id,
   responder,
+  profileImg,
+  name,
   location,
   starRating,
   requestCompleted,
@@ -22,10 +26,12 @@ const ResponseCard = ({
   const [firstName] = responder.split(' ')
   const newLocation = location.length > 15 ? `${location}...` : location
 
+  const avatar = getResolvedAvataUri(profileImg ?? name ?? 'R')
+
   return (
     <View style={styles.container}>
       <View style={styles.detailsContent}>
-        <View style={styles.imageWrapper}></View>
+        <Image source={{ uri: avatar }} style={styles.imageWrapper} />
         <View style={styles.responderDetails}>
           <Text
             size={16}
@@ -33,6 +39,7 @@ const ResponseCard = ({
             weight={700}
             color="grey-500"
             style={styles.responder}
+            numberOfLines={1}
           >
             {responder}
           </Text>
@@ -40,7 +47,7 @@ const ResponseCard = ({
             {newLocation}
           </Text>
         </View>
-        <View>
+        <View style={styles.userReviewWrapper}>
           <View style={styles.ratingsWrapper}>
             <Text size={12} lineHeight={16} weight={600} color="grey-400">
               {starRating}
@@ -49,8 +56,19 @@ const ResponseCard = ({
           </View>
           <View style={styles.ratingsWrapper}>
             <Text size={12} lineHeight={16} weight={600} color="grey-400">
-              {requestCompleted} requests
+              {requestCompleted}
             </Text>
+            <View style={styles.requestText}>
+              <Text
+                size={12}
+                lineHeight={16}
+                weight={600}
+                color="grey-400"
+                numberOfLines={1}
+              >
+                requests
+              </Text>
+            </View>
             <ChatReadIcon width={18} height={18} />
           </View>
         </View>
@@ -76,7 +94,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     backgroundColor: COLORS.white,
-    rowGap: 8,
+    rowGap: 20,
     shadowColor: COLORS.black,
     shadowOffset: {
       width: -2,
@@ -90,6 +108,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     columnGap: 12,
+  },
+  userReviewWrapper: {
+    flexBasis: '33.5%',
   },
   imageWrapper: {
     width: 50,
@@ -110,6 +131,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     columnGap: 4,
+  },
+  requestText: {
+    flex: 1,
   },
 })
 

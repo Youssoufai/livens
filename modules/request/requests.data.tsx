@@ -4,30 +4,35 @@ import {
   SlideOutLeft,
   SlideOutRight,
 } from 'react-native-reanimated'
+import { DimensionValue } from 'react-native'
 
 import RequestSuccessIcon from '@/assets/icons/request-sucess.svg'
 import BoostIcon from '@/assets/icons/boost.svg'
 import RequestCompletedContent from './components/reques-complete-content'
 
 import {
+  HeaderTabList,
   RequestSuccessModalContentType,
   RequestSuccessModalType,
 } from './requests.types'
 import RatingContent from './components/response-rating-content'
 import BoostContent from './components/request-boost-content'
 
-export const REQUESTS_TABS: ListItem[] = [
+export const REQUESTS_TABS: HeaderTabList[] = [
   {
     label: 'Browse requests',
     value: 'browse',
+    width: '35%',
   },
   {
     label: 'Ongoing requests',
     value: 'ongoing',
+    width: '34%',
   },
   {
     label: 'My requests',
     value: 'myrequests',
+    width: '26%',
   },
 ]
 
@@ -87,14 +92,14 @@ export const REQUEST_DURATION = [
 
 export const REWARD_OPTIONS = [
   {
-    id: '500',
-    amount: '₦500',
+    id: '200',
+    amount: '₦200',
     description: 'Popular for simple tasks, gets casual responses fast.',
     popular: true,
   },
   {
-    id: '1000',
-    amount: '₦1,000',
+    id: '500',
+    amount: '₦500',
     description: 'Attracts faster and more reliable responses.',
     popular: false,
   },
@@ -117,19 +122,24 @@ export const animatedComponentDetails = {
   },
 }
 
-export const getRespondersTabData = (responders: number = 0) => {
+export const getRespondersTabData = (
+  responders: number = 0
+): HeaderTabList[] => {
   return [
     {
       label: 'Overview',
       value: 'overview',
+      width: '30%',
     },
     {
       label: `Responders (${responders})`,
       value: 'responders',
+      width: '45%',
     },
     {
       label: 'Status',
       value: 'status',
+      width: '20%',
     },
   ]
 }

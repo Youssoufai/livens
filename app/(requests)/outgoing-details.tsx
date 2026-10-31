@@ -22,7 +22,6 @@ import NeedItem from '@/modules/request/components/need-item'
 
 import AvgIcon from '@/assets/icons/avg_pace.svg'
 import LocationIcon from '@/assets/icons/location_on.svg'
-import OngoingRequestCardSkeleton from '@/components/placeholder/ongoing-request-card-skeleton'
 import BrowseRequestDetailsSkeleton from '@/components/placeholder/browse-request-details-skeleton'
 
 export default function OutgoingRequestScreen() {

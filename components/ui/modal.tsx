@@ -67,6 +67,7 @@ const FullScreenModal = ({
   statusBarStyle,
   onDismiss,
   children,
+  scrollEnabled,
 }: PropsWithChildren<Modalprops>) => {
   const { top, bottom } = useSafeAreaInsets()
 
@@ -104,7 +105,7 @@ const FullScreenModal = ({
               <XIcon size={24} />
             </TouchableOpacity>
           )}
-          <ScrollView>
+          <ScrollView scrollEnabled={scrollEnabled}>
             <View style={styles.content}>{children}</View>
           </ScrollView>
         </View>

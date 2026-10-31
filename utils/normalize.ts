@@ -1,13 +1,13 @@
-import { Dimensions, PixelRatio, Platform } from "react-native";
+import { Dimensions, DimensionValue, PixelRatio, Platform } from 'react-native'
 
-import { BASE_SCREEN_HEIGHT, BASE_SCREEN_WIDTH } from "@/constants/device";
+import { BASE_SCREEN_HEIGHT, BASE_SCREEN_WIDTH } from '@/constants/device'
 
-const { width, height } = Dimensions.get("window");
+const { width, height } = Dimensions.get('window')
 
-const verticalScale = height / BASE_SCREEN_HEIGHT;
-const horizontalScale = width / BASE_SCREEN_WIDTH;
+const verticalScale = height / BASE_SCREEN_HEIGHT
+const horizontalScale = width / BASE_SCREEN_WIDTH
 
-const SCALE = width > height ? height : width;
+const SCALE = width > height ? height : width
 
 const fontConfig = {
   phone: {
@@ -20,79 +20,127 @@ const fontConfig = {
     medium: { min: 1.4, max: 1.5 },
     large: { min: 1.5, max: 1.7 },
   },
-};
+}
 
-const FONT_SCALE = PixelRatio.getFontScale();
+const FONT_SCALE = PixelRatio.getFontScale()
 
-export const lockFontScale = (size: number) => size / FONT_SCALE;
+export const lockFontScale = (size: number) => size / FONT_SCALE
 
 export const actuateNormalize = function normalize(
   size: number,
-  dimension: "width" | "height",
+  dimension: 'width' | 'height'
 ) {
-  let newSize = 0;
+  let newSize = 0
 
-  if (dimension === "width") {
-    newSize = size * horizontalScale;
+  if (dimension === 'width') {
+    newSize = size * horizontalScale
   } else {
-    newSize = size * verticalScale;
+    newSize = size * verticalScale
   }
 
-  if (Platform.OS === "ios") {
-    return Math.floor(PixelRatio.roundToNearestPixel(newSize));
-  } else if (Platform.OS === "android") {
-    return Math.floor(PixelRatio.roundToNearestPixel(newSize)) - 1;
+  if (Platform.OS === 'ios') {
+    return Math.floor(PixelRatio.roundToNearestPixel(newSize))
+  } else if (Platform.OS === 'android') {
+    return Math.floor(PixelRatio.roundToNearestPixel(newSize)) - 1
   }
 
-  return 0;
-};
+  return 0
+}
 
-export function getDeviceType(): "phone" | "tablet" {
-  const pixelDensity = PixelRatio.get();
-  const adjustedWidth = width * pixelDensity;
-  const adjustedHeight = height * pixelDensity;
+export function getDeviceType(): 'phone' | 'tablet' {
+  const pixelDensity = PixelRatio.get()
+  const adjustedWidth = width * pixelDensity
+  const adjustedHeight = height * pixelDensity
 
   if (pixelDensity < 2 && (adjustedWidth >= 1000 || adjustedHeight >= 1000)) {
-    return "tablet";
+    return 'tablet'
   } else if (
     pixelDensity === 2 &&
     (adjustedWidth >= 1920 || adjustedHeight >= 1920)
   ) {
-    return "tablet";
+    return 'tablet'
   } else {
-    return "phone";
+    return 'phone'
   }
 }
 
-const getScreenSizeCategory = (): "small" | "medium" | "large" => {
-  if (SCALE < 350) return "small";
-  if (SCALE > 500) return "large";
-  return "medium";
-};
+const getScreenSizeCategory = (): 'small' | 'medium' | 'large' => {
+  if (SCALE < 350) return 'small'
+  if (SCALE > 500) return 'large'
+  return 'medium'
+}
 
 export function actuateFontSize(size: number) {
-  const deviceType = getDeviceType();
-  const screenCategory = getScreenSizeCategory();
-  const config = fontConfig[deviceType][screenCategory];
+  const deviceType = getDeviceType()
+  const screenCategory = getScreenSizeCategory()
+  const config = fontConfig[deviceType][screenCategory]
 
-  const scaleFactor = SCALE / BASE_SCREEN_WIDTH;
+  const scaleFactor = SCALE / BASE_SCREEN_WIDTH
   const clampedScaleFactor = Math.min(
     Math.max(scaleFactor, config.min),
-    config.max,
-  );
+    config.max
+  )
 
-  let newSize = size * clampedScaleFactor;
+  let newSize = size * clampedScaleFactor
 
-  if (deviceType === "tablet") {
-    newSize *= 1.1;
+  if (deviceType === 'tablet') {
+    newSize *= 1.1
   }
 
-  return lockFontScale(Math.round(PixelRatio.roundToNearestPixel(newSize)));
+  // return lockFontScale(Math.round(PixelRatio.roundToNearestPixel(newSize)))
+
+  return Math.round(PixelRatio.roundToNearestPixel(newSize))
 }
 
 export function actuateLineHeight(fontSize: number, lineHeight: number = 20) {
-  const ratio = lineHeight ? +(lineHeight / fontSize).toFixed(3) : 1.35;
-  const scaledFont = actuateFontSize(fontSize);
+  const ratio = lineHeight ? +(lineHeight / fontSize).toFixed(3) : 1.35
+  const scaledFont = actuateFontSize(fontSize)
 
-  return Math.round(scaledFont * ratio);
+  return Math.round(scaledFont * ratio)
 }
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+
+/**
+ * Converts a pixel value to a percentage string of the screen width.
+ * @param {number} px - The pixel value to convert.
+ * @returns {string} - The percentage string (e.g., "50%").
+ */
+export const pxToPercentageWidth = (px: number): DimensionValue => {
+  return `${(px / screenWidth) * 100}%`
+}
+
+/**
+ * Converts a pixel value to a percentage string of the screen height.
+ * @param {number} px - The pixel value to convert.
+ * @returns {string} - The percentage string (e.g., "25%").
+ */
+export const pxToPercentageHeight = (px: number): DimensionValue => {
+  return `${(px / screenHeight) * 100}%`
+}
+
+/**
+ * Converts a percentage string to a pixel value based on the screen width.
+ * @param {string} widthPercent - The percentage string (e.g., "50%").
+ * @returns {number} - The pixel value.
+ */
+const widthPercentageToDP = (widthPercent: string) => {
+  // Convert string input to decimal number
+  const elemWidth = parseFloat(widthPercent)
+
+  return PixelRatio.roundToNearestPixel((screenWidth * elemWidth) / 100)
+}
+
+/**
+ * Converts a percentage string to a pixel value based on the screen height.
+ * @param {string} heightPercent - The percentage string (e.g., "25%").
+ * @returns {number} - The pixel value.
+ */
+const heightPercentageToDP = (heightPercent: string) => {
+  // Convert string input to decimal number
+  const elemHeight = parseFloat(heightPercent)
+
+  return PixelRatio.roundToNearestPixel((screenHeight * elemHeight) / 100)
+}
+
+export { widthPercentageToDP, heightPercentageToDP }

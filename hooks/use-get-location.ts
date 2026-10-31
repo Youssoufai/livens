@@ -38,7 +38,14 @@ export default function useGetLocation() {
 
       setAddress(address[0])
       setCurrentLocation(location)
-      return { address: address[0].formattedAddress, location }
+      return {
+        address:
+          address[0].formattedAddress ||
+          (address[0].country
+            ? `${address[0].city}, ${address[0].country}`
+            : ''),
+        location,
+      }
     } catch (error) {
       console.error(error)
       return { location, address: null }

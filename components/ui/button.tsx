@@ -5,6 +5,7 @@ import { getResolvedColor } from '@/utils/resolver'
 
 import Text from '../text'
 import { BtnProps } from './ui.types'
+import { pxToPercentageHeight } from '@/utils/normalize'
 
 const Button = ({
   label,
@@ -37,6 +38,7 @@ const Button = ({
             weight={600}
             color={disabled ? disabledTextColor : labelColor}
             style={labelStyle}
+            numberOfLines={1}
           >
             {label}
           </Text>
@@ -76,9 +78,10 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     overflow: 'hidden',
     width: '100%',
-    height: 52,
+    minHeight: 52,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 5,
   },
   content: {
     borderRadius: 30,
